@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block title %}KDS - Karar Destek Sistemi{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- Hero Section -->
+        <div class="text-center py-5">
+            <h1 class="display-4 fw-bold text-primary">
+                <i class="bi bi-graph-up-arrow"></i> Karar Destek Sistemi
+            </h1>
+            <p class="lead text-muted">
+                Cok Kriterli Karar Verme Yontemleri ile Analizlerinizi Yapin
+            </p>
+        </div>
+
+        <!-- Method Cards -->
+        <div class="row g-4 mt-4">
+            <!-- CRITIC Card -->
+            <div class="col-md-6">
+                <div class="card h-100 border-primary method-card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-calculator me-2"></i>CRITIC Yontemi</h4>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="text-muted mb-3">Criteria Importance Through Intercriteria Correlation</h6>
+                        <p class="card-text">
+                            Objektif agirliklandirma yontemi. Kriter agirliklarini
+                            <strong>standart sapma</strong> ve <strong>korelasyon</strong> iliskilerine gore hesaplar.
+                        </p>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Objektif agirlik hesaplama</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Korelasyon analizi</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Bilgi icerigi hesaplama</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Excel yukleme destegi</li>
+                        </ul>
+                        <span class="badge bg-primary mb-3">Agirlik Hesaplama</span>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a href="/critic" class="btn btn-primary w-100">
+                            <i class="bi bi-play-circle me-2"></i>CRITIC Analizine Basla
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TOPSIS Card -->
+            <div class="col-md-6">
+                <div class="card h-100 border-success method-card">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0"><i class="bi bi-bar-chart-steps me-2"></i>TOPSIS Yontemi</h4>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="text-muted mb-3">Technique for Order Preference by Similarity to Ideal Solution</h6>
+                        <p class="card-text">
+                            Alternatifleri <strong>ideal cozume yakinlik</strong> ve <strong>negatif-ideal cozumden uzaklik</strong>
+                            kriterlerine gore siralar.
+                        </p>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Alternatif siralama</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Ideal cozum hesaplama</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>CRITIC entegrasyonu</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Excel yukleme destegi</li>
+                        </ul>
+                        <span class="badge bg-success mb-3">Alternatif Siralama</span>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a href="/topsis" class="btn btn-success w-100">
+                            <i class="bi bi-play-circle me-2"></i>TOPSIS Analizine Basla
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Workflow Section -->
+        <div class="row mt-5 pt-4">
+            <div class="col-12">
+                <div class="card bg-dark border-info">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-arrow-repeat me-2"></i>Entegre Calisma Akisi</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row align-items-center text-center">
+                            <div class="col-md-3">
+                                <div class="p-3">
+                                    <div class="step-number bg-primary">1</div>
+                                    <h6 class="mt-3">CRITIC Analizi</h6>
+                                    <p class="text-muted small">Kriter agirliklarini hesaplayin</p>
+                                </div>
+                            </div>
+                            <div class="col-md-1 d-none d-md-block">
+                                <i class="bi bi-arrow-right fs-3 text-info"></i>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3">
+                                    <div class="step-number bg-success">2</div>
+                                    <h6 class="mt-3">Sonuclari Aktar</h6>
+                                    <p class="text-muted small">Agirliklari TOPSIS'e aktarin</p>
+                                </div>
+                            </div>
+                            <div class="col-md-1 d-none d-md-block">
+                                <i class="bi bi-arrow-right fs-3 text-info"></i>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3">
+                                    <div class="step-number bg-warning text-dark">3</div>
+                                    <h6 class="mt-3">TOPSIS Analizi</h6>
+                                    <p class="text-muted small">Alternatifleri siralayin</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="row mt-5 pt-4">
+            <div class="col-12">
+                <h3 class="text-center mb-4">
+                    <i class="bi bi-stars me-2"></i>Ozellikler
+                </h3>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center p-3">
+                    <i class="bi bi-file-earmark-excel display-4 text-success"></i>
+                    <h5 class="mt-3">Excel Yukleme</h5>
+                    <p class="text-muted small">Verilerinizi Excel'den kolayca yukleyin</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center p-3">
+                    <i class="bi bi-bar-chart-fill display-4 text-primary"></i>
+                    <h5 class="mt-3">Interaktif Dashboard</h5>
+                    <p class="text-muted small">Sonuclari grafiklerle goruntuleyin</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center p-3">
+                    <i class="bi bi-download display-4 text-info"></i>
+                    <h5 class="mt-3">Sonuc Indirme</h5>
+                    <p class="text-muted small">Analizleri Excel olarak indirin</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center p-3">
+                    <i class="bi bi-arrow-left-right display-4 text-warning"></i>
+                    <h5 class="mt-3">Yontem Entegrasyonu</h5>
+                    <p class="text-muted small">CRITIC sonuclarini TOPSIS'e aktarin</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Start -->
+        <div class="row mt-5">
+            <div class="col-12 text-center">
+                <h4 class="mb-4">Hizli Baslangic</h4>
+                <div class="btn-group btn-group-lg" role="group">
+                    <a href="/critic" class="btn btn-outline-primary">
+                        <i class="bi bi-calculator me-2"></i>CRITIC
+                    </a>
+                    <a href="/topsis" class="btn btn-outline-success">
+                        <i class="bi bi-bar-chart-steps me-2"></i>TOPSIS
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

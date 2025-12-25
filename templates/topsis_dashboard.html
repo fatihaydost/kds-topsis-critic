@@ -1,0 +1,415 @@
+{% extends 'base.html' %}
+
+{% block title %}TOPSIS Dashboard - KDS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="bi bi-trophy me-2"></i>TOPSIS Dashboard - Alternatif Siralamasi
+        </h2>
+
+        {% if results %}
+
+        <!-- Winner Card -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card bg-success text-white">
+                    <div class="card-body text-center py-4">
+                        <h4><i class="bi bi-trophy-fill me-2"></i>EN IYI ALTERNATIF</h4>
+                        {% set closeness_list = results.topsis.closeness %}
+                        {% set max_closeness = closeness_list|max %}
+                        {% set winner_idx = closeness_list.index(max_closeness) %}
+                        <h1 class="display-4 mb-0">{{ results.alternative_names[winner_idx] }}</h1>
+                        <p class="mb-0">Yakinlik Katsayisi: {{ "%.4f"|format(max_closeness) }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white h-100">
+                    <div class="card-body">
+                        <h6 class="card-title">Alternatif Sayisi</h6>
+                        <h2 class="mb-0">{{ results.alternative_names|length }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white h-100">
+                    <div class="card-body">
+                        <h6 class="card-title">Kriter Sayisi</h6>
+                        <h2 class="mb-0">{{ results.criteria_names|length }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-dark h-100">
+                    <div class="card-body">
+                        <h6 class="card-title">Max Yakinlik</h6>
+                        <h2 class="mb-0">{{ "%.4f"|format(max_closeness) }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-secondary text-white h-100">
+                    <div class="card-body">
+                        <h6 class="card-title">Min Yakinlik</h6>
+                        {% set min_closeness = closeness_list|min %}
+                        <h2 class="mb-0">{{ "%.4f"|format(min_closeness) }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 1 -->
+        <div class="row g-4 mb-4">
+            <!-- Ranking Bar Chart -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Yakinlik Katsayilari (C)</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="closenessChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ranking Horizontal Bar -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-sort-numeric-down me-2"></i>Siralama</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="rankingChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 2 -->
+        <div class="row g-4 mb-4">
+            <!-- Distance Chart -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-arrows-expand me-2"></i>Ideal Cozumlere Uzakliklar</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="distanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weights Used -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Kullanilan Agirliklar</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="weightsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ranking Table -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-table me-2"></i>Detayli Siralama Tablosu</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Sira</th>
+                                        <th>Alternatif</th>
+                                        <th>D+ (Ideal Uzaklik)</th>
+                                        <th>D- (Negatif-Ideal Uzaklik)</th>
+                                        <th>Yakinlik Katsayisi (C)</th>
+                                        <th>Performans</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% set ranking_data = [] %}
+                                    {% for i in range(results.alternative_names|length) %}
+                                        {% set _ = ranking_data.append({
+                                            'name': results.alternative_names[i],
+                                            'rank': results.topsis.ranking[i],
+                                            'd_pos': results.topsis.distance_positive[i],
+                                            'd_neg': results.topsis.distance_negative[i],
+                                            'closeness': results.topsis.closeness[i]
+                                        }) %}
+                                    {% endfor %}
+                                    {% for item in ranking_data|sort(attribute='rank') %}
+                                    <tr class="{% if item.rank == 1 %}table-success{% elif item.rank == ranking_data|length %}table-danger{% endif %}">
+                                        <td>
+                                            {% if item.rank == 1 %}
+                                            <span class="badge bg-success"><i class="bi bi-trophy-fill me-1"></i>{{ item.rank }}</span>
+                                            {% elif item.rank == 2 %}
+                                            <span class="badge bg-primary">{{ item.rank }}</span>
+                                            {% elif item.rank == 3 %}
+                                            <span class="badge bg-info">{{ item.rank }}</span>
+                                            {% else %}
+                                            <span class="badge bg-secondary">{{ item.rank }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td><strong>{{ item.name }}</strong></td>
+                                        <td>{{ "%.4f"|format(item.d_pos) }}</td>
+                                        <td>{{ "%.4f"|format(item.d_neg) }}</td>
+                                        <td><strong>{{ "%.4f"|format(item.closeness) }}</strong></td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar {% if item.rank == 1 %}bg-success{% elif item.closeness > 0.5 %}bg-primary{% else %}bg-warning{% endif %}"
+                                                     role="progressbar"
+                                                     style="width: {{ item.closeness * 100 }}%">
+                                                    {{ "%.1f"|format(item.closeness * 100) }}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ideal Solutions Table -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-bullseye me-2"></i>Ideal ve Negatif-Ideal Cozumler</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Cozum</th>
+                                        {% for name in results.criteria_names %}
+                                        <th>{{ name }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="table-success">
+                                        <td><strong>A+ (Ideal)</strong></td>
+                                        {% for val in results.topsis.ideal_positive %}
+                                        <td>{{ "%.4f"|format(val) }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                    <tr class="table-danger">
+                                        <td><strong>A- (Negatif-Ideal)</strong></td>
+                                        {% for val in results.topsis.ideal_negative %}
+                                        <td>{{ "%.4f"|format(val) }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="text-center">
+            <a href="/topsis" class="btn btn-outline-primary me-2">
+                <i class="bi bi-arrow-repeat me-2"></i>Yeni Analiz
+            </a>
+            <a href="/topsis/download-excel" class="btn btn-success me-2">
+                <i class="bi bi-download me-2"></i>Excel Indir
+            </a>
+            <a href="/critic" class="btn btn-outline-warning">
+                <i class="bi bi-arrow-left me-2"></i>CRITIC'e Don
+            </a>
+        </div>
+
+        {% else %}
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            Henuz analiz yapilmadi. Lutfen <a href="/topsis">veri girisi</a> yapin.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if results %}
+<script>
+// Data from server
+const alternativeNames = {{ results.alternative_names | tojson }};
+const closeness = {{ results.topsis.closeness | tojson }};
+const distancePositive = {{ results.topsis.distance_positive | tojson }};
+const distanceNegative = {{ results.topsis.distance_negative | tojson }};
+const ranking = {{ results.topsis.ranking | tojson }};
+const criteriaNames = {{ results.criteria_names | tojson }};
+const weights = {{ results.topsis.weights_used | tojson }};
+
+// Color palette
+const colors = [
+    'rgba(54, 162, 235, 0.8)',
+    'rgba(255, 99, 132, 0.8)',
+    'rgba(255, 206, 86, 0.8)',
+    'rgba(75, 192, 192, 0.8)',
+    'rgba(153, 102, 255, 0.8)',
+    'rgba(255, 159, 64, 0.8)',
+    'rgba(199, 199, 199, 0.8)',
+    'rgba(83, 102, 255, 0.8)',
+    'rgba(255, 99, 255, 0.8)',
+    'rgba(99, 255, 132, 0.8)'
+];
+
+// Chart.js dark mode settings
+Chart.defaults.color = '#adb5bd';
+Chart.defaults.borderColor = '#495057';
+
+// Sort by ranking for charts
+const sortedIndices = ranking.map((r, i) => ({rank: r, idx: i}))
+    .sort((a, b) => a.rank - b.rank)
+    .map(x => x.idx);
+
+const sortedNames = sortedIndices.map(i => alternativeNames[i]);
+const sortedCloseness = sortedIndices.map(i => closeness[i]);
+
+// 1. Closeness Bar Chart
+new Chart(document.getElementById('closenessChart'), {
+    type: 'bar',
+    data: {
+        labels: sortedNames,
+        datasets: [{
+            label: 'Yakinlik Katsayisi (C)',
+            data: sortedCloseness,
+            backgroundColor: sortedCloseness.map((c, i) =>
+                i === 0 ? 'rgba(25, 135, 84, 0.8)' : 'rgba(54, 162, 235, 0.8)'
+            ),
+            borderColor: sortedCloseness.map((c, i) =>
+                i === 0 ? 'rgba(25, 135, 84, 1)' : 'rgba(54, 162, 235, 1)'
+            ),
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 1,
+                grid: { color: '#495057' }
+            },
+            x: {
+                grid: { color: '#495057' }
+            }
+        }
+    }
+});
+
+// 2. Ranking Horizontal Bar Chart
+new Chart(document.getElementById('rankingChart'), {
+    type: 'bar',
+    data: {
+        labels: sortedNames,
+        datasets: [{
+            label: 'Performans Skoru',
+            data: sortedCloseness.map(c => c * 100),
+            backgroundColor: sortedCloseness.map((c, i) => {
+                if (i === 0) return 'rgba(25, 135, 84, 0.8)';
+                if (i === 1) return 'rgba(13, 110, 253, 0.8)';
+                if (i === 2) return 'rgba(13, 202, 240, 0.8)';
+                return 'rgba(108, 117, 125, 0.8)';
+            }),
+            borderWidth: 1
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        responsive: true,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            x: {
+                beginAtZero: true,
+                max: 100,
+                grid: { color: '#495057' },
+                title: { display: true, text: 'Performans (%)' }
+            },
+            y: {
+                grid: { color: '#495057' }
+            }
+        }
+    }
+});
+
+// 3. Distance Chart
+new Chart(document.getElementById('distanceChart'), {
+    type: 'bar',
+    data: {
+        labels: alternativeNames,
+        datasets: [{
+            label: 'D+ (Ideal)',
+            data: distancePositive,
+            backgroundColor: 'rgba(25, 135, 84, 0.8)',
+            borderColor: 'rgba(25, 135, 84, 1)',
+            borderWidth: 1
+        }, {
+            label: 'D- (Negatif-Ideal)',
+            data: distanceNegative,
+            backgroundColor: 'rgba(220, 53, 69, 0.8)',
+            borderColor: 'rgba(220, 53, 69, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'top' }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: { color: '#495057' }
+            },
+            x: {
+                grid: { color: '#495057' }
+            }
+        }
+    }
+});
+
+// 4. Weights Pie Chart
+new Chart(document.getElementById('weightsChart'), {
+    type: 'pie',
+    data: {
+        labels: criteriaNames,
+        datasets: [{
+            data: weights,
+            backgroundColor: colors.slice(0, weights.length)
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'right' }
+        }
+    }
+});
+</script>
+{% endif %}
+{% endblock %}

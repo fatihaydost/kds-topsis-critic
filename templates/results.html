@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block title %}Sonuclar - KDS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="bi bi-table me-2"></i>CRITIC Analiz Sonuclari
+        </h2>
+
+        {% if results %}
+
+        <div class="row">
+            <!-- Weights -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Kriter Agirliklari</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Kriter</th>
+                                    <th>Agirlik</th>
+                                    <th>Yuzde</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for i in range(results.criteria_names|length) %}
+                                <tr>
+                                    <td>{{ results.criteria_names[i] }}</td>
+                                    <td>{{ "%.4f"|format(results.critic.weights[i]) }}</td>
+                                    <td>{{ "%.2f"|format(results.critic.weights[i] * 100) }}%</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Standard Deviations -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">Standart Sapmalar</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Kriter</th>
+                                    <th>Standart Sapma</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for i in range(results.criteria_names|length) %}
+                                <tr>
+                                    <td>{{ results.criteria_names[i] }}</td>
+                                    <td>{{ "%.4f"|format(results.critic.std_devs[i]) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Normalized Matrix -->
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">Normalize Matris</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        {% for name in results.criteria_names %}
+                                        <th>{{ name }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for i in range(results.alternative_names|length) %}
+                                    <tr>
+                                        <th>{{ results.alternative_names[i] }}</th>
+                                        {% for j in range(results.criteria_names|length) %}
+                                        <td>{{ "%.3f"|format(results.critic.normalized_matrix[i][j]) }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Correlation Matrix -->
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">Korelasyon Matrisi</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        {% for name in results.criteria_names %}
+                                        <th>{{ name }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for i in range(results.criteria_names|length) %}
+                                    <tr>
+                                        <th>{{ results.criteria_names[i] }}</th>
+                                        {% for j in range(results.criteria_names|length) %}
+                                        <td class="{% if results.critic.correlation_matrix[i][j] > 0.5 %}table-success{% elif results.critic.correlation_matrix[i][j] < -0.5 %}table-danger{% endif %}">
+                                            {{ "%.3f"|format(results.critic.correlation_matrix[i][j]) }}
+                                        </td>
+                                        {% endfor %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Information Content -->
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header bg-warning">
+                        <h5 class="mb-0">Bilgi Icerigi (C)</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Kriter</th>
+                                    <th>Bilgi Icerigi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for i in range(results.criteria_names|length) %}
+                                <tr>
+                                    <td>{{ results.criteria_names[i] }}</td>
+                                    <td>{{ "%.4f"|format(results.critic.information_content[i]) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="/dashboard" class="btn btn-primary btn-lg">
+                <i class="bi bi-bar-chart me-2"></i>Dashboard'a Git
+            </a>
+        </div>
+
+        {% else %}
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            Henuz analiz yapilmadi. Lutfen <a href="/input">veri girisi</a> yapin.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

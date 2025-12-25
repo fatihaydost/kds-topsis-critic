@@ -1,0 +1,400 @@
+{% extends 'base.html' %}
+
+{% block title %}CRITIC Veri Girisi - KDS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="bi bi-calculator me-2"></i>CRITIC Yontemi - Veri Girisi
+        </h2>
+        <p class="text-muted mb-4">CRITIC (Criteria Importance Through Intercriteria Correlation) yontemi ile kriter agirliklarini hesaplayin.</p>
+
+        <!-- Input Method Selection -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-menu-button-wide me-2"></i>Veri Giris Yontemi</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="inputMethod" id="manualInput" value="manual" checked>
+                            <label class="form-check-label" for="manualInput">
+                                <i class="bi bi-keyboard me-2"></i><strong>Manuel Giris</strong>
+                                <small class="d-block text-muted">Verileri elle girin</small>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="inputMethod" id="excelInput" value="excel">
+                            <label class="form-check-label" for="excelInput">
+                                <i class="bi bi-file-earmark-excel me-2"></i><strong>Excel Yukle</strong>
+                                <small class="d-block text-muted">Excel dosyasindan veri yukleyin</small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Excel Upload Section -->
+        <div class="card mb-4 d-none" id="excelSection">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-file-earmark-excel me-2"></i>Excel Dosyasi Yukle</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Excel Format Bilgisi:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li><strong>Basit Format:</strong> Ilk satir kriter adlari, ilk sutun alternatif adlari</li>
+                        <li><strong>Gelismis Format:</strong> Ilk satir kriter yonleri (maliyet/fayda veya min/max), ikinci satir kriter adlari</li>
+                    </ul>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Excel Dosyasi Secin (.xlsx, .xls)</label>
+                    <input type="file" class="form-control" id="excelFile" accept=".xlsx,.xls">
+                </div>
+                <button class="btn btn-success" onclick="uploadExcel()">
+                    <i class="bi bi-upload me-2"></i>Yukle ve Devam Et
+                </button>
+            </div>
+        </div>
+
+        <!-- Manual Input Section -->
+        <div id="manualSection">
+            <!-- Step 1: Matrix Size -->
+            <div class="card mb-4" id="step1">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-1-circle me-2"></i>Adim 1: Matris Boyutunu Belirleyin</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Alternatif Sayisi</label>
+                            <input type="number" class="form-control" id="numAlternatives" min="2" max="20" value="5">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Kriter Sayisi</label>
+                            <input type="number" class="form-control" id="numCriteria" min="2" max="15" value="4">
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button class="btn btn-primary w-100" onclick="generateMatrix()">
+                                <i class="bi bi-table me-2"></i>Matrisi Olustur
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Criteria Settings -->
+            <div class="card mb-4 d-none" id="step2">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-2-circle me-2"></i>Adim 2: Kriter Ayarlari</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="criteriaTable">
+                            <thead>
+                                <tr>
+                                    <th>Kriter</th>
+                                    <th>Kriter Adi</th>
+                                    <th>Yon (Optimizasyon)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="criteriaBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Decision Matrix -->
+            <div class="card mb-4 d-none" id="step3">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-3-circle me-2"></i>Adim 3: Karar Matrisini Doldurun</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover" id="decisionMatrix">
+                            <thead id="matrixHead">
+                            </thead>
+                            <tbody id="matrixBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analyze Button -->
+        <div class="d-none" id="analyzeSection">
+            <div class="d-grid gap-2 col-md-6 mx-auto">
+                <button class="btn btn-success btn-lg" onclick="runAnalysis()">
+                    <i class="bi bi-play-circle me-2"></i>CRITIC Analizi Baslat
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div class="text-center d-none" id="loadingSection">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Yukleniyor...</span>
+            </div>
+            <p class="mt-2">Analiz yapiliyor...</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let numAlternatives = 0;
+let numCriteria = 0;
+
+// Input method toggle
+document.querySelectorAll('input[name="inputMethod"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        if (this.value === 'excel') {
+            document.getElementById('excelSection').classList.remove('d-none');
+            document.getElementById('manualSection').classList.add('d-none');
+            document.getElementById('analyzeSection').classList.add('d-none');
+        } else {
+            document.getElementById('excelSection').classList.add('d-none');
+            document.getElementById('manualSection').classList.remove('d-none');
+        }
+    });
+});
+
+async function uploadExcel() {
+    const fileInput = document.getElementById('excelFile');
+    if (!fileInput.files[0]) {
+        alert('Lutfen bir Excel dosyasi secin!');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+
+    document.getElementById('loadingSection').classList.remove('d-none');
+
+    try {
+        const response = await fetch('/critic/upload-excel', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            const data = result.data;
+
+            // Eski verileri temizle - yeni boyutlari ayarla
+            numAlternatives = data.alternative_names.length;
+            numCriteria = data.criteria_names.length;
+
+            document.getElementById('numAlternatives').value = numAlternatives;
+            document.getElementById('numCriteria').value = numCriteria;
+
+            document.getElementById('excelSection').classList.add('d-none');
+            document.getElementById('manualSection').classList.remove('d-none');
+
+            // Formlari sifirdan olustur (eski veriyi temizler)
+            generateCriteriaSettings();
+            generateDecisionMatrix();
+
+            // Yeni verileri doldur - kriter adlari ve yonleri
+            for (let i = 0; i < data.criteria_names.length; i++) {
+                const nameInput = document.querySelector(`.criteria-name[data-index="${i}"]`);
+                if (nameInput) nameInput.value = data.criteria_names[i];
+
+                const typeSelect = document.querySelector(`.criteria-type[data-index="${i}"]`);
+                if (typeSelect) typeSelect.value = data.criteria_types[i] || 'max';
+
+                const header = document.querySelector(`.criteria-header[data-index="${i}"]`);
+                if (header) header.textContent = data.criteria_names[i];
+            }
+
+            // Alternatif adlarini doldur
+            for (let i = 0; i < data.alternative_names.length; i++) {
+                const input = document.querySelector(`.alt-name[data-index="${i}"]`);
+                if (input) input.value = data.alternative_names[i];
+            }
+
+            // Matris verilerini doldur
+            for (let i = 0; i < data.matrix.length; i++) {
+                for (let j = 0; j < data.matrix[i].length; j++) {
+                    const cell = document.querySelector(`.matrix-cell[data-row="${i}"][data-col="${j}"]`);
+                    if (cell) cell.value = data.matrix[i][j];
+                }
+            }
+
+            document.getElementById('step2').classList.remove('d-none');
+            document.getElementById('step3').classList.remove('d-none');
+            document.getElementById('analyzeSection').classList.remove('d-none');
+            document.getElementById('loadingSection').classList.add('d-none');
+
+            // Dosya inputunu temizle (ayni dosyayi tekrar yukleyebilmek icin)
+            fileInput.value = '';
+
+            alert('Excel dosyasi basariyla yuklendi! (' + data.alternative_names.length + ' alternatif, ' + data.criteria_names.length + ' kriter)');
+        } else {
+            alert('Hata: ' + result.error);
+            document.getElementById('loadingSection').classList.add('d-none');
+        }
+    } catch (error) {
+        alert('Bir hata olustu: ' + error.message);
+        document.getElementById('loadingSection').classList.add('d-none');
+    }
+}
+
+function generateMatrix() {
+    numAlternatives = parseInt(document.getElementById('numAlternatives').value);
+    numCriteria = parseInt(document.getElementById('numCriteria').value);
+
+    if (numAlternatives < 2 || numCriteria < 2) {
+        alert('En az 2 alternatif ve 2 kriter gereklidir!');
+        return;
+    }
+
+    generateCriteriaSettings();
+    generateDecisionMatrix();
+
+    document.getElementById('step2').classList.remove('d-none');
+    document.getElementById('step3').classList.remove('d-none');
+    document.getElementById('analyzeSection').classList.remove('d-none');
+}
+
+function generateCriteriaSettings() {
+    const tbody = document.getElementById('criteriaBody');
+    tbody.innerHTML = '';
+
+    for (let j = 0; j < numCriteria; j++) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><strong>C${j + 1}</strong></td>
+            <td><input type="text" class="form-control criteria-name" value="Kriter ${j + 1}" data-index="${j}"></td>
+            <td>
+                <select class="form-select criteria-type" data-index="${j}">
+                    <option value="max">Maksimizasyon (Fayda)</option>
+                    <option value="min">Minimizasyon (Maliyet)</option>
+                </select>
+            </td>
+        `;
+        tbody.appendChild(row);
+    }
+}
+
+function generateDecisionMatrix() {
+    const thead = document.getElementById('matrixHead');
+    const tbody = document.getElementById('matrixBody');
+
+    let headerHtml = '<tr><th>Alternatif</th>';
+    for (let j = 0; j < numCriteria; j++) {
+        headerHtml += `<th class="criteria-header" data-index="${j}">C${j + 1}</th>`;
+    }
+    headerHtml += '</tr>';
+    thead.innerHTML = headerHtml;
+
+    tbody.innerHTML = '';
+    for (let i = 0; i < numAlternatives; i++) {
+        const row = document.createElement('tr');
+        let rowHtml = `<td><input type="text" class="form-control alt-name" value="A${i + 1}" data-index="${i}" style="width:100px"></td>`;
+
+        for (let j = 0; j < numCriteria; j++) {
+            rowHtml += `<td><input type="text" class="form-control matrix-cell" data-row="${i}" data-col="${j}" value="0" inputmode="decimal"></td>`;
+        }
+        row.innerHTML = rowHtml;
+        tbody.appendChild(row);
+    }
+
+    document.querySelectorAll('.criteria-name').forEach(input => {
+        input.addEventListener('input', function() {
+            const idx = this.dataset.index;
+            document.querySelector(`.criteria-header[data-index="${idx}"]`).textContent = this.value;
+        });
+    });
+}
+
+function parseNumber(value) {
+    if (typeof value === 'string') {
+        value = value.replace(',', '.');
+    }
+    const num = parseFloat(value);
+    return isNaN(num) ? 0 : num;
+}
+
+function getDecisionMatrix() {
+    const matrix = [];
+    for (let i = 0; i < numAlternatives; i++) {
+        const row = [];
+        for (let j = 0; j < numCriteria; j++) {
+            const cell = document.querySelector(`.matrix-cell[data-row="${i}"][data-col="${j}"]`);
+            row.push(parseNumber(cell.value));
+        }
+        matrix.push(row);
+    }
+    return matrix;
+}
+
+function getCriteriaTypes() {
+    const types = [];
+    document.querySelectorAll('.criteria-type').forEach(select => {
+        types.push(select.value);
+    });
+    return types;
+}
+
+function getCriteriaNames() {
+    const names = [];
+    document.querySelectorAll('.criteria-name').forEach(input => {
+        names.push(input.value);
+    });
+    return names;
+}
+
+function getAlternativeNames() {
+    const names = [];
+    document.querySelectorAll('.alt-name').forEach(input => {
+        names.push(input.value);
+    });
+    return names;
+}
+
+async function runAnalysis() {
+    const data = {
+        matrix: getDecisionMatrix(),
+        criteria_types: getCriteriaTypes(),
+        criteria_names: getCriteriaNames(),
+        alternative_names: getAlternativeNames()
+    };
+
+    document.getElementById('analyzeSection').classList.add('d-none');
+    document.getElementById('loadingSection').classList.remove('d-none');
+
+    try {
+        const response = await fetch('/critic/analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            window.location.href = '/critic/dashboard';
+        } else {
+            alert('Hata: ' + result.error);
+            document.getElementById('analyzeSection').classList.remove('d-none');
+            document.getElementById('loadingSection').classList.add('d-none');
+        }
+    } catch (error) {
+        alert('Bir hata olustu: ' + error.message);
+        document.getElementById('analyzeSection').classList.remove('d-none');
+        document.getElementById('loadingSection').classList.add('d-none');
+    }
+}
+</script>
+{% endblock %}

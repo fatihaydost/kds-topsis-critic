@@ -1,0 +1,338 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - KDS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="bi bi-bar-chart me-2"></i>CRITIC Dashboard
+        </h2>
+
+        {% if results %}
+
+        <!-- Summary Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card bg-primary text-white h-100">
+                    <div class="card-body">
+                        <h6 class="card-title">Alternatif Sayisi</h6>
+                        <h2 class="mb-0">{{ results.alternative_names|length }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-success text-white h-100">
+                    <div class="card-body">
+                        <h6 class="card-title">Kriter Sayisi</h6>
+                        <h2 class="mb-0">{{ results.criteria_names|length }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-info text-white h-100">
+                    <div class="card-body">
+                        <h6 class="card-title">En Yuksek Agirlikli Kriter</h6>
+                        {% set max_weight = results.critic.weights|max %}
+                        {% set max_idx = results.critic.weights.index(max_weight) %}
+                        <h2 class="mb-0">{{ results.criteria_names[max_idx] }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 1 -->
+        <div class="row g-4 mb-4">
+            <!-- Weights Bar Chart -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Kriter Agirliklari (Bar Chart)</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="weightsBarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weights Pie Chart -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Agirlik Dagilimi (Pie Chart)</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="weightsPieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 2 -->
+        <div class="row g-4 mb-4">
+            <!-- Standard Deviation Chart -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Standart Sapmalar</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="stdDevChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Correlation Heatmap -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-grid-3x3 me-2"></i>Korelasyon Matrisi (Isi Haritasi)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="correlationHeatmap"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 3 -->
+        <div class="row g-4 mb-4">
+            <!-- Information Content Chart -->
+            <div class="col-md-12">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Bilgi Icerigi (C)</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="infoContentChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weights Table -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-table me-2"></i>Kriter Agirliklari Tablosu</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Kriter</th>
+                                        <th>Yon</th>
+                                        <th>Standart Sapma</th>
+                                        <th>Bilgi Icerigi</th>
+                                        <th>Agirlik</th>
+                                        <th>Yuzde</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for i in range(results.criteria_names|length) %}
+                                    <tr>
+                                        <td><strong>{{ results.criteria_names[i] }}</strong></td>
+                                        <td>
+                                            <span class="badge {% if results.criteria_types[i] == 'max' %}bg-success{% else %}bg-danger{% endif %}">
+                                                {{ 'Maks' if results.criteria_types[i] == 'max' else 'Min' }}
+                                            </span>
+                                        </td>
+                                        <td>{{ "%.4f"|format(results.critic.std_devs[i]) }}</td>
+                                        <td>{{ "%.4f"|format(results.critic.information_content[i]) }}</td>
+                                        <td>{{ "%.4f"|format(results.critic.weights[i]) }}</td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar" role="progressbar"
+                                                     style="width: {{ results.critic.weights[i] * 100 }}%">
+                                                    {{ "%.1f"|format(results.critic.weights[i] * 100) }}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <a href="/input" class="btn btn-outline-primary me-2">
+                <i class="bi bi-arrow-repeat me-2"></i>Yeni Analiz
+            </a>
+            <a href="/results" class="btn btn-outline-secondary">
+                <i class="bi bi-table me-2"></i>Detayli Sonuclar
+            </a>
+        </div>
+
+        {% else %}
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            Henuz analiz yapilmadi. Lutfen <a href="/input">veri girisi</a> yapin.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if results %}
+<script>
+// Data from server
+const criteriaNames = {{ results.criteria_names | tojson }};
+const weights = {{ results.critic.weights | tojson }};
+const correlationMatrix = {{ results.critic.correlation_matrix | tojson }};
+const stdDevs = {{ results.critic.std_devs | tojson }};
+const infoContent = {{ results.critic.information_content | tojson }};
+
+// Color palette
+const colors = [
+    'rgba(54, 162, 235, 0.8)',
+    'rgba(255, 99, 132, 0.8)',
+    'rgba(255, 206, 86, 0.8)',
+    'rgba(75, 192, 192, 0.8)',
+    'rgba(153, 102, 255, 0.8)',
+    'rgba(255, 159, 64, 0.8)',
+    'rgba(199, 199, 199, 0.8)',
+    'rgba(83, 102, 255, 0.8)',
+    'rgba(255, 99, 255, 0.8)',
+    'rgba(99, 255, 132, 0.8)'
+];
+
+// Chart.js dark mode settings
+Chart.defaults.color = '#adb5bd';
+Chart.defaults.borderColor = '#495057';
+
+// 1. Weights Bar Chart
+new Chart(document.getElementById('weightsBarChart'), {
+    type: 'bar',
+    data: {
+        labels: criteriaNames,
+        datasets: [{
+            label: 'Agirlik',
+            data: weights,
+            backgroundColor: colors.slice(0, weights.length),
+            borderColor: colors.slice(0, weights.length).map(c => c.replace('0.8', '1')),
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: Math.max(...weights) * 1.2,
+                grid: { color: '#495057' }
+            },
+            x: {
+                grid: { color: '#495057' }
+            }
+        }
+    }
+});
+
+// 2. Weights Pie Chart
+new Chart(document.getElementById('weightsPieChart'), {
+    type: 'pie',
+    data: {
+        labels: criteriaNames,
+        datasets: [{
+            data: weights,
+            backgroundColor: colors.slice(0, weights.length)
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'right' }
+        }
+    }
+});
+
+// 3. Correlation Heatmap (Plotly)
+const heatmapData = [{
+    z: correlationMatrix,
+    x: criteriaNames,
+    y: criteriaNames,
+    type: 'heatmap',
+    colorscale: [
+        [0, 'rgb(220,53,69)'],
+        [0.5, 'rgb(50,50,50)'],
+        [1, 'rgb(25,135,84)']
+    ],
+    zmin: -1,
+    zmax: 1,
+    text: correlationMatrix.map(row => row.map(val => val.toFixed(3))),
+    texttemplate: '%{text}',
+    textfont: { size: 10, color: '#fff' }
+}];
+
+const heatmapLayout = {
+    margin: { t: 30, l: 80, r: 30, b: 80 },
+    xaxis: { side: 'bottom', color: '#adb5bd' },
+    yaxis: { autorange: 'reversed', color: '#adb5bd' },
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)'
+};
+
+Plotly.newPlot('correlationHeatmap', heatmapData, heatmapLayout, { responsive: true });
+
+// 4. Standard Deviation Chart
+new Chart(document.getElementById('stdDevChart'), {
+    type: 'bar',
+    data: {
+        labels: criteriaNames,
+        datasets: [{
+            label: 'Standart Sapma',
+            data: stdDevs,
+            backgroundColor: 'rgba(75, 192, 192, 0.8)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: { beginAtZero: true, grid: { color: '#495057' } },
+            x: { grid: { color: '#495057' } }
+        }
+    }
+});
+
+// 5. Information Content Chart
+new Chart(document.getElementById('infoContentChart'), {
+    type: 'bar',
+    data: {
+        labels: criteriaNames,
+        datasets: [{
+            label: 'Bilgi Icerigi',
+            data: infoContent,
+            backgroundColor: 'rgba(153, 102, 255, 0.8)',
+            borderColor: 'rgba(153, 102, 255, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: { beginAtZero: true, grid: { color: '#495057' } },
+            x: { grid: { color: '#495057' } }
+        }
+    }
+});
+</script>
+{% endif %}
+{% endblock %}
