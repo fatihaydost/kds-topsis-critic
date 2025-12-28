@@ -50,8 +50,9 @@ class CRITIC:
         return self.normalized_matrix
 
     def calculate_std_deviation(self):
-        """Adım 2: Standart Sapma Hesaplama"""
-        self.std_devs = np.std(self.normalized_matrix, axis=0, ddof=0)
+        """Adım 2: Standart Sapma Hesaplama (Örneklem Standart Sapması)"""
+        # Excel STDEV/STDEV.S ile uyumlu: ddof=1 (n-1 ile bölme)
+        self.std_devs = np.std(self.normalized_matrix, axis=0, ddof=1)
         self.steps['std_devs'] = self.std_devs.tolist()
         return self.std_devs
 
