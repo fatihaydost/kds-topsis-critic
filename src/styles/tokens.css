@@ -1,0 +1,109 @@
+/*
+ * Design tokens. The only place colour values live; see docs/design/DESIGN.md.
+ * Theme: follows the system by default, `data-theme="light" | "dark"` on <html> overrides it.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Neutrals: cool, near-achromatic grey */
+  --bg: oklch(0.975 0.003 250);
+  --surface: oklch(0.993 0.002 250);
+  --surface-2: oklch(0.953 0.004 250);
+  --line: oklch(0.905 0.005 250);
+  --line-strong: oklch(0.8 0.008 250);
+  --text: oklch(0.225 0.01 255);
+  --text-2: oklch(0.42 0.012 255);
+  --text-3: oklch(0.51 0.012 255);
+
+  /* Accent: petrol ink. Primary action, focus, selection, current step, highlighted alternative. */
+  --accent: oklch(0.47 0.08 218);
+  --accent-hover: oklch(0.42 0.08 218);
+  --accent-fg: oklch(0.985 0.005 218);
+  --accent-bg: oklch(0.945 0.022 218);
+
+  /* Status: validation and method warnings only, always with text */
+  --danger: oklch(0.52 0.17 27);
+  --danger-bg: oklch(0.962 0.024 27);
+  --warning: oklch(0.52 0.11 70);
+  --warning-bg: oklch(0.965 0.04 85);
+  --ok: oklch(0.5 0.1 155);
+  --ok-bg: oklch(0.962 0.03 155);
+
+  /* Data colour, separate from UI colour */
+  --data-context: oklch(0.62 0.008 250);
+  --data-accent: var(--accent);
+  --data-heat-0: oklch(0.975 0.004 218);
+  --data-heat-1: oklch(0.47 0.08 218);
+  --data-negative: oklch(0.6 0.12 27);
+
+  --shadow-float: 0 1px 2px oklch(0.3 0.02 250 / 0.08), 0 8px 24px oklch(0.3 0.02 250 / 0.1);
+  --ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+
+  --radius-control: 2px;
+  --radius-float: 4px;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --dur: 150ms;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: oklch(0.17 0.006 250);
+  --surface: oklch(0.205 0.007 250);
+  --surface-2: oklch(0.238 0.008 250);
+  --line: oklch(0.3 0.009 250);
+  --line-strong: oklch(0.41 0.011 250);
+  --text: oklch(0.94 0.005 250);
+  --text-2: oklch(0.77 0.008 250);
+  --text-3: oklch(0.67 0.009 250);
+  --accent: oklch(0.74 0.09 212);
+  --accent-hover: oklch(0.79 0.085 212);
+  --accent-fg: oklch(0.18 0.02 218);
+  --accent-bg: oklch(0.29 0.04 215);
+  --danger: oklch(0.72 0.14 27);
+  --danger-bg: oklch(0.27 0.05 27);
+  --warning: oklch(0.8 0.11 80);
+  --warning-bg: oklch(0.28 0.045 80);
+  --ok: oklch(0.75 0.11 155);
+  --ok-bg: oklch(0.27 0.04 155);
+  --data-context: oklch(0.52 0.01 250);
+  --data-heat-0: oklch(0.22 0.01 218);
+  --data-heat-1: oklch(0.74 0.09 212);
+  --data-negative: oklch(0.7 0.13 27);
+  --shadow-float: 0 1px 2px oklch(0 0 0 / 0.3), 0 8px 24px oklch(0 0 0 / 0.35);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --bg: oklch(0.17 0.006 250);
+    --surface: oklch(0.205 0.007 250);
+    --surface-2: oklch(0.238 0.008 250);
+    --line: oklch(0.3 0.009 250);
+    --line-strong: oklch(0.41 0.011 250);
+    --text: oklch(0.94 0.005 250);
+    --text-2: oklch(0.77 0.008 250);
+    --text-3: oklch(0.67 0.009 250);
+    --accent: oklch(0.74 0.09 212);
+    --accent-hover: oklch(0.79 0.085 212);
+    --accent-fg: oklch(0.18 0.02 218);
+    --accent-bg: oklch(0.29 0.04 215);
+    --danger: oklch(0.72 0.14 27);
+    --danger-bg: oklch(0.27 0.05 27);
+    --warning: oklch(0.8 0.11 80);
+    --warning-bg: oklch(0.28 0.045 80);
+    --ok: oklch(0.75 0.11 155);
+    --ok-bg: oklch(0.27 0.04 155);
+    --data-context: oklch(0.52 0.01 250);
+    --data-heat-0: oklch(0.22 0.01 218);
+    --data-heat-1: oklch(0.74 0.09 212);
+    --data-negative: oklch(0.7 0.13 27);
+    --shadow-float: 0 1px 2px oklch(0 0 0 / 0.3), 0 8px 24px oklch(0 0 0 / 0.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur: 0ms;
+  }
+}
