@@ -77,7 +77,17 @@ export function NumberInput({
       aria-invalid={f['aria-invalid']}
       value={text}
       onFocus={(e) => {
-        setDraft(nf.formatRaw(value))
+        // Show the full-precision value while editing. The text is swapped in the DOM right here
+        // and selected, like a spreadsheet cell: Tab, select() and Playwright's fill select the
+        // old text around this focus, and swapping the value collapses that selection, so typing
+        // appended to it ("0.5" + "0.45" = "0.50.45"). A mouse click still places the caret.
+        const el = e.currentTarget
+        const next = nf.formatRaw(value)
+        if (el.value !== next) {
+          el.value = next
+          el.select()
+        }
+        setDraft(next)
         onFocus?.(e)
       }}
       onChange={(e) => {

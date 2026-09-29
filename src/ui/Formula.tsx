@@ -2,6 +2,7 @@ import 'katex/dist/katex.min.css'
 import katex from 'katex'
 import { useMemo } from 'react'
 import { cn } from './cn'
+import { useScrollRegion } from './useScrollRegion'
 
 export type FormulaProps = {
   /** TeX source, e.g. `r_{ij} = x_{ij} / \sqrt{\sum_i x_{ij}^2}`. */
@@ -30,6 +31,8 @@ export function Formula({ tex, display = false, align = 'left', className }: For
       return { html: null, error: err instanceof Error ? err.message : String(err) }
     }
   }, [tex, display, align])
+  // A long display formula scrolls sideways on a phone; keyboard users can then focus and scroll it.
+  const [scrollRef, region] = useScrollRegion<HTMLDivElement>({}, [out.html])
 
   if (out.html === null) {
     const Tag = display ? 'pre' : 'code'
@@ -44,11 +47,15 @@ export function Formula({ tex, display = false, align = 'left', className }: For
     )
   }
 
-  const Tag = display ? 'div' : 'span'
-  return (
-    <Tag
-      className={cn('text-text', display && 'overflow-x-auto overflow-y-hidden py-1', className)}
-      dangerouslySetInnerHTML={{ __html: out.html }}
-    />
-  )
+  if (display) {
+    return (
+      <div
+        ref={scrollRef}
+        {...region}
+        className={cn('overflow-x-auto overflow-y-hidden rounded-control py-1 text-text', className)}
+        dangerouslySetInnerHTML={{ __html: out.html }}
+      />
+    )
+  }
+  return <span className={cn('text-text', className)} dangerouslySetInnerHTML={{ __html: out.html }} />
 }

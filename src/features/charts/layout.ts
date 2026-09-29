@@ -2,6 +2,7 @@
  * Pure geometry for the charts: text width estimates, bar rows and heatmap cells. No DOM, so the
  * layout can be tested and the SVG components only draw.
  */
+import { contrast, labToRgb, mixOklab, mixOklch, oklchToRgb, type Oklch, type Rgb } from './color'
 import { normalize, scaleLinear, type Domain } from './scale'
 
 /** Rough width of `text` in IBM Plex Sans at `fontSize` px (average glyph ~0.56 em, digits 0.6 em). */
@@ -194,11 +195,29 @@ export type HeatColor = {
   fill: string
   /** Which arm of the ramp the value is on. */
   tone: 'pos' | 'neg' | 'none'
-  /** Intensity 0..10; the stylesheet picks the value text colour from it per theme. */
+  /** Intensity 0..10. */
   level: number
 }
 
 const pct = (t: number) => `${Math.round(t * 1000) / 10}%`
+
+type Arm = { tone: HeatColor['tone']; token: '--data-heat-1' | '--data-negative'; space: 'oklch' | 'oklab'; t: number }
+
+/** Where a value sits on the ramp: which end token, the mixing space and the share t (0..1). */
+function heatArm(value: number, scale: HeatScale, domain?: Domain): Arm {
+  if (scale === 'sequential') {
+    const t = normalize(value, domain ?? [0, 1])
+    return { tone: t > 0 ? 'pos' : 'none', token: '--data-heat-1', space: 'oklch', t }
+  }
+  const [lo, hi] = domain ?? [-1, 1]
+  const mid = lo < 0 && hi > 0 ? 0 : (lo + hi) / 2
+  if (value >= mid) {
+    const t = hi === mid ? 0 : Math.min(1, (value - mid) / (hi - mid))
+    return { tone: t > 0 ? 'pos' : 'none', token: '--data-heat-1', space: 'oklch', t }
+  }
+  const t = lo === mid ? 0 : Math.min(1, (mid - value) / (mid - lo))
+  return { tone: 'neg', token: '--data-negative', space: 'oklab', t }
+}
 
 /**
  * Cell colour from the data colour tokens.
@@ -209,22 +228,71 @@ const pct = (t: number) => `${Math.round(t * 1000) / 10}%`
  */
 export function heatColor(value: number | null | undefined, scale: HeatScale, domain?: Domain): HeatColor {
   if (typeof value !== 'number' || !Number.isFinite(value)) return { fill: 'var(--surface-2)', tone: 'none', level: 0 }
-  if (scale === 'sequential') {
-    const t = normalize(value, domain ?? [0, 1])
-    return { fill: mix('--data-heat-1', t, 'oklch'), tone: t > 0 ? 'pos' : 'none', level: Math.round(t * 10) }
-  }
-  const [lo, hi] = domain ?? [-1, 1]
-  const mid = lo < 0 && hi > 0 ? 0 : (lo + hi) / 2
-  if (value >= mid) {
-    const t = hi === mid ? 0 : Math.min(1, (value - mid) / (hi - mid))
-    return { fill: mix('--data-heat-1', t, 'oklch'), tone: t > 0 ? 'pos' : 'none', level: Math.round(t * 10) }
-  }
-  const t = lo === mid ? 0 : Math.min(1, (mid - value) / (mid - lo))
-  return { fill: mix('--data-negative', t, 'oklab'), tone: 'neg', level: Math.round(t * 10) }
+  const arm = heatArm(value, scale, domain)
+  return { fill: mix(arm.token, arm.t, arm.space), tone: arm.tone, level: Math.round(arm.t * 10) }
 }
 
 function mix(token: string, t: number, space: 'oklch' | 'oklab'): string {
   if (t <= 0) return 'var(--data-heat-0)'
   if (t >= 1) return `var(${token})`
   return `color-mix(in ${space}, var(${token}) ${pct(t)}, var(--data-heat-0))`
+}
+
+/** Resolved token colours of the active theme (read from the page, or from tokens.css in tests). */
+export type HeatTokens = { heat0: Oklch; heat1: Oklch; negative: Oklch; text: Oklch; bg: Oklch }
+
+export type HeatPaint = {
+  fill: string
+  /** Token for the printed value: whichever of `--text` and `--bg` contrasts more with the fill. */
+  ink: 'text' | 'bg'
+  /** Measured contrast of the value text on the fill. */
+  contrast: number
+}
+
+/** DESIGN.md §Accessibility: text contrast >= 4.5:1. The small margin absorbs 8-bit rounding. */
+export const HEAT_TEXT_CONTRAST = 4.6
+/** Largest change of the ramp share t to move a fill out of a band where no ink reaches 4.5:1. */
+const MAX_NUDGE = 0.2
+const NUDGE_STEP = 0.005
+
+function armRgb(arm: Pick<Arm, 'token' | 'space'>, t: number, k: HeatTokens): Rgb {
+  const end = arm.token === '--data-negative' ? k.negative : k.heat1
+  const p = Math.min(1, Math.max(0, t))
+  return labToRgb(arm.space === 'oklab' ? mixOklab(end, k.heat0, p) : mixOklch(end, k.heat0, p))
+}
+
+function bestInk(fill: Rgb, text: Rgb, bg: Rgb): { ink: 'text' | 'bg'; contrast: number } {
+  const onText = contrast(fill, text)
+  const onBg = contrast(fill, bg)
+  return onText >= onBg ? { ink: 'text', contrast: onText } : { ink: 'bg', contrast: onBg }
+}
+
+/**
+ * Fill and value-text colour of one cell, chosen by measured contrast instead of fixed
+ * thresholds. Where the ramp crosses a mid tone on which neither `--text` nor `--bg` reaches
+ * 4.5:1, the fill moves to the nearest share of the ramp that does (at most 0.2 of the ramp,
+ * usually a few hundredths); the printed value and the table keep the exact number.
+ * Without tokens (first render, no DOM) it falls back to `heatColor` with `--text`.
+ */
+export function heatPaint(value: number | null | undefined, scale: HeatScale, domain: Domain | undefined, tokens: HeatTokens | null): HeatPaint {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return { fill: 'var(--surface-2)', ink: 'text', contrast: 0 }
+  const arm = heatArm(value, scale, domain)
+  if (!tokens) return { fill: mix(arm.token, arm.t, arm.space), ink: 'text', contrast: 0 }
+  const text = oklchToRgb(tokens.text)
+  const bg = oklchToRgb(tokens.bg)
+  const at = (t: number) => ({ t, ...bestInk(armRgb(arm, t, tokens), text, bg) })
+  let best = at(arm.t)
+  if (best.contrast < HEAT_TEXT_CONTRAST) {
+    for (let d = NUDGE_STEP; d <= MAX_NUDGE + 1e-9; d += NUDGE_STEP) {
+      // The weaker side wins a tie, so the fill never looks stronger than the value is.
+      const down = arm.t - d >= 0 ? at(arm.t - d) : null
+      const up = arm.t + d <= 1 ? at(arm.t + d) : null
+      const ok = [down, up].filter((x): x is NonNullable<typeof x> => x !== null && x.contrast >= HEAT_TEXT_CONTRAST)
+      if (ok.length > 0) {
+        best = ok[0]!
+        break
+      }
+    }
+  }
+  return { fill: mix(arm.token, best.t, arm.space), ink: best.ink, contrast: best.contrast }
 }

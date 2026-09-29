@@ -23,6 +23,7 @@ export {
   DropdownMenuTrigger,
 } from './DropdownMenu'
 export { Table, TBody, Td, Th, THead, Tr, type TableDensity, type TableProps } from './Table'
+export { useScrollRegion, type ScrollRegionLabel, type ScrollRegionProps } from './useScrollRegion'
 // Formula is imported directly so KaTeX stays out of the main chunk: import { Formula } from '../ui/Formula'.
 export { Notice, type NoticeProps, type NoticeTone } from './Notice'
 export { ErrorSummary, type ErrorSummaryItem, type ErrorSummaryProps } from './ErrorSummary'

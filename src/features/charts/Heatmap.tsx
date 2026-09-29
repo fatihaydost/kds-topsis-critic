@@ -1,9 +1,10 @@
 import { useId, useMemo } from 'react'
 import { ChartFigure } from './ChartFigure'
 import s from './charts.module.css'
-import { heatColor, layoutHeatmap, type HeatScale } from './layout'
+import { heatPaint, layoutHeatmap, type HeatScale } from './layout'
 import type { Domain } from './scale'
 import { useElementWidth } from './useElementWidth'
+import { useHeatTokens } from './useHeatTokens'
 
 export type HeatmapProps = {
   title: string
@@ -30,13 +31,15 @@ export type HeatmapProps = {
 }
 
 /**
- * Matrix heatmap with the value printed in every cell. The fill is a mix of data tokens; the
- * value text switches between `--text` and `--bg` by intensity (thresholds per theme live in the
- * stylesheet), so it stays readable in light and dark.
+ * Matrix heatmap with the value printed in every cell. The fill is a mix of data tokens. The
+ * value text is `--text` or `--bg`, whichever contrasts more with that cell's resolved fill in
+ * the active theme; a fill on which neither reaches 4.5:1 moves slightly along the ramp
+ * (see `heatPaint`), so every printed value stays readable in light and dark.
  */
 export function Heatmap({ title, rowLabels, colLabels, values, scale, domain, format, description, tableLabels, className }: HeatmapProps) {
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
+  const tokens = useHeatTokens()
   const layout = useMemo(() => layoutHeatmap({ rowLabels, colLabels, width }), [rowLabels, colLabels, width])
   const { labelWidth, headerHeight, cellWidth, cellHeight } = layout
 
@@ -90,15 +93,14 @@ export function Heatmap({ title, rowLabels, colLabels, values, scale, domain, fo
               </text>
               {colLabels.map((_, j) => {
                 const v = values[i]?.[j]
-                const c = heatColor(v, scale, domain)
+                const c = heatPaint(v, scale, domain, tokens)
                 const x = labelWidth + j * cellWidth
                 return (
                   <g key={j}>
                     <rect className={s.cell} x={x + 1} y={y + 1} width={cellWidth - 2} height={cellHeight - 2} style={{ fill: c.fill }} />
                     <text
                       className={s.cellText}
-                      data-tone={c.tone}
-                      data-level={c.level}
+                      data-ink={c.ink}
                       x={x + cellWidth / 2}
                       y={y + cellHeight / 2}
                       textAnchor="middle"

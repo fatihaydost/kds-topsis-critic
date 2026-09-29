@@ -111,32 +111,9 @@
   font-size: 12px;
 }
 
-/*
- * Value text on strong cells switches to the page background colour. The thresholds sit where
- * that ink starts to read better than --text over the ramp, which differs per theme:
- * light: positive arm from level 8, the negative arm never gets dark enough;
- * dark: both arms from level 7.
- */
-.cellText[data-tone='pos'][data-level='8'],
-.cellText[data-tone='pos'][data-level='9'],
-.cellText[data-tone='pos'][data-level='10'] {
+/* The ink per cell is chosen by measured contrast in heatPaint (layout.ts). */
+.cellText[data-ink='bg'] {
   fill: var(--bg);
-}
-
-:global(:root[data-theme='dark']) .cellText[data-level='7'],
-:global(:root[data-theme='dark']) .cellText[data-level='8'],
-:global(:root[data-theme='dark']) .cellText[data-level='9'],
-:global(:root[data-theme='dark']) .cellText[data-level='10'] {
-  fill: var(--bg);
-}
-
-@media (prefers-color-scheme: dark) {
-  :global(:root:not([data-theme='light'])) .cellText[data-level='7'],
-  :global(:root:not([data-theme='light'])) .cellText[data-level='8'],
-  :global(:root:not([data-theme='light'])) .cellText[data-level='9'],
-  :global(:root:not([data-theme='light'])) .cellText[data-level='10'] {
-    fill: var(--bg);
-  }
 }
 
 /* Table equivalent --------------------------------------------------------------------------- */

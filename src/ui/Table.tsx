@@ -1,5 +1,6 @@
 import { createContext, useContext, type ComponentPropsWithRef, type CSSProperties } from 'react'
 import { cn } from './cn'
+import { useScrollRegion } from './useScrollRegion'
 
 export type TableDensity = 'compact' | 'regular'
 
@@ -18,24 +19,36 @@ export type TableProps = ComponentPropsWithRef<'table'> & {
   maxHeight?: number | string | undefined
   /** Classes for the scroll container (the table itself takes `className`). */
   containerClassName?: string | undefined
+  /**
+   * Name of the scroll container when the table overflows it. Defaults to the table's own
+   * `aria-labelledby` or `aria-label`, so labelling the table is enough.
+   */
+  scrollLabel?: string | undefined
 }
 
 /**
  * Data table. Its own container scrolls horizontally, never the page. Horizontal hairlines only,
- * no vertical rules, no zebra; rows highlight on hover.
+ * no vertical rules, no zebra; rows highlight on hover. While the table overflows its container
+ * (a narrow screen, a max height), the container is a focusable, named region, so keyboard users
+ * can scroll to the hidden columns.
  */
 export function Table({
   density = 'regular',
   stickyHeader = true,
   maxHeight,
   containerClassName,
+  scrollLabel,
   className,
   ...rest
 }: TableProps) {
   const style: CSSProperties | undefined = maxHeight === undefined ? undefined : { maxHeight }
+  const [ref, region] = useScrollRegion<HTMLDivElement>({
+    label: scrollLabel ?? rest['aria-label'],
+    labelledBy: scrollLabel ? undefined : rest['aria-labelledby'],
+  })
   return (
     <Ctx.Provider value={{ density, stickyHeader }}>
-      <div className={cn('max-w-full overflow-auto', containerClassName)} style={style}>
+      <div ref={ref} className={cn('max-w-full overflow-auto rounded-control', containerClassName)} style={style} {...region}>
         <table className={cn('w-full border-separate border-spacing-0 text-left', className)} {...rest} />
       </div>
     </Ctx.Provider>

@@ -42,7 +42,9 @@ export function ErrorSummary({ errors, title, autoFocus = true, focusKey, classN
       tabIndex={-1}
       role="alert"
       aria-labelledby={titleId}
-      className={cn('rounded-control border-2 border-danger bg-surface px-4 py-3', className)}
+      // It takes focus by script (after a failed Continue, often from a mouse click), where
+      // :focus-visible may not match, so the ring is shown on :focus as well (GOV.UK).
+      className={cn('rounded-control border-2 border-danger bg-surface px-4 py-3 outline-none focus:shadow-[var(--ring)]', className)}
     >
       <h2 id={titleId} className="text-16 font-semibold text-text">
         {title ?? t('validation.summaryTitle')}
