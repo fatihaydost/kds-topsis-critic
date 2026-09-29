@@ -1,4 +1,6 @@
-# KDS - Karar Destek Sistemi
+# KDS - Karar Destek Sistemi (legacy Flask app)
+
+> This is the original Flask version, kept for reference. The new static app lives at the repo root.
 
 TOPSIS ve CRITIC yontemlerini kullanan cok kriterli karar verme uygulamasi.
 
@@ -14,7 +16,7 @@ TOPSIS ve CRITIC yontemlerini kullanan cok kriterli karar verme uygulamasi.
 ```bash
 # Repoyu klonla
 git clone https://github.com/fatihaydost/kds-topsis-critic.git
-cd kds-topsis-critic
+cd kds-topsis-critic/legacy
 
 # Bagimliliklari yukle
 pip install -r requirements.txt
