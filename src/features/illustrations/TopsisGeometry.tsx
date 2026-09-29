@@ -11,6 +11,7 @@ import {
   fitPlot,
   ISO_C_DEFAULT,
   isoClosenessEnd,
+  placeLabels,
   segmentTransform,
   topsisProjection,
   type Point,
@@ -182,6 +183,15 @@ export function TopsisGeometry({ problem, weights, axes, defaultView = 'distance
   const drawing = view === 'distances' ? planeDrawing(proj, w, l, uid, format) : criteriaDrawing(proj, w, l, uid, xName, yName, dirName(ax, xName), dirName(ay, yName))
   const pts = drawing.points
   const nameMax = Math.max(40, Math.min(120, (drawing.box.right - drawing.box.left) / 3))
+  const shortNames = problem.alternatives.map((name) => truncate(name, nameMax, 12))
+  // Labels that would cover each other or another dot move to a free side of their own dot. Best
+  // ranked first, and the same for any selection (a bold label is about 10% wider), so they never jump.
+  const labelSpots = placeLabels(
+    pts,
+    shortNames.map((n) => estimateTextWidth(n, 12) * 1.1),
+    { width, height: drawing.height },
+    proj.closeness.map((_, i) => i).sort((a, b) => proj.closeness[b]! - proj.closeness[a]! || a - b),
+  )
 
   const caption = view === 'distances' ? l.planeCaption : l.caption
   const note = view === 'criteria' && !proj.exact ? l.projectionNote : null
@@ -228,8 +238,8 @@ export function TopsisGeometry({ problem, weights, axes, defaultView = 'distance
           {pts.map((p, i) => {
             const on = i === current
             const name = problem.alternatives[i] ?? ''
-            const short = truncate(name, nameMax, 12)
-            const labelRight = p.x + 10 + estimateTextWidth(short, 12) <= width
+            const short = shortNames[i] ?? ''
+            const spot = labelSpots[i]!
             return (
               <g
                 key={i}
@@ -247,7 +257,7 @@ export function TopsisGeometry({ problem, weights, axes, defaultView = 'distance
                 <circle className={s.hit} cx={p.x} cy={p.y} r={14} />
                 <circle className={s.focusRing} cx={p.x} cy={p.y} r={10} />
                 <circle className={s.dot} cx={p.x} cy={p.y} r={on ? 6 : 5} />
-                <text className={s.pointLabel} x={labelRight ? p.x + 9 : p.x - 9} y={p.y + 14} textAnchor={labelRight ? 'start' : 'end'}>
+                <text className={s.pointLabel} x={spot.x} y={spot.y} textAnchor={spot.anchor}>
                   {name !== short ? <title>{name}</title> : null}
                   {short}
                 </text>

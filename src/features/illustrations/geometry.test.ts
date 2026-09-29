@@ -10,6 +10,8 @@ import {
   defaultAxes,
   distancePoints,
   fitDistancePlane,
+  placeLabels,
+  type PlotBox,
   fitPlot,
   isoClosenessEnd,
   flowIndex,
@@ -188,5 +190,41 @@ describe('flowIndex', () => {
     expect(flowIndex(TOPSIS_FLOW, 'topsis.closeness')).toBe(4)
     expect(flowIndex(TOPSIS_FLOW, 'nope')).toBe(-1)
     expect(flowIndex(TOPSIS_FLOW, undefined)).toBe(-1)
+  })
+})
+
+describe('placeLabels', () => {
+  const W = 12 // "C" and "A" at 12 px, roughly
+  const overlaps = (a: { box: PlotBox }, b: { box: PlotBox }) =>
+    a.box.left < b.box.right && b.box.left < a.box.right && a.box.top < b.box.bottom && b.box.top < a.box.bottom
+
+  it('keeps the usual spot (below right) when nothing is in the way', () => {
+    const [a] = placeLabels([{ x: 50, y: 50 }], [W], { width: 200, height: 200 })
+    expect(a).toMatchObject({ x: 59, y: 64, anchor: 'start' })
+  })
+
+  it('moves a label off a neighbour that sits almost on the same spot (Krishnan: C and A)', () => {
+    // About 12 px apart, as C and A in the workbench's Krishnan example at 1440 px.
+    const pts = [
+      { x: 100, y: 107 },
+      { x: 110, y: 100 },
+    ]
+    const [a, c] = placeLabels(pts, [W, W], { width: 300, height: 300 })
+    expect(overlaps(a!, c!)).toBe(false)
+    // Neither label covers the other dot.
+    const dotBox = (p: { x: number; y: number }) => ({ box: { left: p.x - 6, right: p.x + 6, top: p.y - 6, bottom: p.y + 6 } })
+    expect(overlaps(a!, dotBox(pts[1]!))).toBe(false)
+    expect(overlaps(c!, dotBox(pts[0]!))).toBe(false)
+    // Each label is clearly nearer to its own dot than to the other one.
+    const centre = (l: { box: PlotBox }) => ({ x: (l.box.left + l.box.right) / 2, y: (l.box.top + l.box.bottom) / 2 })
+    const d = (a: { x: number; y: number }, b: { x: number; y: number }) => Math.hypot(a.x - b.x, a.y - b.y)
+    expect(d(centre(a!), pts[0]!)).toBeLessThanOrEqual(0.7 * d(centre(a!), pts[1]!))
+    expect(d(centre(c!), pts[1]!)).toBeLessThanOrEqual(0.7 * d(centre(c!), pts[0]!))
+  })
+
+  it('stays inside the drawing at the right edge', () => {
+    const [a] = placeLabels([{ x: 195, y: 50 }], [40], { width: 200, height: 200 })
+    expect(a!.anchor).toBe('end')
+    expect(a!.box.right).toBeLessThanOrEqual(200)
   })
 })

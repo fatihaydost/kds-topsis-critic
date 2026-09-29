@@ -49,7 +49,9 @@ TOPSIS as a picture, two views behind a small segmented control:
   (no reversed axis); the axis names say which direction is better ("Risk, lower is better"), so
   A+ sits where the data puts it. Exact for two criteria; with more, `projectionNote` is appended.
 
-Below: a readout with the real D+, D− and C, then one caption line. Points are a radio group:
+Point labels go through `placeLabels`: a label that would cover another label or dot, or sit about
+as near to another dot as to its own, moves to a free side of its own dot (best ranked placed first,
+the same for every selection). Below: a readout with the real D+, D− and C, then one caption line. Points are a radio group:
 click, or Tab to it and use the arrow keys / Home / End. Table equivalent behind "Show as table"
 (Distances: D+, D−, C; Two criteria: v on both axes, D+, D−, C, and rows for A+ and A−).
 
@@ -140,7 +142,7 @@ Use: the workbench's empty Data state, above "Load example" / "Start blank".
 
 `topsisProjection(problem, weights, axes?)`, `defaultAxes(weights)`, `fitPlot(...)` (equal-scale
 screen scales, values growing right and up), `distancePoints(proj)`, `closenessAt(p)`,
-`isoClosenessEnd(c, xMax, yMax)`, `fitDistancePlane(...)`, `ISO_C_DEFAULT`, `segmentTransform(...)`,
+`isoClosenessEnd(c, xMax, yMax)`, `fitDistancePlane(...)`, `placeLabels(...)`, `ISO_C_DEFAULT`, `segmentTransform(...)`,
 `planarDistance`, `criticParts(problem)`, `argMax`, `flowIndex`, `TOPSIS_FLOW`, `CRITIC_FLOW`. The
 tests check that A+ / A- and C equal the core and the published values (Opricovic and Tzeng 2004:
 C = 0.762, 0.722, 0.238; Krishnan et al. 2021: σ and weights), that the distance plane places every

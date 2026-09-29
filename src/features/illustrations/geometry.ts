@@ -283,3 +283,76 @@ export function flowIndex(nodes: readonly { key: string; stepKeys?: readonly str
   if (stepKey === undefined) return -1
   return nodes.findIndex((n) => n.key === stepKey || (n.stepKeys?.includes(stepKey) ?? false))
 }
+
+// ---------------------------------------------------------------------------------------------
+// Point labels
+// ---------------------------------------------------------------------------------------------
+
+export type LabelPlacement = { x: number; y: number; anchor: 'start' | 'end'; box: PlotBox }
+
+/** Where a label may sit around its dot, in order of preference: below right first (the old spot). */
+const LABEL_SPOTS: readonly { dx: number; dy: number; anchor: 'start' | 'end' }[] = [
+  { dx: 9, dy: 14, anchor: 'start' },
+  { dx: 9, dy: -7, anchor: 'start' },
+  { dx: -9, dy: 14, anchor: 'end' },
+  { dx: -9, dy: -7, anchor: 'end' },
+  { dx: 11, dy: 4, anchor: 'start' },
+  { dx: -11, dy: 4, anchor: 'end' },
+]
+
+const overlap = (a: PlotBox, b: PlotBox): number =>
+  Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top))
+
+/**
+ * Places one text label per dot so labels do not cover each other or another dot, and each sits
+ * nearer to its own dot than to any other (review P2-5: two alternatives 0.002 apart put "C" next
+ * to A). Greedy, in the order given: each label takes the first free spot around its own dot, or
+ * the least bad one.
+ * `widths` are the text widths; the text is `fontSize` high with its baseline at y.
+ */
+export function placeLabels(
+  points: readonly Point[],
+  widths: readonly number[],
+  bounds: { width: number; height: number },
+  order: readonly number[] = points.map((_, i) => i),
+  opts: { fontSize?: number; dotRadius?: number } = {},
+): LabelPlacement[] {
+  const fontSize = opts.fontSize ?? 12
+  const r = opts.dotRadius ?? 6
+  const dots: PlotBox[] = points.map((p) => ({ left: p.x - r, right: p.x + r, top: p.y - r, bottom: p.y + r }))
+  const placed: PlotBox[] = []
+  const out: LabelPlacement[] = new Array(points.length)
+  for (const i of order) {
+    const p = points[i]!
+    const w = widths[i] ?? 0
+    let best: LabelPlacement | null = null
+    let bestCost = Infinity
+    for (const spot of LABEL_SPOTS) {
+      const x = p.x + spot.dx
+      const y = p.y + spot.dy
+      const left = spot.anchor === 'start' ? x : x - w
+      const box = { left, right: left + w, top: y - fontSize * 0.8, bottom: y + fontSize * 0.25 }
+      // Outside the drawing counts as fully covered, so an edge spot is used only as a last resort.
+      const outside = box.left < 0 || box.right > bounds.width || box.top < 0 || box.bottom > bounds.height ? w * fontSize : 0
+      // A label about as near to another dot as to its own reads as either dot's: its own dot must be
+      // clearly nearer (at most 0.7 of the distance to any other dot).
+      const cx = (box.left + box.right) / 2
+      const cy = (box.top + box.bottom) / 2
+      const own = Math.hypot(cx - p.x, cy - p.y)
+      const misread = points.some((q, k) => k !== i && own > 0.7 * Math.hypot(cx - q.x, cy - q.y)) ? (w * fontSize) / 2 : 0
+      const cost =
+        outside +
+        misread +
+        placed.reduce((sum, b) => sum + overlap(box, b), 0) +
+        dots.reduce((sum, d, k) => sum + (k === i ? 0 : overlap(box, d)), 0)
+      if (cost < bestCost) {
+        best = { x, y, anchor: spot.anchor, box }
+        bestCost = cost
+        if (cost === 0) break
+      }
+    }
+    out[i] = best!
+    placed.push(best!.box)
+  }
+  return out
+}
