@@ -38,25 +38,39 @@ header (`active={stage}`, `showRobustness={false}`).
 
 ## TopsisGeometry
 
-Alternatives as points in the weighted normalized space of two criteria, A+ and A-, and the two
-distance lines of the selected alternative. Better is always right and up (a cost axis is
-reversed; the arrowheads mark "better"), one scale on both axes so lengths are true distances.
-Below: a readout with the real n-criteria D+, D- and C, then one caption line; with more than two
-criteria the `projectionNote` is appended. Points are a radio group: click, or Tab to it and use
-the arrow keys / Home / End. Table equivalent behind "Show as table" (v on both axes, D+, D-, C,
-and rows for A+ and A-).
+TOPSIS as a picture, two views behind a small segmented control:
+
+- **Distances** (default): every alternative at (D+, D−), the core's n-criteria distances, with
+  dashed rays of constant closeness C = 0.25, 0.5, 0.75 through the origin (C = D− / (D+ + D−) is
+  constant along each ray). Top left is best. One scale on both axes, so C = 0.5 is the diagonal.
+  Exact for any number of criteria, so the picture always agrees with the ranking.
+- **Two criteria**: the weighted normalized values of two criteria with A+, A− and the selected
+  alternative's distance lines. Values grow right and up on both axes, also on a cost criterion
+  (no reversed axis); the axis names say which direction is better ("Risk, lower is better"), so
+  A+ sits where the data puts it. Exact for two criteria; with more, `projectionNote` is appended.
+
+Below: a readout with the real D+, D− and C, then one caption line. Points are a radio group:
+click, or Tab to it and use the arrow keys / Home / End. Table equivalent behind "Show as table"
+(Distances: D+, D−, C; Two criteria: v on both axes, D+, D−, C, and rows for A+ and A−).
 
 | Prop | Type | Notes |
 |---|---|---|
 | `problem` | `Problem` | Valid, numeric (render nothing when TOPSIS cannot run). |
 | `weights` | `number[]` | |
-| `axes` | `[number, number]` | Criterion indices; default the two largest weights. |
+| `axes` | `[number, number]` | Criterion indices of the two-criteria view; default the two largest weights. |
+| `defaultView` | `'distances' \| 'criteria'` | Default `'distances'`. |
 | `selected`, `onSelectedChange` | `number`, `(i) => void` | Controlled if `selected` is set; default the best ranked. |
-| `format` | `(n) => string` | Readout and table. |
-| `labels` | `{ title, caption, projectionNote, ideal, antiIdeal, dPlus, dMinus, formula, select, point(name, c), showTable, alternative, closeness }` | |
+| `format` | `(n) => string` | Readout, table and the ray labels (trailing zeros dropped). |
+| `labels` | `{ title, caption, projectionNote, ideal, antiIdeal, dPlus, dMinus, formula, select, point(name, c), showTable, alternative, closeness, viewLabel, viewDistances, viewCriteria, axisDPlus, axisDMinus, isoC(c), planeCaption, higherBetter(name), lowerBetter(name) }` | Translations in `methods.page.idea.topsis.*`. `caption` is the two-criteria line, `planeCaption` the distances line. |
 
 Use: `/methods/topsis` "The idea" (the Opricovic and Tzeng example, `weights=[0.5, 0.5]`, max 760 px);
-workbench Results next to the closeness bars (current problem and weights).
+workbench Ranking next to the closeness bars (current problem and weights).
+
+## MethodThumb
+
+A small decorative picture (132 x 72, `aria-hidden`, no text) for catalogue cards, drawn from real
+values the page passes in: `kind: 'bars'` (`values`, `highlight`: CRITIC or equal weights) or
+`kind: 'plane'` (`points` from `distancePoints`, `highlight`: the TOPSIS distance plane).
 
 ## CriticIdea
 
@@ -124,8 +138,11 @@ Use: the workbench's empty Data state, above "Load example" / "Start blank".
 
 ## Pure helpers (`geometry.ts`, tested in `geometry.test.ts`)
 
-`topsisProjection(problem, weights, axes?)`, `defaultAxes(weights)`, `fitPlot(...)` (equal-scale,
-better-is-up-right screen scales), `segmentTransform(...)`, `planarDistance`, `criticParts(problem)`,
-`argMax`, `flowIndex`, `TOPSIS_FLOW`, `CRITIC_FLOW`. The tests check that A+ / A- and C equal the core
-and the published values (Opricovic and Tzeng 2004: C = 0.762, 0.722, 0.238; Krishnan et al. 2021:
-σ and weights), and that the plot uses one scale on both axes.
+`topsisProjection(problem, weights, axes?)`, `defaultAxes(weights)`, `fitPlot(...)` (equal-scale
+screen scales, values growing right and up), `distancePoints(proj)`, `closenessAt(p)`,
+`isoClosenessEnd(c, xMax, yMax)`, `fitDistancePlane(...)`, `ISO_C_DEFAULT`, `segmentTransform(...)`,
+`planarDistance`, `criticParts(problem)`, `argMax`, `flowIndex`, `TOPSIS_FLOW`, `CRITIC_FLOW`. The
+tests check that A+ / A- and C equal the core and the published values (Opricovic and Tzeng 2004:
+C = 0.762, 0.722, 0.238; Krishnan et al. 2021: σ and weights), that the distance plane places every
+alternative at the core's (D+, D-) with C = y / (x + y) and the core's order, that each ray keeps its
+C, that a cost axis is not reversed, and that both pictures use one scale on both axes.

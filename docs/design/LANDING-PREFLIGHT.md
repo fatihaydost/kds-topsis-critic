@@ -1,7 +1,8 @@
 # Landing and method pages: pre-flight check
 
 The `design-taste-frontend` skill §14 check, run on `/`, `/methods`, `/methods/topsis`, `/methods/vikor`
-(light and dark, 1440 and 390, production build via `pnpm shot --preview`), 29.09.2026.
+(light and dark, 1440 and 390, EN and TR, production build via `vite preview`), 29.09.2026; re-run after
+the review fix round (rename, catalogue, TOPSIS geometry, prerender).
 
 **Design read:** a product landing page plus reference pages for recruiters, researchers and analysts,
 written like a technical report and built to feel like a measuring instrument: Tailwind v4 on
@@ -30,8 +31,8 @@ shows the real stages. No stock images, no picsum, no fake screenshots.
 | Serif discipline | n/a | No serif. |
 | Premium consumer palette | n/a | Not a consumer brief. Cool neutral greys. |
 | Italic descender clearance | n/a | No italic display type. |
-| Hero fits the viewport | pass | 1440 x 900: two-line headline, 20-word lead, both CTAs and the full result panel above the fold. At 390 the CTAs sit above the fold and the panel follows. |
-| Hero top padding | pass | 64 px (`lg:py-16`). |
+| Hero fits the viewport | pass | 1440 x 900: two-line headline, 20-word lead, both CTAs and the full result panel above the fold; the text column is centred against the panel (review P8). At 390 the CTAs sit above the fold and the panel follows. |
+| Hero top padding | pass | 64 px (`lg:py-16`); the text column is vertically centred at `lg`. |
 | Hero stack (4 text elements max) | pass | Headline, lead, two CTAs. No eyebrow, no tagline. |
 | Eyebrow count | pass | Zero eyebrows on the landing page. The small "Weights" / "Ranking" line in the guide is a label inside a component, not a section eyebrow. |
 | Split-header ban | pass | Every section header stacks the heading over at most one sentence. |
@@ -43,10 +44,10 @@ shows the real stages. No stock images, no picsum, no fake screenshots.
 | Motion motivated | pass | No entrance motion. The chart's value transition comes from `features/charts` and follows reduced motion. |
 | Marquee | n/a | None. |
 | Navigation on one line, height 80 px or less | pass | 48 px top bar (shell). |
-| Section layout repetition | pass | Split hero with a live component, a stage row with connectors, two verification panels, a grid of grouped families, a footer strip. Five sections, five layout families. |
+| Section layout repetition | pass | Split hero with a live component, a stage row with connectors, a two-row verification ledger (claim first, tolerance small, review P9), a grid of grouped families, a footer strip. Five sections, five layout families. |
 | Bento cell count | n/a | No bento. |
-| Long lists | pass | Landing: 26 methods as six family groups of names. `/methods`: a card grid (name, one clamped line, status, family), narrowed by the family and status filters. |
-| Real images | n/a (override) | The real component and data pictures take their place: `PipelineDiagram` on the landing page, `TopsisGeometry` and `CriticIdea` on the TOPSIS and CRITIC pages (both computed by the core from the published examples), and family glyphs in the catalogue (`src/features/illustrations`). |
+| Long lists | pass | Landing: 26 methods as six family groups of names. `/methods`: the 3 available methods as large cards (a computed picture and one line), the 23 in research as name chips in six family groups; no filters needed. |
+| Real images | n/a (override) | The real component and data pictures take their place: `PipelineDiagram` on the landing page, `TopsisGeometry` (D+ / D− plane by default, exact in any dimension) and `CriticIdea` on the TOPSIS and CRITIC pages (both computed by the core from the published examples), `MethodThumb` on the catalogue cards, family glyphs for methods in research (`src/features/illustrations`). |
 | Hand-rolled SVG | pass | Icons and family glyphs are Phosphor. The hand-drawn SVG is limited to the data pictures, which the owner asked for on 29.09. |
 | Pills on images, photo credits, version footers | pass | None. |
 | Micro-meta sentences, hero text strip, floating corner text | pass | None. |
@@ -54,7 +55,7 @@ shows the real stages. No stock images, no picsum, no fake screenshots.
 | Locale strips, scroll cues, version labels | pass | None. "Planned after v1" on the robustness stage is a real status, not a hero label. |
 | Section-number eyebrows, decorative dots | pass | None. |
 | Border on every row | pass | No row lists on the landing page. The algorithm steps are collapsed rows with one hairline between them. |
-| Content density | pass | One sentence per section at most. Method pages: 3 summary bullets, then the when / avoid / inputs / pitfalls tabs. Algorithm steps show titles only, and each step opens to its formula. Sources and reference details are collapsed. |
+| Content density | pass | Visible words, disclosures closed, whole page (EN / TR): `/` 271 / 254, `/methods` 150 / 132 (was 870 / 732), `/methods/topsis` 198 / 184 (was 277 / 243), `/methods/vikor` 152 / 143. Method pages: one summary sentence under the picture, then the use / avoid / inputs / pitfalls tabs; algorithm steps show titles only. No table of contents (the headings are the page). |
 | Quotes | n/a | None. |
 | Motion claimed = motion shown | pass | Motion dial is 3, and the page is static on purpose (DESIGN.md: no entry fades, no scroll reveal). |
 | GSAP patterns, scroll listeners | n/a | None. |
@@ -68,13 +69,14 @@ shows the real stages. No stock images, no picsum, no fake screenshots.
 | Icons from an allowed library | pass | Phosphor, regular weight. |
 | Motion isolated in client leaves | n/a | Vite SPA, no RSC. No motion components. |
 | No AI tells (§9) | pass | No Inter, no purple, no three-card row, no invented names or numbers. |
-| Core Web Vitals plausible | pass | The landing page is its own chunk (13 kB). KaTeX (260 kB) and the method content (186 kB) load only on method pages and for the catalogue preview. The main chunk dropped from 652 kB to 353 kB. |
+| Core Web Vitals plausible | pass | The home page is prerendered at build (EN and TR) and its Plex Sans faces are preloaded. Lighthouse mobile (simulated slow 4G) on `/`: LCP 2.6 s (was 3.8 s), FCP 1.9 s, CLS 0, performance 93. What is left is the 115 kB (gzip) main chunk, which carries both languages' strings; splitting the inactive language out is the next step. |
 | One design system | pass | |
 
 ## Open items
 
-- The repo has no `LICENSE` file. The footer says "MIT License" as plain text, without a link.
-- `/app?example=<id>` (link on the method pages) needs the workbench to read the query. Reported to
-  the workbench pass.
+- LCP target was below 2.5 s; measured 2.6 s. The rest is the main chunk (React, i18next and both
+  language files); loading the inactive language on demand needs a change in `src/i18n/index.ts`.
+- Deep links are served through 404.html with status 404 (review P20): per-route `index.html`
+  copies with their own title and description are not built yet.
 - Methods in research show only their family glyph as the picture. They get their own illustration
   when they are implemented.

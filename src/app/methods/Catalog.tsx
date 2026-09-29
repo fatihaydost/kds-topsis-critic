@@ -72,10 +72,10 @@ export default function Catalog() {
                     <li key={id} className="min-w-0">
                       <Link
                         href={`/methods/${id}`}
-                        className="group flex h-full flex-col gap-4 rounded-control border border-line bg-surface p-4 no-underline transition-colors hover:border-line-strong hover:bg-surface-2"
+                        className="group flex h-full flex-row items-center gap-4 rounded-control border border-line bg-surface p-4 no-underline transition-colors hover:border-line-strong hover:bg-surface-2 md:flex-col md:items-start"
                       >
                         <MethodThumb {...thumbs[id]} />
-                        <span className="flex flex-col gap-1">
+                        <span className="flex min-w-0 flex-col gap-1">
                           <span className="text-20 font-semibold text-text group-hover:underline">{m.name[lang]}</span>
                           <span className="text-14 text-text-2">{t(`methods.catalog.oneLiner.${id}`)}</span>
                         </span>
