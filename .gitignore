@@ -36,3 +36,8 @@ nul
 node_modules/
 dist/
 *.tsbuildinfo
+
+# Screenshots and Playwright output
+.shots/
+test-results/
+playwright-report/
