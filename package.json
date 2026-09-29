@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "shot": "node scripts/shot.mjs"
+    "shot": "node scripts/shot.mjs",
+    "e2e": "playwright test -c tests/e2e"
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.3.0",
