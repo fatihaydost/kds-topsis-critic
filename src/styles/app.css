@@ -1,0 +1,164 @@
+/*
+ * Tailwind v4 entry. Colour, radius and shadow values live in tokens.css; this file only maps
+ * them to utilities. Tailwind's default palette, radii and shadows are switched off, so
+ * `bg-blue-500`, `rounded-lg` or `shadow-md` generate nothing.
+ */
+@import 'tailwindcss';
+@import './tokens.css';
+@import './fonts.css';
+
+/* `dark:` follows the resolved theme: explicit data-theme, or the system when none is set. */
+@custom-variant dark {
+  &:where([data-theme='dark'], [data-theme='dark'] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme='light']), :root:not([data-theme='light']) *) {
+      @slot;
+    }
+  }
+}
+
+@theme inline {
+  --color-*: initial;
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-text: var(--text);
+  --color-text-2: var(--text-2);
+  --color-text-3: var(--text-3);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-bg: var(--accent-bg);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --color-ok: var(--ok);
+  --color-ok-bg: var(--ok-bg);
+  --color-data-context: var(--data-context);
+  --color-data-accent: var(--data-accent);
+  --color-data-heat-0: var(--data-heat-0);
+  --color-data-heat-1: var(--data-heat-1);
+  --color-data-negative: var(--data-negative);
+  --color-overlay: var(--overlay);
+
+  --font-*: initial;
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  --font-weight-*: initial;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  /* Type scale from DESIGN.md (px): text-12 ... text-44. Line heights sit on the 4 px grid. */
+  --text-*: initial;
+  --text-12: 12px;
+  --text-12--line-height: 16px;
+  --text-13: 13px;
+  --text-13--line-height: 18px;
+  --text-14: 14px;
+  --text-14--line-height: 20px;
+  --text-16: 16px;
+  --text-16--line-height: 24px;
+  --text-20: 20px;
+  --text-20--line-height: 28px;
+  --text-24: 24px;
+  --text-24--line-height: 32px;
+  --text-32: 32px;
+  --text-32--line-height: 40px;
+  --text-44: 44px;
+  --text-44--line-height: 52px;
+
+  /* Radius and shadow: defaults off; token utilities are defined below with @utility, since a
+     theme key with the token's own name would emit a self-referencing variable. */
+  --radius-*: initial;
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --blur-*: initial;
+
+  --ease-*: initial;
+  --ease-standard: var(--ease);
+  --default-transition-duration: var(--dur);
+  --default-transition-timing-function: var(--ease);
+
+  /* Motion only for state change (a panel opened). --dur is 0 under prefers-reduced-motion. */
+  --animate-*: initial;
+  --animate-fade-in: kds-fade-in var(--dur) var(--ease);
+  @keyframes kds-fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+/* 2 px: inputs, cells, buttons. 4 px: popovers, dialogs. Nothing else is rounded. */
+@utility rounded-control {
+  border-radius: var(--radius-control);
+}
+@utility rounded-float {
+  border-radius: var(--radius-float);
+}
+/* The one shadow, for floating elements only (menu, popover, dialog, toast). */
+@utility shadow-float {
+  box-shadow: var(--shadow-float);
+}
+
+/* Tabular figures for every number: `num` on cells, values, inputs. */
+@utility num {
+  font-variant-numeric: tabular-nums;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background: var(--accent-bg);
+    color: var(--text);
+  }
+
+  :focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+
+  a {
+    color: inherit;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+    color: inherit;
+  }
+}
+
+/* Left-aligned display formulas start at the text edge, not 2em in. */
+.katex-display.fleqn > span.katex {
+  padding-left: 0;
+}
