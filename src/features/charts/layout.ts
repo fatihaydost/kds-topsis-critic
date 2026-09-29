@@ -178,13 +178,23 @@ export function layoutHeatmap({
   maxCellWidth = 96,
 }: HeatmapLayoutInput): HeatmapLayout {
   const cols = Math.max(colLabels.length, 1)
-  const maxLabel = Math.max(0, ...rowLabels.map((l) => estimateTextWidth(l, fontSize)))
-  const labelWidth = Math.ceil(Math.min(maxLabel + GAP * 2, Math.max(width * 0.3, 64)))
-  const cellWidth = Math.floor(Math.min(maxCellWidth, Math.max(minCellWidth, (width - labelWidth) / cols)))
+  // The label column takes what the longest row name needs, up to 30% of the width, or more (up to
+  // 200 px) when the cells still get their minimum width; only then are names cut.
+  const cap = Math.max(width * 0.3, 64, Math.min(width - cols * minCellWidth, 200))
+  const labelFor = (labels: readonly string[]) =>
+    Math.ceil(Math.min(Math.max(0, ...labels.map((l) => estimateTextWidth(l, fontSize))) + GAP * 2, cap))
+  const cellFor = (label: number) => Math.floor(Math.min(maxCellWidth, Math.max(minCellWidth, (width - label) / cols)))
+  let labelWidth = labelFor(rowLabels)
+  let cellWidth = cellFor(labelWidth)
   const headerHeight = 24
   const cut = colLabels.some((l) => estimateTextWidth(l, fontSize) > cellWidth - 6)
   const same = rowLabels.length === colLabels.length && rowLabels.every((l, i) => l === colLabels[i])
   const numbered = cut && same && colLabels.length > 1
+  if (numbered) {
+    // Size the column for the numbered names ("3 Pixel density"), which are wider.
+    labelWidth = labelFor(rowLabels.map((l, i) => `${i + 1} ${l}`))
+    cellWidth = cellFor(labelWidth)
+  }
   return {
     width: labelWidth + cellWidth * colLabels.length,
     height: headerHeight + cellHeight * rowLabels.length,

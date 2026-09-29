@@ -155,6 +155,17 @@ describe('heatmap', () => {
     expect(l.numbered).toBe(true)
     expect(l.colLabels).toEqual(['1', '2', '3', '4', '5'])
     expect(l.rowLabels[0]).toBe('1 Price')
+    // The numbered names fit whole when there is room (review P2-4: "3 Pixel den…" at 1440).
+    for (const width of [408, 420, 560, 720]) {
+      const w = layoutHeatmap({ rowLabels: names, colLabels: names, width })
+      expect(w.rowLabels, String(width)).toEqual(names.map((n, i) => (w.numbered ? `${i + 1} ${n}` : n)))
+      expect([...w.rowLabels, ...w.colLabels].some((l) => l.endsWith('…')), String(width)).toBe(false)
+      expect(w.cellWidth).toBeGreaterThanOrEqual(44)
+      expect(w.width).toBeLessThanOrEqual(width)
+    }
+    // On a phone the cells keep their minimum and long names are cut (the full name is the tooltip).
+    const phone = layoutHeatmap({ rowLabels: names, colLabels: names, width: 300 })
+    expect(phone.cellWidth).toBe(44)
     const wide = layoutHeatmap({ rowLabels: ['A', 'B'], colLabels: ['A', 'B'], width: 420 })
     expect(wide.numbered).toBe(false)
     expect(wide.colLabels).toEqual(['A', 'B'])
