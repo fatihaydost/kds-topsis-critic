@@ -8,54 +8,36 @@ import { useWorkbench, type Stage } from '../../state/workbench'
 
 const linkClass = 'text-accent underline underline-offset-2 hover:no-underline'
 
-function MethodNotes({ id, fullTitle = false }: { id: MethodId; fullTitle?: boolean }) {
+/** First sentence of a summary ("vd. (2021)" and "e.g." do not end one: the next word is not capitalized). */
+export function firstSentence(text: string): string {
+  const m = /^(.+?[.!?])\s+(?=[A-ZÇĞİÖŞÜ])/u.exec(text)
+  return m ? m[1]! : text
+}
+
+/**
+ * One method in the panel (DESIGN.md §Copy, at most 60 words a stage): the name, one sentence,
+ * at most one "Watch out" line, and the method page for the rest.
+ */
+function MethodNote({ id, brief = false }: { id: MethodId; brief?: boolean }) {
   const { t } = useTranslation()
   const [lang] = useLang()
   const content = getMethodContent(id)
   if (!content) return null
   const m = localizeMethod(content, lang)
-  const o = content.origin
+  const pitfall = brief ? undefined : m.pitfalls[0]
   return (
-    <section className="flex flex-col gap-3" aria-label={m.name}>
+    <section className="flex flex-col gap-2" aria-label={m.name}>
       <div>
         <h3 className="text-14 font-semibold text-text">{m.name}</h3>
-        {fullTitle && m.fullName !== m.name && <p className="text-12 text-text-3">{m.fullName}</p>}
+        {!brief && m.fullName !== m.name && <p className="text-12 text-text-3">{m.fullName}</p>}
       </div>
-      <p className="text-14 text-text-2">{m.summary}</p>
-      {m.whenToUse.length > 0 && (
-        <div>
-          <h4 className="text-13 font-medium text-text">{t('workbench.panel.whenToUse')}</h4>
-          <ul className="mt-1 flex list-disc flex-col gap-1 pl-4 text-13 text-text-2">
-            {m.whenToUse.slice(0, 2).map((x, k) => (
-              <li key={k}>{x}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-      {m.pitfalls.length > 0 && (
-        <div>
-          <h4 className="text-13 font-medium text-text">{t('workbench.panel.pitfalls')}</h4>
-          <ul className="mt-1 flex list-disc flex-col gap-1 pl-4 text-13 text-text-2">
-            {m.pitfalls.slice(0, 2).map((x, k) => (
-              <li key={k}>{x}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-      <div>
-        <h4 className="text-13 font-medium text-text">{t('workbench.panel.origin')}</h4>
-        <p className="mt-1 text-12 text-text-2">
-          {shortCitation({ authors: o.authors, year: o.year, title: o.title, venue: o.venue, doi: o.doi ?? '', tables: '' }, lang)}
-          {o.doi && (
-            <>
-              {'. '}
-              <a href={doiUrl(o.doi)} target="_blank" rel="noreferrer" className={linkClass}>
-                doi:{o.doi}
-              </a>
-            </>
-          )}
+      <p className="text-14 text-text-2">{firstSentence(m.summary)}</p>
+      {pitfall && (
+        <p className="text-13 text-text-2">
+          <span className="font-medium text-text">{t('workbench.panel.pitfalls')}: </span>
+          {pitfall}
         </p>
-      </div>
+      )}
       <Link href={`/methods/${id}`} className={`${linkClass} text-13`}>
         {t('workbench.panel.methodPage', { method: m.name })}
       </Link>
@@ -81,7 +63,6 @@ function DataNotes() {
       {example && (
         <section className="flex flex-col gap-1">
           <h3 className="text-13 font-medium text-text">{t('workbench.panel.data.exampleTitle')}</h3>
-          <p className="text-13">{example.summary[lang]}</p>
           <p className="text-12">
             {shortCitation(example.citation, lang)}. {example.citation.venue}.{' '}
             <a href={doiUrl(example.citation.doi)} target="_blank" rel="noreferrer" className={linkClass}>
@@ -108,16 +89,16 @@ function ManualNotes() {
 export function ExplanationPanel({ stage }: { stage: Stage }) {
   const weightMethod = useWorkbench((s) => s.weightMethod)
   const rankingMethod = useWorkbench((s) => s.rankingMethod)
-  const weighting = weightMethod === 'manual' ? <ManualNotes /> : <MethodNotes id={weightMethod} fullTitle />
 
   if (stage === 'data') return <DataNotes />
-  if (stage === 'weights') return weighting
-  if (stage === 'ranking') return <MethodNotes id={rankingMethod} fullTitle />
+  if (stage === 'weights') return weightMethod === 'manual' ? <ManualNotes /> : <MethodNote id={weightMethod} />
+  if (stage === 'ranking') return <MethodNote id={rankingMethod} />
+  // Results: one line per method and the links; the details are on the stages before.
   return (
-    <div className="flex flex-col gap-6">
-      {weighting}
+    <div className="flex flex-col gap-5">
+      {weightMethod === 'manual' ? <ManualNotes /> : <MethodNote id={weightMethod} brief />}
       <div className="border-t border-line pt-4">
-        <MethodNotes id={rankingMethod} fullTitle />
+        <MethodNote id={rankingMethod} brief />
       </div>
     </div>
   )

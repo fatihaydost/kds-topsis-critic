@@ -119,7 +119,7 @@ test('an empty cell blocks Continue with a GOV.UK summary whose link focuses the
   // Later stages explain what blocks them instead of failing.
   await page.locator('#wb-cell-0-0').click()
   await page.keyboard.press('Delete')
-  await page.locator('nav[aria-label="Stages"] button', { hasText: 'Ranking' }).click()
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Ranking' }).click()
   await expect(page.getByText('The decision matrix has problems')).toBeVisible()
   await page.getByRole('button', { name: 'Enter a number for A on Price.' }).click()
   await expect(stageHeading(page, 'Data')).toBeVisible()
@@ -130,9 +130,7 @@ test('manual weights: live total, specific sum error, normalize', async ({ page 
   await page.goto('/app?example=opricovic-tzeng-2004-f&stage=weights')
   await expect(page.getByRole('radio', { name: 'Manual' })).toHaveAttribute('aria-checked', 'true')
   const w1 = page.locator('#wb-weight-1')
-  await w1.click()
-  await page.keyboard.press('ControlOrMeta+A')
-  await page.keyboard.type('0.45')
+  await w1.fill('0.45')
   await w1.blur()
   await expect(page.getByText('Weights sum to 0.950, they must sum to 1.')).toBeVisible()
   await page.getByRole('button', { name: 'Continue to ranking' }).click()
@@ -147,16 +145,20 @@ test('copy a step as TSV and LaTeX', async ({ page, context }) => {
   await page.goto('/app?example=krishnan-2021-smartphones&stage=results')
   await page.getByRole('button', { name: 'Show the calculation' }).click()
   const block = page.locator('section[data-step="critic.weights"]')
-  await block.getByRole('button', { name: 'Copy step 7 as TSV' }).click()
-  await expect(block.getByRole('button', { name: 'Copy step 7 as TSV' })).toHaveText('Copied')
+  // One "Copy" menu per step: TSV or LaTeX.
+  const copy = block.getByRole('button', { name: 'Copy step 7' })
+  await copy.click()
+  await page.getByRole('menuitem', { name: 'As TSV, for spreadsheets' }).click()
+  await expect(copy).toHaveText('Copied')
   const tsv = await page.evaluate(() => navigator.clipboard.readText())
   expect(tsv.split('\n')[0]).toBe('\tPrice\tScreen size\tPixel density\tThickness\tMass')
   expect(tsv.split('\n')[1]!.startsWith('w\t0.187')).toBe(true)
-  await block.getByRole('button', { name: 'Copy step 7 as LaTeX' }).click()
+  await copy.click()
+  await page.getByRole('menuitem', { name: 'As a LaTeX table' }).click()
   const tex = await page.evaluate(() => navigator.clipboard.readText())
   expect(tex).toContain('\\toprule')
   expect(tex).toContain('$w_j$ & 0.1872')
-  await expect(block.getByRole('button', { name: 'Copy step 7 as TSV' })).toHaveText('Copy TSV', { timeout: 3000 })
+  await expect(copy).toHaveText('Copy', { timeout: 3000 })
 })
 
 test('download the full calculation as .xlsx', async ({ page }) => {
@@ -165,10 +167,23 @@ test('download the full calculation as .xlsx', async ({ page }) => {
     page.waitForEvent('download'),
     page.getByRole('button', { name: 'Download full calculation (.xlsx)' }).click(),
   ])
-  expect(download.suggestedFilename()).toBe('kds-calculation.xlsx')
+  expect(download.suggestedFilename()).toBe('mcdm-calculation.xlsx')
   const path = await download.path()
-  const wb = XLSX.read(readFileSync(path))
-  expect(wb.SheetNames).toEqual(['Data', 'Weights', 'Ranking', 'Calculation'])
+  const wb = XLSX.read(readFileSync(path), { cellNF: true })
+  // Data first (it imports back), the provenance last.
+  expect(wb.SheetNames).toEqual(['Data', 'Weights', 'Ranking', 'Calculation', 'About'])
+  const about = XLSX.utils.sheet_to_json<string[]>(wb.Sheets['About']!, { header: 1 })
+  expect(about[0]).toEqual(['Tool', 'MCDM Workbench'])
+  expect(about.find((r) => r[0] === 'Data source')?.[1]).toContain('doi:10.3390/sym13060973')
+  // Computed numbers are number cells with a 4-decimal format and full precision.
+  const w = wb.Sheets['Weights']!['F4']!
+  expect(w.t).toBe('n')
+  expect(w.z).toBe('0.0000')
+  expect(String(w.v).length).toBeGreaterThan(8)
+  // Each calculation block names its method.
+  const titles = XLSX.utils.sheet_to_json<string[]>(wb.Sheets['Calculation']!, { header: 1 }).filter((r) => r.length === 1).map((r) => r[0])
+  expect(titles).toContain('CRITIC: Normalized matrix r (min-max)')
+  expect(titles).toContain('TOPSIS: Normalized matrix r (vector)')
 })
 
 test('the whole flow works with the keyboard alone', async ({ page }) => {

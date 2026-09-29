@@ -93,7 +93,16 @@ export type WorkbookInput = {
   weighting?: { method: string; result: Pick<WeightingResult, 'weights' | 'steps'> }
   ranking?: { method: string; result: Pick<RankingResult, 'scores' | 'ranking' | 'steps'> }
   labels?: Partial<WorkbookLabels>
+  /**
+   * Provenance written as a last sheet (tool, address, date, data source, methods), so a file
+   * that travels on its own still says where it came from. Data stays the first sheet, so the
+   * file imports back as it is.
+   */
+  about?: { sheet: string; rows: (readonly [string, string])[] }
 }
+
+/** Display format of computed numbers; the cells keep full precision. */
+export const COMPUTED_NUMBER_FORMAT = '0.0000'
 
 const sameValues = (a: readonly number[], b: readonly number[]): boolean =>
   a.length === b.length && a.every((x, i) => x === b[i])
@@ -110,8 +119,18 @@ function sheetName(name: string, taken: Set<string>): string {
 const finite = (x: number | null | undefined): number | null =>
   typeof x === 'number' && Number.isFinite(x) ? x : null
 
-function toSheet(X: SheetJS, rows: Cell[][]): XLSX.WorkSheet {
+/** `numFmt`: display format for non-integer number cells (computed values); raw input keeps none. */
+function toSheet(X: SheetJS, rows: Cell[][], numFmt?: string): XLSX.WorkSheet {
   const ws = X.utils.aoa_to_sheet(rows)
+  if (numFmt) {
+    rows.forEach((row, r) =>
+      row.forEach((c, j) => {
+        if (typeof c !== 'number' || Number.isInteger(c)) return
+        const cell = ws[X.utils.encode_cell({ r, c: j })] as XLSX.CellObject | undefined
+        if (cell && cell.t === 'n') cell.z = numFmt
+      }),
+    )
+  }
   const widths: number[] = []
   for (const row of rows) {
     row.forEach((c, j) => {
@@ -139,7 +158,8 @@ export function buildWorkbook(X: SheetJS, input: WorkbookInput): WorkBook {
   const axisLabels: StepLabels = { alternatives: problem.alternatives, criteria: problem.criteria.map((c) => c.name) }
   const wb = X.utils.book_new()
   const taken = new Set<string>()
-  const add = (rows: Cell[][], name: string) => X.utils.book_append_sheet(wb, toSheet(X, rows), sheetName(name, taken))
+  const add = (rows: Cell[][], name: string, numFmt?: string) =>
+    X.utils.book_append_sheet(wb, toSheet(X, rows, numFmt), sheetName(name, taken))
 
   // Data
   add(problemToGrid(problem, { corner: L.alternative, typeLabel: L.type, typeWords: L.typeWords }), L.sheets.data)
@@ -164,7 +184,7 @@ export function buildWorkbook(X: SheetJS, input: WorkbookInput): WorkBook {
       ]),
     ]
     if (scalars.length > 0) rows.push([], ...scalars.map((t): Cell[] => [t.rowLabels[0]!, finite(t.values[0]![0])]))
-    add(rows, L.sheets.weights)
+    add(rows, L.sheets.weights, COMPUTED_NUMBER_FORMAT)
   }
 
   // Ranking
@@ -187,22 +207,29 @@ export function buildWorkbook(X: SheetJS, input: WorkbookInput): WorkBook {
         ]),
       ],
       L.sheets.ranking,
+      COMPUTED_NUMBER_FORMAT,
     )
   }
 
-  // Calculation: every step, weighting first, as a titled block with its labels.
-  const steps: Step[] = [...(input.weighting?.result.steps ?? []), ...(input.ranking?.result.steps ?? [])]
+  // Calculation: every step, weighting first, as a titled block with its labels. The block title
+  // names the method ("CRITIC: ...", "TOPSIS: ..."), since both methods have a normalized matrix.
+  const steps: { step: Step; method: string | undefined }[] = [
+    ...(input.weighting?.result.steps ?? []).map((step) => ({ step, method: input.weighting?.method })),
+    ...(input.ranking?.result.steps ?? []).map((step) => ({ step, method: input.ranking?.method })),
+  ]
   if (steps.length > 0) {
     const rows: Cell[][] = []
-    for (const s of steps) {
+    for (const { step: s, method } of steps) {
       const table = stepToTable(s, axisLabels, { valueLabel: L.step(s.key) })
-      rows.push([L.step(s.key)])
+      rows.push([method ? `${method}: ${L.step(s.key)}` : L.step(s.key)])
       const cells = tableToCells(table, '')
       // A scalar block already has its title as the row label; keep only the value under the title.
       rows.push(...(table.kind === 'scalar' ? cells.map((r) => ['', ...r.slice(1)]) : cells), [])
     }
-    add(rows, L.sheets.calculation)
+    add(rows, L.sheets.calculation, COMPUTED_NUMBER_FORMAT)
   }
+
+  if (input.about) add(input.about.rows.map(([k, v]): Cell[] => [k, v]), input.about.sheet)
 
   return wb
 }

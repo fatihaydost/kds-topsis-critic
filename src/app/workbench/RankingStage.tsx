@@ -20,7 +20,11 @@ export function rankOrder(result: RankingResult): number[] {
 /** Index of the first-ranked alternative. */
 export const bestIndex = (result: RankingResult): number => rankOrder(result)[0] ?? 0
 
-export function RankingTable({ problem, result, id }: { problem: DraftProblem; result: RankingResult; id?: string }) {
+/**
+ * The ranking in rank order. `compact` keeps rank, name and C (the Results summary); the full
+ * table on the Ranking stage adds D+ and D-.
+ */
+export function RankingTable({ problem, result, id, compact = false }: { problem: DraftProblem; result: RankingResult; id?: string; compact?: boolean }) {
   const { t } = useTranslation()
   const nf = useNumberFormat(DECIMALS.score)
   const dPlus = findStep(result.steps, 'topsis.distanceBest')?.vector
@@ -28,15 +32,15 @@ export function RankingTable({ problem, result, id }: { problem: DraftProblem; r
   const order = rankOrder(result)
   return (
     <div className="min-w-0">
-      <Table density="regular" className="w-auto min-w-[min(100%,560px)]" aria-labelledby={id}>
+      <Table density="regular" className={cn('w-auto', compact ? 'min-w-[min(100%,360px)]' : 'min-w-[min(100%,560px)]')} aria-labelledby={id}>
         <THead>
           <Tr>
             <Th numeric className="w-16">
               {t('workbench.ranking.columns.rank')}
             </Th>
             <Th>{t('workbench.ranking.columns.alternative')}</Th>
-            <Th numeric>{t('workbench.ranking.columns.dPlus')}</Th>
-            <Th numeric>{t('workbench.ranking.columns.dMinus')}</Th>
+            {!compact && <Th numeric>{t('workbench.ranking.columns.dPlus')}</Th>}
+            {!compact && <Th numeric>{t('workbench.ranking.columns.dMinus')}</Th>}
             <Th numeric>{t('workbench.ranking.columns.closeness')}</Th>
           </Tr>
         </THead>
@@ -51,8 +55,8 @@ export function RankingTable({ problem, result, id }: { problem: DraftProblem; r
                 <Th scope="row" className={cn(first && 'font-semibold')}>
                   {alternativeName(problem, i, t)}
                 </Th>
-                <Td numeric>{nf.format(dPlus?.[i])}</Td>
-                <Td numeric>{nf.format(dMinus?.[i])}</Td>
+                {!compact && <Td numeric>{nf.format(dPlus?.[i])}</Td>}
+                {!compact && <Td numeric>{nf.format(dMinus?.[i])}</Td>}
                 <Td numeric data-testid="closeness" className={cn(first ? 'font-semibold' : 'font-medium')}>
                   {nf.format(result.scores[i])}
                 </Td>
@@ -110,6 +114,16 @@ export function TopsisPicture({ problem, weights, className }: { problem: DraftP
         formula: 'C = D− / (D+ + D−)',
         select: t('workbench.visual.topsis.select'),
         point: (name, value) => t('workbench.visual.topsis.point', { name, value }),
+        // The picture's own words are shared with the TOPSIS method page.
+        viewLabel: t('methods.page.idea.topsis.view'),
+        viewDistances: t('methods.page.idea.topsis.viewDistances'),
+        viewCriteria: t('methods.page.idea.topsis.viewCriteria'),
+        axisDPlus: t('methods.page.idea.topsis.axisDPlus'),
+        axisDMinus: t('methods.page.idea.topsis.axisDMinus'),
+        isoC: (c) => t('methods.page.idea.topsis.iso', { c }),
+        planeCaption: t('methods.page.idea.topsis.planeCaption'),
+        higherBetter: (name) => t('methods.page.idea.topsis.higherBetter', { name }),
+        lowerBetter: (name) => t('methods.page.idea.topsis.lowerBetter', { name }),
         showTable: t('workbench.chart.showTable'),
         alternative: t('workbench.alternative'),
         closeness: 'C',

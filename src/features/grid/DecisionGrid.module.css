@@ -13,6 +13,14 @@
   line-height: 20px;
 }
 
+/* On a phone the name column takes at most a quarter of the width, so 2 to 3 criteria show. */
+@media (max-width: 480px) {
+  .root {
+    --grid-name-w: 96px;
+    --grid-value-w: 88px;
+  }
+}
+
 /* Toolbar ------------------------------------------------------------------------------------ */
 
 .toolbar {

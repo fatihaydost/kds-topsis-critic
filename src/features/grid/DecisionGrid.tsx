@@ -92,6 +92,11 @@ export type GridLabels = {
   /** Name for a new row or column, 1-based: "Alternative 4", "Criterion 3". */
   newAlternative: (n: number) => string
   newCriterion: (n: number) => string
+  /**
+   * Announced (and shown) after a direction flips, since one click on the direction cell flips it:
+   * e.g. "Pixel density is now Cost. Ctrl+Z undoes it."
+   */
+  typeChanged: (criterion: string, type: string) => string
 }
 
 export type DecisionGridProps = {
@@ -117,6 +122,7 @@ type Notice =
   | { kind: 'headers'; before: GridProblem; at: Pos; cells: string[][]; skipped: number }
   | { kind: 'skipped'; count: number }
   | { kind: 'not-a-number'; text: string }
+  | { kind: 'type-changed'; j: number }
 
 const key = (p: Pos): string => `${p.row}:${p.col}`
 
@@ -163,6 +169,7 @@ export function DecisionGrid({
   const editRef = useRef<Editing | null>(null)
   editRef.current = editing
   const dragging = useRef(false)
+  const leaving = useRef(false)
 
   const names = useMemo<NameFactory>(
     () => ({ alternative: (i) => labels.newAlternative(i + 1), criterion: (j) => labels.newCriterion(j + 1) }),
@@ -226,6 +233,12 @@ export function DecisionGrid({
     setNotice(null)
   }
 
+  /** Flips benefit / cost of criterion j and says so, with the undo shortcut. */
+  const flipType = (j: number) => {
+    emit(toggleType(problem, j))
+    setNotice({ kind: 'type-changed', j })
+  }
+
   const openEditor = (pos: Pos, mode: EditMode, draft?: string) => {
     if (!isEditable(cellKind(pos))) return
     const original = cellText(problem, pos, format)
@@ -281,6 +294,13 @@ export function DecisionGrid({
 
   const onGridKeyDown = (e: KeyboardEvent<HTMLTableElement>) => {
     if (editRef.current) return
+    // Escape (not editing) and then Tab leaves the grid instead of moving cell by cell, so a
+    // big matrix is not dozens of tab stops before "Continue".
+    if (e.key === 'Tab' && leaving.current) {
+      leaving.current = false
+      return
+    }
+    leaving.current = e.key === 'Escape'
     const cmd = commandForKey(
       { key: e.key, shift: e.shiftKey, ctrl: e.ctrlKey || e.metaKey, alt: e.altKey },
       cellKind(cursor),
@@ -301,7 +321,7 @@ export function DecisionGrid({
         return
       case 'toggle-type':
         e.preventDefault()
-        emit(toggleType(problem, toData(cursor).j))
+        flipType(toData(cursor).j)
         return
       case 'clear':
         e.preventDefault()
@@ -383,6 +403,7 @@ export function DecisionGrid({
   // --- mouse ----------------------------------------------------------------------------------
 
   const onCellMouseDown = (pos: Pos, e: MouseEvent) => {
+    leaving.current = false
     if (e.button !== 0) return
     if (editing && samePos(editing.pos, pos)) return
     dragging.current = true
@@ -484,7 +505,12 @@ export function DecisionGrid({
         />
       )
     }
-    return <span className={s.text}>{text}</span>
+    // Names can be cut with an ellipsis on a phone; the full name is the tooltip.
+    return (
+      <span className={s.text} title={!numeric && typeof text === 'string' && text ? text : undefined}>
+        {text}
+      </span>
+    )
   }
 
   const typeLabel = (c: Criterion) => (c.type === 'benefit' ? `↑ ${labels.benefit}` : `↓ ${labels.cost}`)
@@ -508,6 +534,10 @@ export function DecisionGrid({
     )
   } else if (notice?.kind === 'skipped') noticeNode = <span>{labels.pasteSkipped(notice.count)}</span>
   else if (notice?.kind === 'not-a-number') noticeNode = <span className={s.msgDanger}>{labels.notANumber(notice.text)}</span>
+  else if (notice?.kind === 'type-changed' && criteria[notice.j]) {
+    const c = criteria[notice.j]!
+    noticeNode = <span>{labels.typeChanged(c.name, c.type === 'benefit' ? labels.benefit : labels.cost)}</span>
+  }
 
   const scrollerStyle: CSSProperties | undefined = maxHeight === undefined ? undefined : { maxHeight }
 
@@ -598,7 +628,7 @@ export function DecisionGrid({
                       type="button"
                       tabIndex={-1}
                       className={s.typeButton}
-                      onClick={() => emit(toggleType(problem, j))}
+                      onClick={() => flipType(j)}
                     >
                       {typeLabel(c)}
                     </button>

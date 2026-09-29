@@ -3,9 +3,9 @@ import { defineConfig } from '@playwright/test'
 /**
  * End-to-end tests of the workbench in Chromium against a Vite dev server on its own port
  * (5191, so it never collides with a dev server someone already runs on 5173 or 5180).
- * Run: pnpm e2e
+ * Run: pnpm e2e. E2E_PORT picks another port when two runs share a machine.
  */
-const PORT = 5191
+const PORT = Number(process.env.E2E_PORT ?? 5191)
 
 export default defineConfig({
   testDir: '.',

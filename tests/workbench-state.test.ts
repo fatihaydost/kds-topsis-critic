@@ -32,7 +32,8 @@ describe('examples match the published fixtures', () => {
   it('every example has a DOI and a table reference', () => {
     for (const ex of examples) {
       expect(ex.citation.doi).toMatch(/^10\.\d{4,}\//)
-      expect(ex.citation.tables).not.toBe('')
+      expect(ex.citation.tables.en).not.toBe('')
+      expect(ex.citation.tables.tr).not.toBe('')
       expect(ex.matrix.length).toBe(ex.alternatives.length)
       for (const row of ex.matrix) expect(row.length).toBe(ex.criteria.length)
     }

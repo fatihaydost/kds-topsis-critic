@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { getExample } from '../../data/examples'
 import { useLang } from '../../i18n'
 import { isEmptyProblem, STAGES, useRanking, useValidation, useWeights, useWorkbench, type Stage } from '../../state/workbench'
+import { usePageMeta } from '../landing/usePageMeta'
 import { WorkbenchLayout } from '../shell/WorkbenchLayout'
 import { DataStage } from './DataStage'
 import { ExplanationPanel } from './ExplanationPanel'
@@ -61,6 +62,7 @@ const NO_ATTEMPTS: Record<Stage, boolean> = { data: false, weights: false, ranki
 
 export default function WorkbenchPage() {
   const { t } = useTranslation()
+  usePageMeta(t('workbench.meta.title'), t('workbench.meta.description'))
   useQueryBootstrap()
   const stage = useWorkbench((s) => s.stage)
   const setStage = useWorkbench((s) => s.setStage)

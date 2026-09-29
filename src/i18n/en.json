@@ -131,15 +131,13 @@
       },
       "results": {
         "title": "No results yet",
-        "body": "Results appear once the ranking can be calculated.",
-        "action": "Go to Ranking"
+        "body": "Enter or load a decision matrix, and the result appears here.",
+        "blocked": "The ranking cannot be calculated yet."
       }
     },
     "explanation": {
       "title": "Explanation",
-      "open": "Show explanation",
-      "close": "Hide explanation",
-      "empty": "Method notes, formulas and sources for the current stage appear here."
+      "open": "Show explanation"
     },
     "alternative": "Alternative",
     "alternatives": "Alternatives",
@@ -190,7 +188,8 @@
       "pastedWithNames": "The first row and column were used as names.",
       "pasteAsValues": "Paste as values instead",
       "pasteSkipped_one": "{{count}} pasted cell was not a number and was skipped.",
-      "pasteSkipped_other": "{{count}} pasted cells were not numbers and were skipped."
+      "pasteSkipped_other": "{{count}} pasted cells were not numbers and were skipped.",
+      "typeChanged": "{{criterion}} is now {{type}}. Ctrl+Z undoes it."
     },
     "data": {
       "importFile": "Import file",
@@ -235,7 +234,8 @@
         "edit": "Edit a cell",
         "type": "Switch benefit and cost",
         "undo": "Undo",
-        "paste": "Paste a block copied from Excel or Sheets into any cell; the table grows to fit."
+        "paste": "Paste a block copied from Excel or Sheets into any cell; the table grows to fit.",
+        "leave": "Leave the table"
       },
       "exampleShort": "Example data: {{citation}}, {{tables}}."
     },
@@ -299,8 +299,8 @@
       "weightingPart": "Weighting: {{method}}",
       "rankingPart": "Ranking: {{method}}",
       "file": {
-        "xlsx": "kds-calculation.xlsx",
-        "csv": "kds-data.csv"
+        "xlsx": "mcdm-calculation.xlsx",
+        "csv": "mcdm-data.csv"
       },
       "workbook": {
         "data": "Data",
@@ -313,28 +313,39 @@
         "score": "Closeness C",
         "rank": "Rank",
         "benefit": "benefit",
-        "cost": "cost"
+        "cost": "cost",
+        "about": "About"
       },
       "headline": "{{name}} ranks first",
-      "byline": "Weights: {{weights}}. Ranking: {{ranking}}. {{m}} alternatives, {{n}} criteria."
+      "byline": "Weights: {{weights}}. Ranking: {{ranking}}. {{m}} alternatives, {{n}} criteria.",
+      "about": {
+        "tool": "Tool",
+        "address": "Address",
+        "created": "Created",
+        "source": "Data source",
+        "weighting": "Weighting",
+        "ranking": "Ranking",
+        "precision": "Numbers",
+        "precisionNote": "Stored at full precision, shown with 4 decimals."
+      }
     },
     "calc": {
       "step": "Step {{n}}",
-      "copyTsv": "Copy TSV",
-      "copyLatex": "Copy LaTeX",
-      "copyTsvLabel": "Copy step {{n}} as TSV",
-      "copyLatexLabel": "Copy step {{n}} as LaTeX",
+      "copyTsv": "As TSV, for spreadsheets",
+      "copyLatex": "As a LaTeX table",
       "copied": "Copied",
       "copiedTsv": "Step {{n}} copied as TSV.",
       "copiedLatex": "Step {{n}} copied as LaTeX.",
       "copyFailed": "This browser blocked copying. Select the table and copy it by hand.",
       "loading": "Loading the calculation",
       "tableLabel": "Step {{n}}: {{name}}",
-      "edgeCase": "Edge case: {{text}}"
+      "edgeCase": "Edge case: {{text}}",
+      "copy": "Copy",
+      "copyLabel": "Copy step {{n}}"
     },
     "stepNames": {
       "critic": {
-        "normalized": "Normalized matrix r",
+        "normalized": "Normalized matrix r (min-max)",
         "sigma": "Contrast σ",
         "correlation": "Correlation ρ",
         "conflict": "Conflict Σ(1 − ρ)",
@@ -343,7 +354,7 @@
         "weights": "Weights w"
       },
       "topsis": {
-        "normalized": "Normalized matrix r",
+        "normalized": "Normalized matrix r (vector)",
         "weighted": "Weighted matrix v",
         "idealBest": "Ideal solution A+",
         "idealWorst": "Negative-ideal solution A−",
@@ -370,20 +381,18 @@
       "showTable": "Show as table"
     },
     "panel": {
-      "whenToUse": "When to use",
       "pitfalls": "Watch out",
-      "origin": "Origin",
-      "methodPage": "Open the {{method}} method page",
+      "methodPage": "{{method}} method page",
       "data": {
         "title": "Decision matrix",
-        "body": "One row per alternative, one column per criterion. Mark each criterion as benefit (higher is better) or cost (lower is better).",
+        "body": "One row per alternative, one column per criterion; mark each criterion benefit (higher is better) or cost (lower is better).",
         "importTitle": "Import",
-        "import": "An .xlsx or .csv file (comma or semicolon) with a row of criterion names, an optional benefit or cost row, then one row per alternative with its name in the first column. Decimal commas and points are both read.",
+        "import": ".xlsx or .csv: a row of criterion names, an optional benefit or cost row, then one row per alternative.",
         "exampleTitle": "Example source"
       },
       "manual": {
         "title": "Manual weights",
-        "body": "Weights you set yourself, for example from an expert survey or a policy. They must be 0 or more and sum to 1. Normalize divides each weight by the total."
+        "body": "Your own weights, for example from an expert survey. Each is 0 or more and they sum to 1; Normalize divides each by the total."
       }
     },
     "rail": {
@@ -396,14 +405,14 @@
     "visual": {
       "emptyMatrix": "An empty decision matrix: alternatives in rows, criteria in columns",
       "critic": {
-        "title": "Contrast times conflict gives the weight",
+        "title": "Contrast × conflict = weight",
         "contrast": "Contrast (σ)",
         "conflict": "Conflict Σ(1 − ρ)",
         "weight": "Weight",
         "information": "Information C"
       },
       "topsis": {
-        "title": "Distance to the ideal and the negative ideal",
+        "title": "Distances to A+ and A−",
         "caption": "Closer to A+ and farther from A− gives a higher C.",
         "projectionNote": "Drawn on the two heaviest criteria; D and C use all criteria.",
         "select": "Choose an alternative",
@@ -434,6 +443,10 @@
       "results": "Result",
       "robustness": "Robustness",
       "soon": "Coming later"
+    },
+    "meta": {
+      "title": "CRITIC and TOPSIS in the browser: MCDM Workbench",
+      "description": "Enter or import a decision matrix, weight the criteria with CRITIC, equal or your own weights, rank the alternatives with TOPSIS and see every step of the calculation."
     }
   },
   "methods": {

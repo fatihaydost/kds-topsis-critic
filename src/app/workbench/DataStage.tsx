@@ -60,6 +60,7 @@ function useGridLabels(): GridLabels {
       pasteSkipped: (count) => t('workbench.grid.pasteSkipped', { count }),
       newAlternative: (n) => t('workbench.alternativeN', { n }),
       newCriterion: (n) => t('workbench.criterionN', { n }),
+      typeChanged: (criterion, type) => t('workbench.grid.typeChanged', { criterion, type }),
     }),
     [t],
   )
@@ -423,7 +424,7 @@ export function ExampleCitation({ example, lang }: { example: ExampleDataset; la
   const c = example.citation
   return (
     <p className="text-13 text-text-2">
-      {t('workbench.data.exampleShort', { citation: shortCitation(c, lang), tables: c.tables })}{' '}
+      {t('workbench.data.exampleShort', { citation: shortCitation(c, lang), tables: c.tables[lang] })}{' '}
       <a href={doiUrl(c.doi)} target="_blank" rel="noreferrer" className="text-accent underline underline-offset-2 hover:no-underline">
         doi:{c.doi}
       </a>
@@ -455,6 +456,7 @@ function GridHelp() {
           {row(['F2'], t('workbench.data.help.edit'))}
           {row(['Space'], t('workbench.data.help.type'))}
           {row(['Ctrl', 'Z'], t('workbench.data.help.undo'))}
+          {row(['Esc', 'Tab'], t('workbench.data.help.leave'))}
         </ul>
         <p className="mt-3 border-t border-line pt-3 text-13 text-text-2">{t('workbench.data.help.paste')}</p>
       </PopoverContent>

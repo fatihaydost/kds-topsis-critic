@@ -1,4 +1,4 @@
-import { Check, Copy, Info } from '@phosphor-icons/react'
+import { CaretDown, Check, Copy, Info } from '@phosphor-icons/react'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { isStepKey, stepContent } from '../../content/steps'
@@ -7,7 +7,7 @@ import { CRITIC_FLOW, StepFlow, TOPSIS_FLOW, type FlowNode } from '../../feature
 import { stepToTable, tableToLatex, tableToTsv, type StepTable } from '../../features/io'
 import { useNumberFormat } from '../../i18n'
 import type { DraftProblem } from '../../state/workbench'
-import { Button, cn, IconButton, Tooltip } from '../../ui'
+import { Button, cn, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, IconButton, Tooltip } from '../../ui'
 // Direct import, not the barrel: KaTeX must stay out of the main chunk.
 import { Formula } from '../../ui/Formula'
 import type { CalcGroup } from './parts'
@@ -250,26 +250,25 @@ function StepBlock({ step, number, index, domId, current, onCurrent, labels, hea
             {description && <p className="text-14 text-text-2">{description}</p>}
           </div>
         </div>
-        <div className="flex shrink-0 gap-1 sm:pl-0">
-          <Button
-            variant="ghost"
-            size="sm"
-            aria-label={t('workbench.calc.copyTsvLabel', { n: number })}
-            icon={copied === 'tsv' ? <Check aria-hidden /> : <Copy aria-hidden />}
-            onClick={() => void copy('tsv')}
-          >
-            {copied === 'tsv' ? t('workbench.calc.copied') : t('workbench.calc.copyTsv')}
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            aria-label={t('workbench.calc.copyLatexLabel', { n: number })}
-            icon={copied === 'latex' ? <Check aria-hidden /> : <Copy aria-hidden />}
-            onClick={() => void copy('latex')}
-          >
-            {copied === 'latex' ? t('workbench.calc.copied') : t('workbench.calc.copyLatex')}
-          </Button>
-        </div>
+        {/* One quiet "Copy" menu per step (TSV or LaTeX), so 14 steps do not carry 28 buttons. */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              aria-label={t('workbench.calc.copyLabel', { n: number })}
+              icon={copied === 'tsv' || copied === 'latex' ? <Check aria-hidden /> : <Copy aria-hidden />}
+              iconEnd={<CaretDown aria-hidden />}
+              className="shrink-0"
+            >
+              {copied === 'tsv' || copied === 'latex' ? t('workbench.calc.copied') : t('workbench.calc.copy')}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onSelect={() => void copy('tsv')}>{t('workbench.calc.copyTsv')}</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => void copy('latex')}>{t('workbench.calc.copyLatex')}</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {tex && (

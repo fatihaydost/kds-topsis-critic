@@ -1,15 +1,15 @@
 import { DownloadSimple } from '@phosphor-icons/react'
 import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { doiUrl, getExample, shortCitation } from '../../data/examples'
+import { doiUrl, formatCitation, getExample, shortCitation } from '../../data/examples'
 import { Heatmap } from '../../features/charts'
 import { buildWorkbook, exportCsv, writeWorkbook, type WorkbookLabels } from '../../features/io'
 import { useNumberFormat } from '../../i18n'
-import { useRanking, useWeights, useWorkbench } from '../../state/workbench'
+import { isEmptyProblem, useRanking, useWeights, useWorkbench } from '../../state/workbench'
 import { Button, EmptyState, Notice } from '../../ui'
 import { useWorkbenchNav } from './nav'
 import { BlockedByIssues, CalculationToggle, SectionTitle } from './parts'
-import { bestIndex, ClosenessChart, RankingTable, TopsisPicture } from './RankingStage'
+import { bestIndex, RankingTable } from './RankingStage'
 import { alternativeName, criterionName, DECIMALS, downloadBlob, findStep, stepName, weightMethodLabel } from './shared'
 import { WeightsChart } from './WeightsStage'
 
@@ -34,15 +34,20 @@ export function ResultsStage() {
 
   const result = ranking.value
   const w = weights.value
+  if (isEmptyProblem(problem)) {
+    // A first visit: one sentence and one way forward, no list of problems yet.
+    return (
+      <EmptyState
+        title={t('workbench.empty.results.title')}
+        description={t('workbench.empty.results.body')}
+        action={<Button onClick={() => goTo('data')}>{t('workbench.empty.weights.action')}</Button>}
+      />
+    )
+  }
   if (!result || !w) {
     return (
       <div className="flex flex-col gap-4">
-        <EmptyState
-          title={t('workbench.empty.results.title')}
-          description={t('workbench.empty.results.body')}
-          action={<Button onClick={() => goTo('ranking')}>{t('workbench.empty.results.action')}</Button>}
-          className="pb-2"
-        />
+        <EmptyState title={t('workbench.empty.results.title')} description={t('workbench.empty.results.blocked')} className="pb-2" />
         <BlockedByIssues issues={ranking.issues} problem={problem} />
       </div>
     )
@@ -72,6 +77,27 @@ export function ResultsStage() {
     step: (key) => stepName(key, t),
   })
 
+  /** Provenance for the About sheet: a downloaded file on its own still says where it came from. */
+  const aboutRows = (): (readonly [string, string])[] => {
+    const rows: (readonly [string, string])[] = [
+      [t('workbench.results.about.tool'), t('common.wordmark')],
+      [t('workbench.results.about.address'), `${window.location.origin}${import.meta.env.BASE_URL}app`],
+      [t('workbench.results.about.created'), new Date().toISOString().slice(0, 10)],
+      [
+        t('workbench.results.about.source'),
+        example
+          ? `${formatCitation(example.citation)}; ${example.citation.tables[nf.lang]}`
+          : importedFrom
+            ? t('workbench.results.sourceFile', { name: importedFrom })
+            : t('workbench.results.sourceManual'),
+      ],
+      [t('workbench.results.about.weighting'), weightLabel],
+      [t('workbench.results.about.ranking'), rankingLabel],
+      [t('workbench.results.about.precision'), t('workbench.results.about.precisionNote')],
+    ]
+    return rows
+  }
+
   const downloadXlsx = async () => {
     setBusy('xlsx')
     setFailed(false)
@@ -82,6 +108,7 @@ export function ResultsStage() {
         weighting: { method: weightLabel, result: w },
         ranking: { method: rankingLabel, result },
         labels: workbookLabels(),
+        about: { sheet: t('workbench.results.workbook.about'), rows: aboutRows() },
       })
       const bytes = writeWorkbook(X, wb)
       downloadBlob(
@@ -136,10 +163,6 @@ export function ResultsStage() {
             {source}
           </p>
         </div>
-        <div className="grid grid-cols-1 items-start gap-8 xl:grid-cols-2">
-          <ClosenessChart problem={problem} result={result} className="min-w-0" />
-          <TopsisPicture problem={problem} weights={w.weights} className="min-w-0" />
-        </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="primary" icon={<DownloadSimple aria-hidden />} onClick={() => void downloadXlsx()} disabled={busy !== null}>
             {busy === 'xlsx' ? t('workbench.results.preparing') : t('workbench.results.downloadXlsx')}
@@ -158,11 +181,12 @@ export function ResultsStage() {
         )}
       </section>
 
-      <section aria-labelledby="wb-results-ranking" className="flex flex-col gap-3">
+      {/* Results is the summary: the closeness bars and the TOPSIS picture stay on Ranking. */}
+      <section className="flex flex-col gap-3">
         <SectionTitle>
           <span id="wb-results-ranking">{t('workbench.results.rankingTitle')}</span>
         </SectionTitle>
-        <RankingTable problem={problem} result={result} id="wb-results-ranking" />
+        <RankingTable problem={problem} result={result} id="wb-results-ranking" compact />
       </section>
 
       <section className="grid grid-cols-1 items-start gap-8 xl:grid-cols-2">

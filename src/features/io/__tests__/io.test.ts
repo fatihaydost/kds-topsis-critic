@@ -279,8 +279,23 @@ describe.skipIf(!X)('xlsx (real SheetJS)', () => {
 
     const calc = wb.Sheets['Calculation']!
     const titles = rowsOf('Calculation').filter((row) => row.length === 1).map((row) => row[0])
-    expect(titles).toEqual([...w.steps, ...r.steps].map((s) => s.key))
+    // Each block names its method: both CRITIC and TOPSIS have a "normalized matrix".
+    expect(titles).toEqual([...w.steps.map((s) => `critic: ${s.key}`), ...r.steps.map((s) => `topsis: ${s.key}`)])
     expect(calc['B3']).toMatchObject({ t: 'n' })
+    // Computed numbers keep full precision and show 4 decimals; raw input has no format.
+    expect(wb.Sheets['Weights']!['F4']).toMatchObject({ t: 'n', v: w.weights[0], z: '0.0000' })
+    expect(data['B3']!.z).toBeUndefined()
+  })
+
+  it('writes a last About sheet with the provenance, after the re-importable Data sheet', () => {
+    const wb = buildWorkbook(X!, {
+      problem,
+      about: { sheet: 'About', rows: [['Tool', 'MCDM Workbench'], ['Created', '2026-09-29']] },
+    })
+    expect(wb.SheetNames).toEqual(['Data', 'About'])
+    expect(wb.Sheets['About']!['A1']).toMatchObject({ v: 'Tool' })
+    expect(wb.Sheets['About']!['B2']).toMatchObject({ v: '2026-09-29' })
+    expect(importWorkbook(X!, wb).problem).toEqual(problem)
   })
 
   it('uses localized labels and still re-imports the Data sheet', () => {

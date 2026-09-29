@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ValidationIssue, WeightingResult } from '../../core'
 import { getExample, shortCitation } from '../../data/examples'
-import { BarChart } from '../../features/charts'
+import { BarChart, ChartTableModeProvider } from '../../features/charts'
 import { CriticIdea } from '../../features/illustrations'
 import { useNumberFormat } from '../../i18n'
 import {
@@ -103,27 +103,31 @@ function ComputedWeights({ problem, method, result }: { problem: DraftProblem; m
         <p className="text-14 text-text">{t('workbench.weights.equalNote', { n, value: nf.format(1 / n) })}</p>
       )}
       {method === 'critic' && (
-        <CriticIdea
-          problem={toProblem(problem)}
-          format={format}
-          labels={{
-            title: t('workbench.visual.critic.title'),
-            contrast: t('workbench.visual.critic.contrast'),
-            conflict: t('workbench.visual.critic.conflict'),
-            weight: t('workbench.visual.critic.weight'),
-            information: t('workbench.visual.critic.information'),
-            showTable: t('workbench.chart.showTable'),
-            criterion: t('workbench.criterion'),
-          }}
-          className="max-w-[760px]"
-        />
+        // The table right below shows the same numbers, so the picture keeps its table for
+        // screen readers only instead of a third copy behind "Show as table".
+        <ChartTableModeProvider value="screen-reader">
+          <CriticIdea
+            problem={toProblem(problem)}
+            format={format}
+            labels={{
+              title: t('workbench.visual.critic.title'),
+              contrast: t('workbench.visual.critic.contrast'),
+              conflict: t('workbench.visual.critic.conflict'),
+              weight: t('workbench.visual.critic.weight'),
+              information: t('workbench.visual.critic.information'),
+              showTable: t('workbench.chart.showTable'),
+              criterion: t('workbench.criterion'),
+            }}
+            className="max-w-[760px]"
+          />
+        </ChartTableModeProvider>
       )}
-      <section className="flex flex-col gap-3" aria-labelledby="wb-weights-table">
+      <section className="flex flex-col gap-3">
         <SectionTitle>
           <span id="wb-weights-table">{t('workbench.weights.tableTitle')}</span>
         </SectionTitle>
         <div className="min-w-0">
-          <Table density="compact" className="w-auto min-w-[min(100%,560px)]">
+          <Table density="compact" className="w-auto min-w-[min(100%,560px)]" aria-labelledby="wb-weights-table">
             <THead>
               <Tr>
                 <Th>{t('workbench.weights.columns.criterion')}</Th>
@@ -165,6 +169,10 @@ function ComputedWeights({ problem, method, result }: { problem: DraftProblem; m
   )
 }
 
+/** Index of the largest weight (the first one on ties), drawn in the accent as on the landing page. */
+export const argmax = (values: readonly number[]): number =>
+  values.reduce((best, v, j) => (v > (values[best] ?? -Infinity) ? j : best), 0)
+
 export function WeightsChart({ names, weights, format, className }: { names: string[]; weights: number[]; format: (v: number) => string; className?: string }) {
   const { t } = useTranslation()
   return (
@@ -172,6 +180,7 @@ export function WeightsChart({ names, weights, format, className }: { names: str
       title={t('workbench.weights.chartTitle')}
       labels={names}
       values={weights}
+      highlight={argmax(weights)}
       format={format}
       tableLabels={{ show: t('workbench.chart.showTable'), label: t('workbench.criterion'), value: t('workbench.weights.columns.weight') }}
       className={cn('max-w-[640px]', className)}
@@ -233,7 +242,7 @@ function ManualWeights({ problem, issues, showErrors, summaryRoot }: ManualProps
         <p className="text-13 text-text-2">{t('workbench.weights.fromPaper', { citation: shortCitation(example.citation, nf.lang) })}</p>
       )}
 
-      <section className="flex flex-col gap-3" aria-labelledby="wb-weights-table">
+      <section className="flex flex-col gap-3">
         <SectionTitle>
           <span id="wb-weights-table">{t('workbench.weights.tableTitle')}</span>
         </SectionTitle>
@@ -248,7 +257,7 @@ function ManualWeights({ problem, issues, showErrors, summaryRoot }: ManualProps
           )}
         </div>
         <div className="min-w-0">
-          <Table density="regular" stickyHeader={false} className="w-auto min-w-[min(100%,480px)]">
+          <Table density="regular" stickyHeader={false} className="w-auto min-w-[min(100%,480px)]" aria-labelledby="wb-weights-table">
             <THead>
               <Tr>
                 <Th>{t('workbench.weights.columns.criterion')}</Th>

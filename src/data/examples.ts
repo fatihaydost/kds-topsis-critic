@@ -12,8 +12,8 @@ export type Citation = {
   /** Journal, volume(issue), pages or article number. */
   venue: string
   doi: string
-  /** Where the data comes from inside the paper. */
-  tables: string
+  /** Where the data comes from inside the paper, in the UI language ("Table 1 (input)" / "Tablo 1 (girdi)"). */
+  tables: Localized
 }
 
 export type ExampleDataset = {
@@ -61,7 +61,7 @@ export const examples: readonly ExampleDataset[] = [
       title: 'A Modified CRITIC Method to Estimate the Objective Weights of Decision Criteria',
       venue: 'Symmetry 13(6), 973',
       doi: '10.3390/sym13060973',
-      tables: 'Table 1 (input), Table 2 and Table 5 (output)',
+      tables: { en: 'Table 1 (input), Tables 2 and 5 (output)', tr: 'Tablo 1 (girdi), Tablo 2 ve 5 (çıktı)' },
     },
     alternatives: ['A', 'B', 'C', 'D', 'E'],
     criteria: [
@@ -91,7 +91,10 @@ export const examples: readonly ExampleDataset[] = [
       tr: 'Üç tırmanış rotası; risk ve yükseklik, eşit ağırlıkla. Makale TOPSIS uzaklıklarını ve yakınlık katsayılarını veriyor.',
     },
     referenceFor: ['topsis'],
-    citation: { ...OPRICOVIC_TZENG_2004, tables: 'Tables 1 and 2 (input, problem f), Table 3 (output)' },
+    citation: {
+      ...OPRICOVIC_TZENG_2004,
+      tables: { en: 'Tables 1 and 2 (input, problem f), Table 3 (output)', tr: 'Tablo 1 ve 2 (girdi, f problemi), Tablo 3 (çıktı)' },
+    },
     alternatives: ['A1', 'A2', 'A3'],
     criteria: [
       { name: { en: 'Risk (1 to 5)', tr: 'Risk (1 ile 5 arası)' }, type: 'cost' },
@@ -120,7 +123,10 @@ export const examples: readonly ExampleDataset[] = [
       tr: 'Aynı rotalar; risk 5 kaydırılmış, yükseklik etekten km cinsinden. TOPSIS bu kez farklı sıralıyor; makale bunu sıra değişimini göstermek için kullanıyor.',
     },
     referenceFor: ['topsis'],
-    citation: { ...OPRICOVIC_TZENG_2004, tables: 'Tables 1 and 2 (input, problem φ), Table 3 (output)' },
+    citation: {
+      ...OPRICOVIC_TZENG_2004,
+      tables: { en: 'Tables 1 and 2 (input, problem φ), Table 3 (output)', tr: 'Tablo 1 ve 2 (girdi, φ problemi), Tablo 3 (çıktı)' },
+    },
     alternatives: ['A1', 'A2', 'A3'],
     criteria: [
       { name: { en: 'Risk (6 to 10)', tr: 'Risk (6 ile 10 arası)' }, type: 'cost' },
@@ -148,7 +154,7 @@ export function formatCitation(c: Citation): string {
 }
 
 /** "Krishnan et al. (2021)" / "Krishnan vd. (2021)"; two authors are both named. */
-export function shortCitation(c: Citation, lang: Lang): string {
+export function shortCitation(c: Pick<Citation, 'authors' | 'year'>, lang: Lang): string {
   const surnames = c.authors.split(';').map((a) => a.trim().split(',')[0]!.trim())
   const and = lang === 'tr' ? 've' : 'and'
   const etal = lang === 'tr' ? 'vd.' : 'et al.'
