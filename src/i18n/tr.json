@@ -126,7 +126,7 @@
     "empty": {
       "data": {
         "title": "Henüz karar matrisi yok",
-        "body": "Alternatifleri ve kriterleri ekle, bir tablodan kopyaladığın bloğu yapıştır ya da yayımlanmış bir örneği yükle.",
+        "body": "Her alternatif bir satır, her kriter bir sütun.",
         "loadExample": "Örneği yükle",
         "startBlank": "Boş tabloyla başla"
       },
@@ -204,11 +204,9 @@
       "pasteSkipped_other": "Yapıştırılan {{count}} hücre sayı değildi, atlandı."
     },
     "data": {
-      "hint": "Ok tuşları ve Tab ile gezin; yazmaya başlamak hücreyi değiştirir, F2 düzenler. Excel ya da Sheets'ten kopyaladığın bir bloğu herhangi bir hücreye yapıştırabilirsin.",
       "importFile": "Dosya içe aktar",
       "loadExample": "Örnek yükle",
       "examplesLabel": "Yayımlanmış örnekler",
-      "otherExamples": "Diğer yayımlanmış örnekler",
       "clear": "Tabloyu temizle",
       "clearTitle": "Tablo temizlensin mi?",
       "clearBody": "Alternatifler, kriterler, değerler ve ağırlıklar silinir. Bu işlem geri alınamaz.",
@@ -241,7 +239,16 @@
         "mixed-decimal": "Bazı sayılarda ondalık ayırıcı nokta, bazılarında virgül. Hepsi için {{separator}} kullanıldı."
       },
       "moreProblems_one": "Tabloda {{count}} sorun daha işaretli.",
-      "moreProblems_other": "Tabloda {{count}} sorun daha işaretli."
+      "moreProblems_other": "Tabloda {{count}} sorun daha işaretli.",
+      "helpLabel": "Klavye ve yapıştırma yardımı",
+      "help": {
+        "move": "Hücreler arasında gezin",
+        "edit": "Hücreyi düzenle",
+        "type": "Fayda ile maliyet arasında geç",
+        "undo": "Geri al",
+        "paste": "Excel ya da Sheets'ten kopyaladığın bloğu herhangi bir hücreye yapıştır; tablo sığacak kadar büyür."
+      },
+      "exampleShort": "Örnek veri: {{citation}}, {{tables}}."
     },
     "weights": {
       "methodHint": {
@@ -268,7 +275,6 @@
       "startCritic": "CRITIC ağırlıklarıyla doldur",
       "sumError": "Ağırlıkların toplamı {{value}}; 1 olmalı.",
       "sumOk": "Ağırlıkların toplamı 1.",
-      "weightOf": "{{criterion}} ağırlığı",
       "emptyWeight": "{{criterion}} için bir ağırlık gir.",
       "fromPaper": "Ağırlıklar {{citation}} çalışmasındaki gibi.",
       "equalNote": "{{n}} kriter var, her ağırlık 1 / {{n}} = {{value}}."
@@ -277,7 +283,6 @@
       "methodHint": {
         "topsis": "Alternatifleri ideal ve negatif ideal çözüme olan uzaklıklarına göre sıralar."
       },
-      "moreMethods": "Yeni sıralama yöntemleri tek tek eklenecek; her biri önce yayımlanmış bir örnekle doğrulanıyor.",
       "columns": {
         "rank": "Sıra",
         "alternative": "Alternatif",
@@ -292,25 +297,16 @@
       "best": "{{name}}, C = {{value}} ile ilk sırada."
     },
     "results": {
-      "summaryTitle": "Özet",
-      "data": "Veri",
-      "weights": "Ağırlıklar",
-      "ranking": "Sıralama",
-      "first": "İlk sıra",
-      "shape": "{{m}} alternatif, {{n}} kriter",
       "sourceFile": "{{name}} dosyasından içe aktarıldı",
       "sourceManual": "Çalışma alanında girildi",
-      "firstValue": "{{name}}, C = {{value}}",
       "downloadXlsx": "Tüm hesabı indir (.xlsx)",
       "downloadCsv": "Veriyi indir (.csv)",
       "preparing": "Dosya hazırlanıyor",
       "downloadFailed": "Dosya oluşturulamadı. Yeniden dene.",
       "rankingTitle": "Sıralama",
-      "chartsTitle": "Grafikler",
       "correlationTitle": "Kriterler arası korelasyon (CRITIC)",
       "correlationHint": "Normalize sütunların Pearson korelasyonu. Düşük ya da negatif değer çatışma demektir ve kriterin ağırlığını artırır.",
       "calculationTitle": "Hesap",
-      "calculationLead": "Bütün ara adımlar, hesaplandıkları sırayla. Bir bloğu tabloya yapıştırmak için TSV, makale için LaTeX olarak kopyalayabilirsin.",
       "weightingPart": "Ağırlıklandırma: {{method}}",
       "rankingPart": "Sıralama: {{method}}",
       "file": {
@@ -329,7 +325,9 @@
         "rank": "Sıra",
         "benefit": "fayda",
         "cost": "maliyet"
-      }
+      },
+      "headline": "{{name}} ilk sırada",
+      "byline": "Ağırlık: {{weights}}. Sıralama: {{ranking}}. {{m}} alternatif, {{n}} kriter."
     },
     "calc": {
       "step": "Adım {{n}}",
@@ -342,7 +340,8 @@
       "copiedLatex": "{{n}}. adım LaTeX olarak kopyalandı.",
       "copyFailed": "Tarayıcı kopyalamaya izin vermedi. Tabloyu seçip elle kopyala.",
       "loading": "Hesap yükleniyor",
-      "tableLabel": "{{n}}. adım: {{name}}"
+      "tableLabel": "{{n}}. adım: {{name}}",
+      "edgeCase": "Özel durum: {{text}}"
     },
     "stepNames": {
       "critic": {
@@ -379,8 +378,7 @@
       "goToWeights": "Ağırlıklar aşamasına git"
     },
     "chart": {
-      "showTable": "Tablo olarak göster",
-      "value": "Değer"
+      "showTable": "Tablo olarak göster"
     },
     "panel": {
       "whenToUse": "Ne zaman kullanılır",
@@ -390,8 +388,6 @@
       "data": {
         "title": "Karar matrisi",
         "body": "Her alternatif bir satır, her kriter bir sütun. Her kriteri fayda (yüksek olan iyi) ya da maliyet (düşük olan iyi) olarak işaretle.",
-        "keysTitle": "Klavye",
-        "keys": "Ok tuşları, Tab ve Enter ile gezin. Yazmaya başlamak hücreyi değiştirir; F2 ya da çift tık düzenler, Esc vazgeçer. Boşluk fayda ile maliyet arasında geçer. Ctrl+Z geri alır.",
         "importTitle": "İçe aktarma",
         "import": "Kriter adlarının olduğu bir satır, isteğe bağlı bir fayda ya da maliyet satırı, ardından ilk sütunda adıyla her alternatif için bir satır içeren .xlsx ya da .csv dosyası (virgül ya da noktalı virgülle ayrılmış). Ondalık virgül de nokta da okunur.",
         "exampleTitle": "Örneğin kaynağı"
@@ -400,6 +396,13 @@
         "title": "Elle girilen ağırlıklar",
         "body": "Kendi belirlediğin ağırlıklar; örneğin bir uzman anketinden ya da bir politikadan. Her biri 0 ya da daha büyük olmalı, toplamları 1 etmeli. Ölçekleme her ağırlığı toplama böler."
       }
+    },
+    "rail": {
+      "done": "Tamam",
+      "attention": "Düzeltme gerekiyor",
+      "toFix_one": "{{count}} sorun",
+      "toFix_other": "{{count}} sorun",
+      "checkWeights": "Ağırlıkları kontrol et"
     }
   },
   "methods": {

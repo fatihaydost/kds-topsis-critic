@@ -79,7 +79,7 @@ export function WeightsStage() {
         <ComputedWeights problem={problem} method={weightMethod} result={weights.value} />
       ) : null}
 
-      <ContinueBar to="ranking" onContinue={onContinue} />
+      {!dataBlocked && <ContinueBar to="ranking" onContinue={onContinue} />}
     </div>
   )
 }
@@ -100,6 +100,7 @@ function ComputedWeights({ problem, method, result }: { problem: DraftProblem; m
       {method === 'equal' && (
         <p className="text-14 text-text">{t('workbench.weights.equalNote', { n, value: nf.format(1 / n) })}</p>
       )}
+      {method === 'critic' && <WeightsChart names={names} weights={result.weights} format={format} />}
       <section className="flex flex-col gap-3" aria-labelledby="wb-weights-table">
         <SectionTitle>
           <span id="wb-weights-table">{t('workbench.weights.tableTitle')}</span>
@@ -142,12 +143,7 @@ function ComputedWeights({ problem, method, result }: { problem: DraftProblem; m
         </div>
       </section>
 
-      {method === 'critic' && (
-        <>
-          <WeightsChart names={names} weights={result.weights} format={format} />
-          <CalculationToggle groups={[{ steps: result.steps }]} problem={problem} />
-        </>
-      )}
+      {method === 'critic' && <CalculationToggle groups={[{ steps: result.steps }]} problem={problem} />}
     </>
   )
 }
@@ -279,8 +275,8 @@ function ManualWeights({ problem, issues, showErrors, summaryRoot }: ManualProps
                   {t('workbench.weights.total')}
                 </Th>
                 <Td />
-                <Td numeric className={cn('pr-5 font-semibold', filled && !sumOk ? 'text-danger' : 'text-text')} aria-live="polite">
-                  {nf.format(sum, Math.max(DECIMALS.weight, sumDecimals(sum)))}
+                <Td numeric className="pr-5 font-semibold" aria-live="polite">
+                  <span className={filled && !sumOk ? 'text-danger' : undefined}>{nf.format(sum, Math.max(DECIMALS.weight, sumDecimals(sum)))}</span>
                 </Td>
               </Tr>
             </TBody>

@@ -123,7 +123,7 @@ export function RankingStage() {
           className="self-start"
         />
         <p className="max-w-[72ch] text-13 text-text-2">
-          {t(`workbench.ranking.methodHint.${rankingMethod}`)} {t('workbench.ranking.moreMethods')}
+          {t(`workbench.ranking.methodHint.${rankingMethod}`)}
         </p>
         <p className="flex flex-wrap items-center gap-x-2 text-13 text-text-2">
           <span>{t('workbench.ranking.weightsUsed', { method: weightMethodLabel(weightMethod, t) })}</span>
@@ -138,21 +138,21 @@ export function RankingStage() {
       ) : (
         <>
           <MethodWarnings warnings={result.warnings} problem={problem} />
-          <p className="text-16 text-text" data-testid="best-sentence">
+          <p className="text-20 font-semibold text-text" data-testid="best-sentence">
             {t('workbench.ranking.best', { name: alternativeName(problem, best, t), value: nf.format(result.scores[best]) })}
           </p>
+          <ClosenessChart problem={problem} result={result} />
           <section className="flex flex-col gap-3">
             <SectionTitle>
               <span id="wb-ranking-table">{t('workbench.ranking.tableTitle')}</span>
             </SectionTitle>
             <RankingTable problem={problem} result={result} id="wb-ranking-table" />
           </section>
-          <ClosenessChart problem={problem} result={result} />
           <CalculationToggle groups={[{ steps: result.steps }]} problem={problem} />
         </>
       )}
 
-      <ContinueBar to="results" onContinue={() => goTo('results')} />
+      {result && <ContinueBar to="results" onContinue={() => goTo('results')} />}
     </div>
   )
 }

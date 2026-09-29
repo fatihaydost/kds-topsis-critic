@@ -1,4 +1,4 @@
-import { CaretDown, FileArrowUp, Trash } from '@phosphor-icons/react'
+import { CaretDown, FileArrowUp, Question, Trash } from '@phosphor-icons/react'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ValidationIssue } from '../../core'
@@ -17,14 +17,19 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-  EmptyState,
   ErrorSummary,
+  IconButton,
+  Kbd,
   Notice,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   Skeleton,
   type ErrorSummaryItem,
 } from '../../ui'
 import { cellRef, IMPORT_ACCEPT, isLocated, readDecisionFile } from './importFile'
 import { useWorkbenchNav, type ImportReport } from './nav'
+import { MatrixHint } from './MatrixHint'
 import { ContinueBar } from './parts'
 import { alternativeName, criterionName, ids, placeIssue, tr } from './shared'
 
@@ -258,11 +263,12 @@ export function DataStage() {
       <div className="flex flex-col gap-2 pt-2">
         {fileControl}
         {statusNode && <div className="pt-4">{statusNode}</div>}
-        <EmptyState
-          title={t('workbench.empty.data.title')}
-          description={t('workbench.empty.data.body')}
-          action={
-            <>
+        <div className="flex flex-col gap-5 py-8 sm:flex-row sm:items-center sm:gap-10">
+          <MatrixHint className="shrink-0" />
+          <div className="flex max-w-[480px] flex-col items-start gap-2">
+            <h2 className="text-16 font-semibold text-text">{t('workbench.empty.data.title')}</h2>
+            <p className="text-14 text-text-2">{t('workbench.empty.data.body')}</p>
+            <div className="mt-2 flex flex-wrap gap-2">
               <Button variant="primary" onClick={() => onLoadExample(DEFAULT_EXAMPLE)}>
                 {t('workbench.data.loadExample')}
               </Button>
@@ -280,10 +286,9 @@ export function DataStage() {
               >
                 {t('workbench.empty.data.startBlank')}
               </Button>
-            </>
-          }
-          className="pb-6"
-        />
+            </div>
+          </div>
+        </div>
         <ExampleList lang={lang} onLoad={onLoadExample} />
       </div>
     )
@@ -311,6 +316,7 @@ export function DataStage() {
         <Button icon={<FileArrowUp aria-hidden />} onClick={openFile}>
           {t('workbench.data.importFile')}
         </Button>
+        <GridHelp />
         <Button variant="ghost" icon={<Trash aria-hidden />} className="ml-auto" onClick={() => setClearOpen(true)}>
           {t('workbench.data.clear')}
         </Button>
@@ -347,8 +353,6 @@ export function DataStage() {
           </p>
         </Notice>
       )}
-
-      <p className="max-w-[80ch] text-13 text-text-2">{t('workbench.data.hint')}</p>
 
       <div ref={gridRoot} className="min-w-0">
         <DecisionGrid
@@ -413,13 +417,13 @@ function ProblemWarnings({ issues, problem }: { issues: ValidationIssue[]; probl
   )
 }
 
-/** "Example data from Krishnan et al. (2021). Title. Venue. Tables. doi:..." under the grid. */
+/** One line under the grid: "Example data: Krishnan et al. (2021), Table 1 (input) ... doi:..." */
 export function ExampleCitation({ example, lang }: { example: ExampleDataset; lang: Lang }) {
   const { t } = useTranslation()
   const c = example.citation
   return (
-    <p className="max-w-[80ch] text-13 text-text-2">
-      {t('workbench.example.loaded', { citation: shortCitation(c, lang) })}. {c.title}. {c.venue}. {c.tables}.{' '}
+    <p className="text-13 text-text-2">
+      {t('workbench.data.exampleShort', { citation: shortCitation(c, lang), tables: c.tables })}{' '}
       <a href={doiUrl(c.doi)} target="_blank" rel="noreferrer" className="text-accent underline underline-offset-2 hover:no-underline">
         doi:{c.doi}
       </a>
@@ -427,10 +431,41 @@ export function ExampleCitation({ example, lang }: { example: ExampleDataset; la
   )
 }
 
+/** "?" next to the toolbar: the grid's keys and paste, instead of a paragraph above it. */
+function GridHelp() {
+  const { t } = useTranslation()
+  const row = (keys: string[], label: string) => (
+    <li className="flex items-baseline justify-between gap-4">
+      <span className="text-13 text-text-2">{label}</span>
+      <span className="flex shrink-0 gap-1">
+        {keys.map((k) => (
+          <Kbd key={k}>{k}</Kbd>
+        ))}
+      </span>
+    </li>
+  )
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <IconButton aria-label={t('workbench.data.helpLabel')} icon={<Question />} />
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-80">
+        <ul className="flex flex-col gap-2">
+          {row(['↑', '↓', 'Tab', 'Enter'], t('workbench.data.help.move'))}
+          {row(['F2'], t('workbench.data.help.edit'))}
+          {row(['Space'], t('workbench.data.help.type'))}
+          {row(['Ctrl', 'Z'], t('workbench.data.help.undo'))}
+        </ul>
+        <p className="mt-3 border-t border-line pt-3 text-13 text-text-2">{t('workbench.data.help.paste')}</p>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
 function ExampleList({ lang, onLoad }: { lang: Lang; onLoad: (id: string) => void }) {
   const { t } = useTranslation()
   return (
-    <section aria-labelledby="wb-examples" className="max-w-[720px] border-t border-line pt-6">
+    <section aria-labelledby="wb-examples" className="max-w-[720px] border-t border-line pt-5">
       <h2 id="wb-examples" className="text-14 font-semibold text-text">
         {t('workbench.data.examplesLabel')}
       </h2>
@@ -439,7 +474,6 @@ function ExampleList({ lang, onLoad }: { lang: Lang; onLoad: (id: string) => voi
           <li key={ex.id} className="flex flex-col gap-1 border-b border-line py-3 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
             <div className="flex min-w-0 flex-col gap-0.5">
               <span className="text-14 font-medium text-text">{ex.name[lang]}</span>
-              <span className="text-13 text-text-2">{ex.summary[lang]}</span>
               <span className="text-12 text-text-3">
                 {ex.citation.venue}.{' '}
                 <a href={doiUrl(ex.citation.doi)} target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:no-underline">

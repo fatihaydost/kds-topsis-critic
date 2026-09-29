@@ -26,7 +26,7 @@ function MethodNotes({ id, fullTitle = false }: { id: MethodId; fullTitle?: bool
         <div>
           <h4 className="text-13 font-medium text-text">{t('workbench.panel.whenToUse')}</h4>
           <ul className="mt-1 flex list-disc flex-col gap-1 pl-4 text-13 text-text-2">
-            {m.whenToUse.slice(0, 3).map((x, k) => (
+            {m.whenToUse.slice(0, 2).map((x, k) => (
               <li key={k}>{x}</li>
             ))}
           </ul>
@@ -36,7 +36,7 @@ function MethodNotes({ id, fullTitle = false }: { id: MethodId; fullTitle?: bool
         <div>
           <h4 className="text-13 font-medium text-text">{t('workbench.panel.pitfalls')}</h4>
           <ul className="mt-1 flex list-disc flex-col gap-1 pl-4 text-13 text-text-2">
-            {m.pitfalls.slice(0, 3).map((x, k) => (
+            {m.pitfalls.slice(0, 2).map((x, k) => (
               <li key={k}>{x}</li>
             ))}
           </ul>
@@ -45,10 +45,10 @@ function MethodNotes({ id, fullTitle = false }: { id: MethodId; fullTitle?: bool
       <div>
         <h4 className="text-13 font-medium text-text">{t('workbench.panel.origin')}</h4>
         <p className="mt-1 text-12 text-text-2">
-          {o.authors} ({o.year}). {o.title}. {o.venue}.
+          {shortCitation({ authors: o.authors, year: o.year, title: o.title, venue: o.venue, doi: o.doi ?? '', tables: '' }, lang)}
           {o.doi && (
             <>
-              {' '}
+              {'. '}
               <a href={doiUrl(o.doi)} target="_blank" rel="noreferrer" className={linkClass}>
                 doi:{o.doi}
               </a>
@@ -75,10 +75,6 @@ function DataNotes() {
         <p>{t('workbench.panel.data.body')}</p>
       </section>
       <section className="flex flex-col gap-1">
-        <h3 className="text-13 font-medium text-text">{t('workbench.panel.data.keysTitle')}</h3>
-        <p className="text-13">{t('workbench.panel.data.keys')}</p>
-      </section>
-      <section className="flex flex-col gap-1">
         <h3 className="text-13 font-medium text-text">{t('workbench.panel.data.importTitle')}</h3>
         <p className="text-13">{t('workbench.panel.data.import')}</p>
       </section>
@@ -87,7 +83,7 @@ function DataNotes() {
           <h3 className="text-13 font-medium text-text">{t('workbench.panel.data.exampleTitle')}</h3>
           <p className="text-13">{example.summary[lang]}</p>
           <p className="text-12">
-            {shortCitation(example.citation, lang)}. {example.citation.title}. {example.citation.venue}.{' '}
+            {shortCitation(example.citation, lang)}. {example.citation.venue}.{' '}
             <a href={doiUrl(example.citation.doi)} target="_blank" rel="noreferrer" className={linkClass}>
               doi:{example.citation.doi}
             </a>

@@ -45,7 +45,7 @@ test('example -> CRITIC -> TOPSIS: weights match Krishnan et al. (2021), closene
   await page.goto('/app')
   await page.getByRole('button', { name: 'Load example', exact: true }).first().click()
   await expect(page.getByRole('grid', { name: 'Decision matrix' })).toBeVisible()
-  await expect(page.getByText('Example data from Krishnan et al. (2021)')).toBeVisible()
+  await expect(page.getByText('Example data: Krishnan et al. (2021)')).toBeVisible()
 
   await page.getByRole('button', { name: 'Continue to weights' }).click()
   await expect(stageHeading(page, 'Weights')).toBeVisible()
@@ -69,7 +69,9 @@ test('example -> CRITIC -> TOPSIS: weights match Krishnan et al. (2021), closene
   await page.getByRole('button', { name: 'Continue to results' }).click()
   await expect(stageHeading(page, 'Results')).toBeVisible()
   expect(await closenessByName(page)).toEqual(expected)
-  // The worked calculation: 7 CRITIC steps + 7 TOPSIS steps, with formulas.
+  // The worked calculation, collapsed until asked for: 7 CRITIC steps + 7 TOPSIS steps, with formulas.
+  await expect(page.locator('section[data-step]')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Show the calculation' }).click()
   await expect(page.locator('section[data-step]')).toHaveCount(14)
   await expect(page.locator('section[data-step] .katex').first()).toBeVisible()
 })
@@ -143,6 +145,7 @@ test('manual weights: live total, specific sum error, normalize', async ({ page 
 test('copy a step as TSV and LaTeX', async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write'])
   await page.goto('/app?example=krishnan-2021-smartphones&stage=results')
+  await page.getByRole('button', { name: 'Show the calculation' }).click()
   const block = page.locator('section[data-step="critic.weights"]')
   await block.getByRole('button', { name: 'Copy step 7 as TSV' }).click()
   await expect(block.getByRole('button', { name: 'Copy step 7 as TSV' })).toHaveText('Copied')

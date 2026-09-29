@@ -8,7 +8,7 @@ import { useNumberFormat } from '../../i18n'
 import { useRanking, useWeights, useWorkbench } from '../../state/workbench'
 import { Button, EmptyState, Notice } from '../../ui'
 import { useWorkbenchNav } from './nav'
-import { BlockedByIssues, Calculation, SectionTitle } from './parts'
+import { BlockedByIssues, CalculationToggle, SectionTitle } from './parts'
 import { bestIndex, ClosenessChart, RankingTable } from './RankingStage'
 import { alternativeName, criterionName, DECIMALS, downloadBlob, findStep, stepName, weightMethodLabel } from './shared'
 import { WeightsChart } from './WeightsStage'
@@ -120,27 +120,26 @@ export function ResultsStage() {
 
   return (
     <div className="flex flex-col gap-10 pt-4">
-      <section aria-labelledby="wb-summary" className="flex flex-col gap-4">
-        <SectionTitle>
-          <span id="wb-summary">{t('workbench.results.summaryTitle')}</span>
-        </SectionTitle>
-        <dl className="grid grid-cols-1 gap-x-8 gap-y-4 border-y border-line py-4 sm:grid-cols-2 xl:grid-cols-4">
-          <SummaryItem term={t('workbench.results.data')}>
-            <span className="text-text">{t('workbench.results.shape', { m: problem.alternatives.length, n: problem.criteria.length })}</span>
-            <span className="text-13 text-text-2">{source}</span>
-          </SummaryItem>
-          <SummaryItem term={t('workbench.results.weights')}>
-            <span className="text-text">{weightLabel}</span>
-          </SummaryItem>
-          <SummaryItem term={t('workbench.results.ranking')}>
-            <span className="text-text">{rankingLabel}</span>
-          </SummaryItem>
-          <SummaryItem term={t('workbench.results.first')}>
-            <span className="text-text">
-              {t('workbench.results.firstValue', { name: alternativeName(problem, best, t), value: nf.format(result.scores[best]) })}
-            </span>
-          </SummaryItem>
-        </dl>
+      <section aria-labelledby="wb-results-headline" className="flex flex-col gap-5">
+        <div className="flex flex-col gap-1">
+          <p id="wb-results-headline" className="text-24 font-semibold text-text">
+            {t('workbench.results.headline', { name: alternativeName(problem, best, t) })}
+            <span className="num ml-3 text-20 font-normal text-text-2">C = {nf.format(result.scores[best])}</span>
+          </p>
+          <p className="text-13 text-text-2">
+            {t('workbench.results.byline', {
+              weights: weightLabel,
+              ranking: rankingLabel,
+              m: problem.alternatives.length,
+              n: problem.criteria.length,
+            })}{' '}
+            {source}
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
+          <ClosenessChart problem={problem} result={result} className="min-w-0" />
+          <WeightsChart names={names} weights={w.weights} format={format4} className="min-w-0" />
+        </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="primary" icon={<DownloadSimple aria-hidden />} onClick={() => void downloadXlsx()} disabled={busy !== null}>
             {busy === 'xlsx' ? t('workbench.results.preparing') : t('workbench.results.downloadXlsx')}
@@ -166,38 +165,26 @@ export function ResultsStage() {
         <RankingTable problem={problem} result={result} id="wb-results-ranking" />
       </section>
 
-      <section aria-labelledby="wb-results-charts" className="flex flex-col gap-4">
-        <SectionTitle>
-          <span id="wb-results-charts">{t('workbench.results.chartsTitle')}</span>
-        </SectionTitle>
-        <div className="grid grid-cols-1 gap-8 2xl:grid-cols-2">
-          <WeightsChart names={names} weights={w.weights} format={format4} className="min-w-0" />
-          <ClosenessChart problem={problem} result={result} className="min-w-0" />
-        </div>
-        {correlation && (
-          <div className="flex max-w-[640px] min-w-0 flex-col gap-2">
-            <Heatmap
-              title={t('workbench.results.correlationTitle')}
-              description={t('workbench.results.correlationHint')}
-              scale="diverging"
-              rowLabels={names}
-              colLabels={names}
-              values={correlation}
-              format={format2}
-              tableLabels={{ show: t('workbench.chart.showTable'), corner: t('workbench.criterion') }}
-            />
-          </div>
-        )}
-      </section>
+      {correlation && (
+        <section className="flex max-w-[640px] min-w-0 flex-col gap-2">
+          <Heatmap
+            title={t('workbench.results.correlationTitle')}
+            description={t('workbench.results.correlationHint')}
+            scale="diverging"
+            rowLabels={names}
+            colLabels={names}
+            values={correlation}
+            format={format2}
+            tableLabels={{ show: t('workbench.chart.showTable'), corner: t('workbench.criterion') }}
+          />
+        </section>
+      )}
 
-      <section aria-labelledby="wb-calculation" className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
-          <SectionTitle>
-            <span id="wb-calculation">{t('workbench.results.calculationTitle')}</span>
-          </SectionTitle>
-          <p className="max-w-[72ch] text-14 text-text-2">{t('workbench.results.calculationLead')}</p>
-        </div>
-        <Calculation
+      <section aria-labelledby="wb-calculation" className="flex flex-col gap-3">
+        <SectionTitle>
+          <span id="wb-calculation">{t('workbench.results.calculationTitle')}</span>
+        </SectionTitle>
+        <CalculationToggle
           problem={problem}
           headingLevel="h4"
           groups={[
@@ -206,15 +193,6 @@ export function ResultsStage() {
           ]}
         />
       </section>
-    </div>
-  )
-}
-
-function SummaryItem({ term, children }: { term: string; children: React.ReactNode }) {
-  return (
-    <div className="flex min-w-0 flex-col gap-0.5">
-      <dt className="text-12 font-medium text-text-3">{term}</dt>
-      <dd className="flex flex-col gap-0.5 text-14">{children}</dd>
     </div>
   )
 }

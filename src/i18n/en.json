@@ -126,7 +126,7 @@
     "empty": {
       "data": {
         "title": "No decision matrix yet",
-        "body": "Add alternatives and criteria, paste a block copied from a spreadsheet, or load a published example.",
+        "body": "One row per alternative, one column per criterion.",
         "loadExample": "Load example",
         "startBlank": "Start with an empty table"
       },
@@ -204,11 +204,9 @@
       "pasteSkipped_other": "{{count}} pasted cells were not numbers and were skipped."
     },
     "data": {
-      "hint": "Arrow keys and Tab move, typing replaces a cell, F2 edits it. Paste a block copied from Excel or Sheets into any cell.",
       "importFile": "Import file",
       "loadExample": "Load example",
       "examplesLabel": "Published examples",
-      "otherExamples": "Other published examples",
       "clear": "Clear table",
       "clearTitle": "Clear the table?",
       "clearBody": "The alternatives, criteria, values and weights are removed. This cannot be undone.",
@@ -241,7 +239,16 @@
         "mixed-decimal": "Some numbers use a point and others a comma as the decimal separator. All of them were read with {{separator}} as the decimal separator."
       },
       "moreProblems_one": "{{count}} more problem is marked in the table.",
-      "moreProblems_other": "{{count}} more problems are marked in the table."
+      "moreProblems_other": "{{count}} more problems are marked in the table.",
+      "helpLabel": "Keyboard and paste help",
+      "help": {
+        "move": "Move between cells",
+        "edit": "Edit a cell",
+        "type": "Switch benefit and cost",
+        "undo": "Undo",
+        "paste": "Paste a block copied from Excel or Sheets into any cell; the table grows to fit."
+      },
+      "exampleShort": "Example data: {{citation}}, {{tables}}."
     },
     "weights": {
       "methodHint": {
@@ -268,7 +275,6 @@
       "startCritic": "Fill with CRITIC weights",
       "sumError": "Weights sum to {{value}}, they must sum to 1.",
       "sumOk": "Weights sum to 1.",
-      "weightOf": "Weight of {{criterion}}",
       "emptyWeight": "Enter a weight for {{criterion}}.",
       "fromPaper": "Weights as given in {{citation}}.",
       "equalNote": "{{n}} criteria, so each weight is 1 / {{n}} = {{value}}."
@@ -277,7 +283,6 @@
       "methodHint": {
         "topsis": "Ranks the alternatives by their distance from an ideal and a negative-ideal solution."
       },
-      "moreMethods": "Further ranking methods are added one at a time, each checked against a published example first.",
       "columns": {
         "rank": "Rank",
         "alternative": "Alternative",
@@ -292,25 +297,16 @@
       "best": "{{name}} ranks first with C = {{value}}."
     },
     "results": {
-      "summaryTitle": "Summary",
-      "data": "Data",
-      "weights": "Weights",
-      "ranking": "Ranking",
-      "first": "First place",
-      "shape": "{{m}} alternatives, {{n}} criteria",
       "sourceFile": "Imported from {{name}}",
       "sourceManual": "Entered in the workbench",
-      "firstValue": "{{name}}, C = {{value}}",
       "downloadXlsx": "Download full calculation (.xlsx)",
       "downloadCsv": "Download data (.csv)",
       "preparing": "Preparing the file",
       "downloadFailed": "The file could not be created. Try again.",
       "rankingTitle": "Ranking",
-      "chartsTitle": "Charts",
       "correlationTitle": "Correlation between criteria (CRITIC)",
       "correlationHint": "Pearson correlation of the normalized columns. Low or negative values mean conflict, which raises a criterion's weight.",
       "calculationTitle": "Calculation",
-      "calculationLead": "Every intermediate step in the order it was calculated. Copy a block as TSV for a spreadsheet or as LaTeX for a paper.",
       "weightingPart": "Weighting: {{method}}",
       "rankingPart": "Ranking: {{method}}",
       "file": {
@@ -329,7 +325,9 @@
         "rank": "Rank",
         "benefit": "benefit",
         "cost": "cost"
-      }
+      },
+      "headline": "{{name}} ranks first",
+      "byline": "Weights: {{weights}}. Ranking: {{ranking}}. {{m}} alternatives, {{n}} criteria."
     },
     "calc": {
       "step": "Step {{n}}",
@@ -342,7 +340,8 @@
       "copiedLatex": "Step {{n}} copied as LaTeX.",
       "copyFailed": "This browser blocked copying. Select the table and copy it by hand.",
       "loading": "Loading the calculation",
-      "tableLabel": "Step {{n}}: {{name}}"
+      "tableLabel": "Step {{n}}: {{name}}",
+      "edgeCase": "Edge case: {{text}}"
     },
     "stepNames": {
       "critic": {
@@ -379,8 +378,7 @@
       "goToWeights": "Go to Weights"
     },
     "chart": {
-      "showTable": "Show as table",
-      "value": "Value"
+      "showTable": "Show as table"
     },
     "panel": {
       "whenToUse": "When to use",
@@ -390,8 +388,6 @@
       "data": {
         "title": "Decision matrix",
         "body": "One row per alternative, one column per criterion. Mark each criterion as benefit (higher is better) or cost (lower is better).",
-        "keysTitle": "Keyboard",
-        "keys": "Arrow keys, Tab and Enter move. Typing replaces a cell, F2 or a double click edits it, Esc cancels. Space switches benefit and cost. Ctrl+Z undoes.",
         "importTitle": "Import",
         "import": "An .xlsx or .csv file (comma or semicolon) with a row of criterion names, an optional benefit or cost row, then one row per alternative with its name in the first column. Decimal commas and points are both read.",
         "exampleTitle": "Example source"
@@ -400,6 +396,13 @@
         "title": "Manual weights",
         "body": "Weights you set yourself, for example from an expert survey or a policy. They must be 0 or more and sum to 1. Normalize divides each weight by the total."
       }
+    },
+    "rail": {
+      "done": "Done",
+      "attention": "Needs attention",
+      "toFix_one": "{{count}} to fix",
+      "toFix_other": "{{count}} to fix",
+      "checkWeights": "Check weights"
     }
   },
   "methods": {

@@ -1,4 +1,4 @@
-import { Check, Copy } from '@phosphor-icons/react'
+import { Check, Copy, Info } from '@phosphor-icons/react'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { isStepKey, stepContent } from '../../content/steps'
@@ -6,7 +6,7 @@ import type { Step } from '../../core'
 import { stepToTable, tableToLatex, tableToTsv, type StepTable } from '../../features/io'
 import { useNumberFormat } from '../../i18n'
 import type { DraftProblem } from '../../state/workbench'
-import { Button, cn } from '../../ui'
+import { Button, cn, IconButton, Tooltip } from '../../ui'
 // Direct import, not the barrel: KaTeX must stay out of the main chunk.
 import { Formula } from '../../ui/Formula'
 import type { CalcGroup } from './parts'
@@ -175,10 +175,17 @@ function StepBlock({ step, number, current, onCurrent, labels, heading: H, name 
             {number}
           </span>
           <div className="flex min-w-0 flex-col gap-0.5">
-            <H id={titleId} className="text-14 font-semibold text-text">
-              <span className="sr-only">{t('workbench.calc.step', { n: number })}: </span>
-              {name}
-            </H>
+            <div className="flex items-center gap-1">
+              <H id={titleId} className="text-14 font-semibold text-text">
+                <span className="sr-only">{t('workbench.calc.step', { n: number })}: </span>
+                {name}
+              </H>
+              {edgeCase && (
+                <Tooltip content={edgeCase} side="top">
+                  <IconButton size="sm" aria-label={t('workbench.calc.edgeCase', { text: edgeCase })} icon={<Info />} className="-my-1" />
+                </Tooltip>
+              )}
+            </div>
             {description && <p className="text-14 text-text-2">{description}</p>}
           </div>
         </div>
@@ -207,7 +214,6 @@ function StepBlock({ step, number, current, onCurrent, labels, heading: H, name 
       {tex && (
         <div className="min-w-0 sm:pl-8">
           <Formula tex={tex} display className="text-text" />
-          {edgeCase && <p className="mt-1 text-12 text-text-3">{edgeCase}</p>}
         </div>
       )}
 

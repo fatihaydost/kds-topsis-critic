@@ -40,7 +40,15 @@ export function Calculation(props: { groups: readonly CalcGroup[]; problem: Draf
 }
 
 /** "Show the calculation" disclosure used on the Weights and Ranking stages. */
-export function CalculationToggle({ groups, problem }: { groups: readonly CalcGroup[]; problem: DraftProblem }) {
+export function CalculationToggle({
+  groups,
+  problem,
+  headingLevel = 'h3',
+}: {
+  groups: readonly CalcGroup[]
+  problem: DraftProblem
+  headingLevel?: 'h3' | 'h4'
+}) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const regionId = useId()
@@ -57,7 +65,7 @@ export function CalculationToggle({ groups, problem }: { groups: readonly CalcGr
         </Button>
       </div>
       <div id={regionId} hidden={!open}>
-        {open && <Calculation groups={groups} problem={problem} headingLevel="h3" />}
+        {open && <Calculation groups={groups} problem={problem} headingLevel={headingLevel} />}
       </div>
     </section>
   )

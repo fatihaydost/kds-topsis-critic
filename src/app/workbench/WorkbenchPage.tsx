@@ -1,8 +1,9 @@
+import { CheckCircle, WarningCircle } from '@phosphor-icons/react'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getExample } from '../../data/examples'
 import { useLang } from '../../i18n'
-import { isEmptyProblem, STAGES, useRanking, useWorkbench, type Stage } from '../../state/workbench'
+import { isEmptyProblem, STAGES, useRanking, useValidation, useWeights, useWorkbench, type Stage } from '../../state/workbench'
 import { WorkbenchLayout } from '../shell/WorkbenchLayout'
 import { DataStage } from './DataStage'
 import { ExplanationPanel } from './ExplanationPanel'
@@ -39,6 +40,23 @@ function useQueryBootstrap() {
   }, [lang, loadExample, setStage])
 }
 
+type StageState = 'done' | 'attention' | 'pending'
+
+/** Rail status under a stage name: an icon and a word for done / needs attention, plain otherwise. */
+function StageStatus({ state, children }: { state: StageState; children: ReactNode }) {
+  const { t } = useTranslation()
+  return (
+    <span className="inline-flex items-center gap-1">
+      {state === 'done' && <CheckCircle aria-hidden className="size-3.5 shrink-0 text-ok" />}
+      {state === 'attention' && <WarningCircle aria-hidden className="size-3.5 shrink-0 text-warning" />}
+      <span className={state === 'attention' ? 'text-warning' : undefined}>{children}</span>
+      {state !== 'pending' && (
+        <span className="sr-only">, {state === 'done' ? t('workbench.rail.done') : t('workbench.rail.attention')}</span>
+      )}
+    </span>
+  )
+}
+
 const NO_ATTEMPTS: Record<Stage, boolean> = { data: false, weights: false, ranking: false, results: false }
 
 export default function WorkbenchPage() {
@@ -50,6 +68,8 @@ export default function WorkbenchPage() {
   const weightMethod = useWorkbench((s) => s.weightMethod)
   const rankingMethod = useWorkbench((s) => s.rankingMethod)
   const ranking = useRanking()
+  const weights = useWeights()
+  const validation = useValidation()
 
   const [attempted, setAttemptedState] = useState<Record<Stage, boolean>>(NO_ATTEMPTS)
   const [importReport, setImportReport] = useState<ImportReport | null>(null)
@@ -108,10 +128,26 @@ export default function WorkbenchPage() {
 
   const stageMeta: Partial<Record<Stage, ReactNode>> = {}
   if (!isEmptyProblem(problem)) {
-    stageMeta.data = `${problem.alternatives.length} × ${problem.criteria.length}`
-    stageMeta.weights = weightMethodLabel(weightMethod, t)
-    stageMeta.ranking = t(`workbench.rankingMethod.${rankingMethod}`)
-    if (ranking.value) stageMeta.results = alternativeName(problem, bestIndex(ranking.value), t)
+    const dataErrors = validation.filter((x) => x.severity === 'error').length
+    stageMeta.data =
+      dataErrors > 0 ? (
+        <StageStatus state="attention">{t('workbench.rail.toFix', { count: dataErrors })}</StageStatus>
+      ) : (
+        <StageStatus state="done">{`${problem.alternatives.length} × ${problem.criteria.length}`}</StageStatus>
+      )
+    const weightsBroken = weights.value === null && weights.issues.some((x) => x.code.includes('weight'))
+    stageMeta.weights = weights.value ? (
+      <StageStatus state="done">{weightMethodLabel(weightMethod, t)}</StageStatus>
+    ) : weightsBroken ? (
+      <StageStatus state="attention">{t('workbench.rail.checkWeights')}</StageStatus>
+    ) : (
+      <StageStatus state="pending">{weightMethodLabel(weightMethod, t)}</StageStatus>
+    )
+    const rankingLabel = t(`workbench.rankingMethod.${rankingMethod}`)
+    stageMeta.ranking = <StageStatus state={ranking.value ? 'done' : 'pending'}>{rankingLabel}</StageStatus>
+    if (ranking.value) {
+      stageMeta.results = <StageStatus state="done">{alternativeName(problem, bestIndex(ranking.value), t)}</StageStatus>
+    }
   }
 
   let content: ReactNode
