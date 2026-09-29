@@ -75,9 +75,31 @@ describe('rankScores', () => {
 
 describe('registry', () => {
   it('lists methods by id and kind', () => {
-    expect(listMethods().map((m) => m.id)).toEqual(['critic', 'topsis'])
-    expect(listMethods('weighting').map((m) => m.id)).toEqual(['critic'])
+    expect(listMethods().map((m) => m.id)).toEqual(['critic', 'equal', 'topsis'])
+    expect(listMethods('weighting').map((m) => m.id)).toEqual(['critic', 'equal'])
     expect(getMethod('topsis')?.kind).toBe('ranking')
     expect(getMethod('nope')).toBeUndefined()
+  })
+})
+
+describe('equal weights', () => {
+  it('gives every criterion 1/n and ignores the matrix values', async () => {
+    const { equal } = await import('../src/core')
+    const p: Problem = {
+      alternatives: ['A', 'B'],
+      criteria: [
+        { name: 'x', type: 'benefit' },
+        { name: 'y', type: 'cost' },
+        { name: 'z', type: 'benefit' },
+        { name: 'w', type: 'cost' },
+      ],
+      matrix: [
+        [1, 2, 3, 4],
+        [1, 2, 3, 4],
+      ],
+    }
+    const r = equal.compute(p, {})
+    expect(r.weights).toEqual([0.25, 0.25, 0.25, 0.25])
+    expect(r.steps[0]?.key).toBe('equal.weights')
   })
 })

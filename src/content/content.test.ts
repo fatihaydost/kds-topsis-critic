@@ -80,7 +80,7 @@ describe('method content', () => {
     const available = allMethods.filter((m) => m.status === 'available').map((m) => m.id).sort()
     const registry = listMethods().map((m) => m.id).sort()
     expect(available).toEqual(registry)
-    expect(available).toEqual(['critic', 'topsis'])
+    expect(available).toEqual(['critic', 'equal', 'topsis'])
   })
 
   it('gives each registry method the matching kind of family', () => {

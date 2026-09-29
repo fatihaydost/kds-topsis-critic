@@ -6,7 +6,7 @@ export const equal: MethodContent = {
   name: { en: 'Equal weights', tr: 'Eşit ağırlık' },
   fullName: { en: 'Equal weights', tr: 'Eşit ağırlık' },
   family: 'weighting-objective',
-  status: 'research',
+  status: 'available',
   year: 1974,
   origin: {
     authors: 'Dawes, R.M.; Corrigan, B.',
