@@ -46,8 +46,8 @@ shows the real stages. No stock images, no picsum, no fake screenshots.
 | Section layout repetition | pass | Split hero with a live component, a stage row with connectors, two verification panels, a grid of grouped families, a footer strip. Five sections, five layout families. |
 | Bento cell count | n/a | No bento. |
 | Long lists | pass | Landing: 26 methods as six family groups of names. `/methods`: a card grid (name, one clamped line, status, family), narrowed by the family and status filters. |
-| Real images | n/a (override) | The real component and the diagram of the real pipeline take their place (brief). |
-| Hand-rolled SVG | pass, with note | Icons are Phosphor. The only hand-drawn SVG is the connector arrows of the pipeline diagram (lines and chevrons), which carry what flows between the stages. |
+| Real images | n/a (override) | The real component and data pictures take their place: `PipelineDiagram` on the landing page, `TopsisGeometry` and `CriticIdea` on the TOPSIS and CRITIC pages (both computed by the core from the published examples), and family glyphs in the catalogue (`src/features/illustrations`). |
+| Hand-rolled SVG | pass | Icons and family glyphs are Phosphor. The hand-drawn SVG is limited to the data pictures, which the owner asked for on 29.09. |
 | Pills on images, photo credits, version footers | pass | None. |
 | Micro-meta sentences, hero text strip, floating corner text | pass | None. |
 | Scoring bars with filled tracks | pass | The weight bars have no background track. |
@@ -76,3 +76,5 @@ shows the real stages. No stock images, no picsum, no fake screenshots.
 - The repo has no `LICENSE` file. The footer says "MIT License" as plain text, without a link.
 - `/app?example=<id>` (link on the method pages) needs the workbench to read the query. Reported to
   the workbench pass.
+- Methods in research show only their family glyph as the picture. They get their own illustration
+  when they are implemented.
