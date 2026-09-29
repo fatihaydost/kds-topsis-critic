@@ -1,10 +1,19 @@
 import { useTranslation } from 'react-i18next'
 import { Link } from 'wouter'
-import { getMethodContent } from '../../content/methods'
-import { localizeMethod, type MethodId } from '../../content/types'
+import { Suspense, use } from 'react'
+import { loadMethod } from '../../content/methods/load'
+import { localizeMethod } from '../../content/types'
 import { doiUrl, getExample, shortCitation } from '../../data/examples'
 import { useLang } from '../../i18n'
 import { useWorkbench, type Stage } from '../../state/workbench'
+
+/** The methods the workbench runs. Their cards are chunks of their own (shared with the method pages). */
+type PanelMethod = 'critic' | 'equal' | 'topsis'
+
+/** Starts loading the workbench's method cards (WorkbenchPage calls it when its chunk loads). */
+export function preloadPanelCards(): void {
+  for (const id of ['critic', 'equal', 'topsis'] as const) void loadMethod(id)
+}
 
 const linkClass = 'text-accent underline underline-offset-2 hover:no-underline'
 
@@ -15,16 +24,32 @@ export function firstSentence(text: string): string {
 }
 
 /**
+ * "Rank reversal: the winner changes ..." -> its own label and the rest, so the panel does not print
+ * "Watch out: Rank reversal: ...". Without a short label before a colon, the panel's "Watch out" is used.
+ */
+export function splitLabel(text: string): { label?: string; text: string } {
+  const m = /^([^:.;]{2,40}):\s+(.+)$/su.exec(text)
+  return m ? { label: m[1]!, text: m[2]! } : { text }
+}
+
+/**
  * One method in the panel (DESIGN.md §Copy, at most 60 words a stage): the name, one sentence,
  * at most one "Watch out" line, and the method page for the rest.
  */
-function MethodNote({ id, brief = false }: { id: MethodId; brief?: boolean }) {
+/** A card still loading shows nothing; the panel is secondary and fills in a moment later. */
+function MethodNote(props: { id: PanelMethod; brief?: boolean }) {
+  return (
+    <Suspense fallback={null}>
+      <MethodNoteBody {...props} />
+    </Suspense>
+  )
+}
+
+function MethodNoteBody({ id, brief = false }: { id: PanelMethod; brief?: boolean }) {
   const { t } = useTranslation()
   const [lang] = useLang()
-  const content = getMethodContent(id)
-  if (!content) return null
-  const m = localizeMethod(content, lang)
-  const pitfall = brief ? undefined : m.pitfalls[0]
+  const m = localizeMethod(use(loadMethod(id)), lang)
+  const pitfall = brief || !m.pitfalls[0] ? undefined : splitLabel(m.pitfalls[0])
   return (
     <section className="flex flex-col gap-2" aria-label={m.name}>
       <div>
@@ -34,8 +59,8 @@ function MethodNote({ id, brief = false }: { id: MethodId; brief?: boolean }) {
       <p className="text-14 text-text-2">{firstSentence(m.summary)}</p>
       {pitfall && (
         <p className="text-13 text-text-2">
-          <span className="font-medium text-text">{t('workbench.panel.pitfalls')}: </span>
-          {pitfall}
+          <span className="font-medium text-text">{pitfall.label ?? t('workbench.panel.pitfalls')}: </span>
+          {pitfall.text}
         </p>
       )}
       <Link href={`/methods/${id}`} className={`${linkClass} text-13`}>

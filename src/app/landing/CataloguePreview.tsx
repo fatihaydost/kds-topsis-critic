@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Link } from 'wouter'
-import { allMethods, FAMILY_ORDER, methodsByFamily } from '../../content/methods'
+import { allMethods, FAMILY_ORDER, methodsByFamily } from '../../content/methods/catalog'
 import { MethodGlyph } from '../../features/illustrations/MethodGlyph'
 import { useLang } from '../../i18n'
 

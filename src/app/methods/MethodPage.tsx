@@ -1,13 +1,13 @@
 import { ArrowLeft, CaretRight } from '@phosphor-icons/react'
-import type { ReactNode } from 'react'
+import { lazy, Suspense, use, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'wouter'
-import { getMethodContent, methodContent } from '../../content/methods'
+import { isMethodId, methodMeta } from '../../content/methods/catalog'
+import { loadMethod } from '../../content/methods/load'
 import { localizeMethod, type MethodContent } from '../../content/types'
 import { examples } from '../../data/examples'
 import { useLang } from '../../i18n'
 import { buttonClasses, cn, Notice, Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui'
-import { Formula } from '../../ui/Formula'
 import { SiteFooter } from '../landing/SiteFooter'
 import { textLink, usePageMeta } from '../landing/usePageMeta'
 import { MethodIdea } from './MethodIdea'
@@ -54,10 +54,37 @@ function NotFoundMethod({ id }: { id: string }) {
   )
 }
 
+// KaTeX (about 260 kB of script and 30 kB of CSS) loads when the first step is opened, not with the page.
+const Formula = lazy(() => import('../../ui/Formula').then((m) => ({ default: m.Formula })))
+
 /** `/methods/:id`: one method, picture and short summary first, details behind disclosures. */
 export default function MethodPage({ id }: { id: string }) {
-  const m = getMethodContent(id)
-  return m ? <MethodArticle m={m} /> : <NotFoundMethod id={id} />
+  return isMethodId(id) ? <MethodArticle m={use(loadMethod(id))} /> : <NotFoundMethod id={id} />
+}
+
+/** One algorithm step: the title always, the formula only once the step has been opened. */
+function AlgorithmStep({ n, step }: { n: number; step: { title: string; tex: string; note?: string } }) {
+  const [opened, setOpened] = useState(false)
+  return (
+    <details className="group" onToggle={(e) => e.currentTarget.open && setOpened(true)}>
+      <summary className="grid cursor-pointer list-none grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-x-3 py-3 hover:bg-surface-2 [&::-webkit-details-marker]:hidden">
+        <span className="num pl-1 font-mono text-14 text-text-2">{n}</span>
+        <span className="text-16 font-medium text-text">{step.title}</span>
+        <CaretRight
+          aria-hidden
+          className="mr-2 size-4 text-text-2 group-open:rotate-90 motion-safe:transition-transform motion-safe:duration-150"
+        />
+      </summary>
+      <div className="flex flex-col gap-2 pb-4 pl-[40px]">
+        {opened && (
+          <Suspense fallback={<div aria-busy="true" className="h-12" />}>
+            <Formula display tex={step.tex} className="text-16" />
+          </Suspense>
+        )}
+        {step.note && <p className="text-14 text-text-2">{step.note}</p>}
+      </div>
+    </details>
+  )
 }
 
 /** "Opricovic, S.; Tzeng, G.-H. (2004). Title..." -> "Opricovic, S.; Tzeng, G.-H. (2004)". */
@@ -130,20 +157,7 @@ function MethodArticle({ m }: { m: MethodContent }) {
               <ol className="flex flex-col border-t border-line">
                 {l.steps.map((s, i) => (
                   <li key={i} className="border-b border-line">
-                    <details className="group">
-                      <summary className="grid cursor-pointer list-none grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-x-3 py-3 hover:bg-surface-2 [&::-webkit-details-marker]:hidden">
-                        <span className="num pl-1 font-mono text-14 text-text-2">{i + 1}</span>
-                        <span className="text-16 font-medium text-text">{s.title}</span>
-                        <CaretRight
-                          aria-hidden
-                          className="mr-2 size-4 text-text-2 group-open:rotate-90 motion-safe:transition-transform motion-safe:duration-150"
-                        />
-                      </summary>
-                      <div className="flex flex-col gap-2 pb-4 pl-[40px]">
-                        <Formula display tex={s.tex} className="text-16" />
-                        {s.note && <p className="text-14 text-text-2">{s.note}</p>}
-                      </div>
-                    </details>
+                    <AlgorithmStep n={i + 1} step={s} />
                   </li>
                 ))}
               </ol>
@@ -161,7 +175,7 @@ function MethodArticle({ m }: { m: MethodContent }) {
                         <span className="text-text-3" aria-hidden>
                           +
                         </span>
-                        {methodContent[c.methodId!].name[lang]}
+                        {methodMeta[c.methodId!].name[lang]}
                       </Link>
                     </li>
                   ))}

@@ -7,12 +7,15 @@ import { isEmptyProblem, STAGES, useRanking, useValidation, useWeights, useWorkb
 import { usePageMeta } from '../landing/usePageMeta'
 import { WorkbenchLayout } from '../shell/WorkbenchLayout'
 import { DataStage } from './DataStage'
-import { ExplanationPanel } from './ExplanationPanel'
+import { ExplanationPanel, preloadPanelCards } from './ExplanationPanel'
 import { WorkbenchNavContext, type ImportReport, type WorkbenchNav } from './nav'
 import { bestIndex, RankingStage } from './RankingStage'
 import { ResultsStage } from './ResultsStage'
 import { alternativeName, weightMethodLabel } from './shared'
 import { WeightsStage } from './WeightsStage'
+
+// The panel's method cards load alongside this chunk, not after the first render.
+preloadPanelCards()
 
 const isStage = (v: string | null): v is Stage => v !== null && (STAGES as readonly string[]).includes(v)
 

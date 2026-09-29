@@ -98,7 +98,7 @@ describe('method content', () => {
 
   it('has one file per method, named after its id', () => {
     const files = readdirSync(join(here, 'methods'))
-      .filter((f) => f.endsWith('.ts') && f !== 'index.ts')
+      .filter((f) => f.endsWith('.ts') && !['index.ts', 'catalog.ts', 'load.ts'].includes(f))
       .map((f) => f.replace(/\.ts$/, ''))
       .sort()
     expect(files).toEqual(allMethods.map((m) => m.id).sort())

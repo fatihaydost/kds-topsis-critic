@@ -1,4 +1,5 @@
 import type { MethodContent, MethodFamily, MethodId } from '../types'
+import { FAMILY_ORDER } from './catalog'
 import { ahp } from './ahp'
 import { aras } from './aras'
 import { bwm } from './bwm'
@@ -55,7 +56,10 @@ export {
   waspas,
 }
 
-/** Every method card, keyed by id. */
+/**
+ * Every method card, keyed by id. The app imports ./catalog.ts (lists) and ./load.ts (one card per
+ * chunk) instead; this module is for tests and the build (route metadata).
+ */
 export const methodContent: Readonly<Record<MethodId, MethodContent>> = {
   ahp,
   aras,
@@ -85,15 +89,7 @@ export const methodContent: Readonly<Record<MethodId, MethodContent>> = {
   waspas,
 }
 
-/** Weighting methods first, then ranking methods, each group in the family order below. */
-export const FAMILY_ORDER: readonly MethodFamily[] = [
-  'weighting-objective',
-  'weighting-subjective',
-  'ranking-distance',
-  'ranking-utility',
-  'ranking-ratio',
-  'ranking-outranking',
-]
+export { FAMILY_ORDER }
 
 export const allMethods: readonly MethodContent[] = Object.values(methodContent).sort(
   (a, b) => FAMILY_ORDER.indexOf(a.family) - FAMILY_ORDER.indexOf(b.family) || a.year - b.year,

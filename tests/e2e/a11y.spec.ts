@@ -220,3 +220,10 @@ for (const lang of ['en', 'tr'] as const) {
     }
   })
 }
+
+test('explanation panel: a pitfall with its own label is not printed after "Watch out:"', async ({ page }) => {
+  await page.goto('/app?example=krishnan-2021-smartphones&stage=ranking')
+  const panel = page.locator('aside')
+  await expect(panel).toContainText('Rank reversal: the winner changes')
+  await expect(panel).not.toContainText('Watch out: Rank reversal')
+})

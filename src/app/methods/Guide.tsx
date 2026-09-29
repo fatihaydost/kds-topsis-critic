@@ -13,7 +13,7 @@ import {
   type GuideOption,
   type RiskyCombination,
 } from '../../content/guide'
-import { methodContent } from '../../content/methods'
+import { methodMeta } from '../../content/methods/catalog'
 import type { MethodId } from '../../content/types'
 import { useLang } from '../../i18n'
 import { Button, cn } from '../../ui'
@@ -138,7 +138,7 @@ export function Guide() {
                 <span className="text-12 text-text-2">{t(`methods.guide.stage.${stage}`)}</span>
                 <div className="flex flex-wrap gap-x-4 gap-y-2">
                   {rec.methodIds.map((id) => {
-                    const m = methodContent[id]
+                    const m = methodMeta[id]
                     return (
                       <span key={id} className="inline-flex items-center gap-2">
                         <Link
