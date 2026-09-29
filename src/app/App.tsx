@@ -1,4 +1,4 @@
-import { lazy, Suspense, useLayoutEffect } from 'react'
+import { lazy, Suspense, useLayoutEffect, type ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Route, Router, Switch } from 'wouter'
 import { TooltipProvider } from '../ui'
@@ -10,7 +10,14 @@ import { TopBar } from './shell/TopBar'
 export const ROUTER_BASE = import.meta.env.BASE_URL.replace(/\/$/, '')
 
 // Landing and method pages load on demand; the method pages share one chunk with the content and KaTeX.
-const Landing = lazy(() => import('./landing/Landing'))
+type LandingModule = { default: ComponentType }
+let landingModule: LandingModule | undefined
+/** Loads the landing chunk and keeps it, so a later render can use it without suspending. */
+export const loadLanding = (): Promise<LandingModule> => import('./landing/Landing').then((m) => (landingModule = m))
+// Once loaded, lazy() gets a thenable that resolves synchronously: React then renders the landing in
+// the first commit instead of a fallback. main.tsx relies on it to replace the prerendered HTML of
+// the home page (vite.config.ts) without a blank frame; the prerender relies on it to render at all.
+const Landing = lazy(() => (landingModule ? ({ then: (resolve: (m: LandingModule) => void) => resolve(landingModule!) } as unknown as Promise<LandingModule>) : loadLanding()))
 const MethodsCatalog = lazy(() => import('./methods/Catalog'))
 const MethodPage = lazy(() => import('./methods/MethodPage'))
 
@@ -26,7 +33,8 @@ function PageFallback() {
   return <div aria-busy="true" className="min-h-[calc(100dvh-48px)]" />
 }
 
-export function App() {
+/** `ssrPath` only for the build-time prerender of the home page (src/app/prerender.tsx). */
+export function App({ ssrPath }: { ssrPath?: string | undefined } = {}) {
   const { t, i18n } = useTranslation()
 
   // Layout effect: runs before the pages' own (passive) title effects, so a page title wins.
@@ -34,9 +42,14 @@ export function App() {
     document.title = t('common.documentTitle')
   }, [t, i18n.resolvedLanguage])
 
+  // The live app has replaced the prerendered home page: charts may show (see vite.config.ts).
+  useLayoutEffect(() => {
+    document.getElementById('root')?.removeAttribute('data-prerender')
+  }, [])
+
   return (
     <TooltipProvider>
-      <Router base={ROUTER_BASE}>
+      <Router base={ROUTER_BASE} {...(ssrPath !== undefined && { ssrPath })}>
         <div className="flex min-h-dvh flex-col">
           <TopBar />
           <Switch>
