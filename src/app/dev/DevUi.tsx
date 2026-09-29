@@ -18,7 +18,6 @@ import {
   EmptyState,
   ErrorSummary,
   Field,
-  Formula,
   IconButton,
   Kbd,
   Notice,
@@ -43,6 +42,7 @@ import {
   Tr,
   type TableDensity,
 } from '../../ui'
+import { Formula } from '../../ui/Formula'
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
