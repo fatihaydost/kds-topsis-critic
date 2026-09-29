@@ -1,0 +1,498 @@
+/*
+ * Method illustrations. Colours only from tokens.css: UI colour for chrome (--line, --text-*),
+ * data colour for marks (--data-context for the rest, --data-accent for the one that matters).
+ * Motion only on a state change: 200 ms (4/3 of --dur), 0 under prefers-reduced-motion (--dur is 0).
+ */
+
+.fig {
+  margin: 0;
+  min-width: 0;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.svg {
+  display: block;
+  overflow: visible;
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.caption {
+  margin: 8px 0 0;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.note {
+  color: var(--text-3);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+/* Pipeline diagram ---------------------------------------------------------------------------- */
+
+.pipeline {
+  container-type: inline-size;
+}
+
+.track {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stage {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--data-context);
+  transition:
+    border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+
+.stage[data-active] {
+  border-color: var(--accent);
+  color: var(--data-accent);
+}
+
+.stage[data-soon] {
+  border-style: dashed;
+  background: transparent;
+}
+
+.stageGlyph {
+  flex: none;
+  width: 40px;
+  height: 28px;
+}
+
+.stageText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.stageName {
+  color: var(--text);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+}
+
+.stage[data-active] .stageName {
+  font-weight: 600;
+}
+
+.stage[data-soon] .stageName {
+  color: var(--text-3);
+  font-weight: 400;
+}
+
+.stageMethod {
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.stage[data-soon] .stageMethod {
+  color: var(--text-3);
+}
+
+.arrow {
+  display: flex;
+  justify-content: flex-start;
+  padding-left: 31px;
+  color: var(--line-strong);
+}
+
+.arrow svg {
+  width: 20px;
+  height: 16px;
+  transform: rotate(90deg);
+}
+
+.arrow[data-soon] svg {
+  stroke-dasharray: 2 3;
+}
+
+@container (min-width: 600px) {
+  .track {
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .stage {
+    flex: 1 1 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .arrow {
+    flex: none;
+    align-items: center;
+    padding: 0 4px;
+  }
+
+  .arrow svg {
+    width: 20px;
+    transform: none;
+  }
+
+  .stageGlyph {
+    width: 60px;
+    height: 42px;
+  }
+}
+
+/* TOPSIS geometry ----------------------------------------------------------------------------- */
+
+.axis {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+  fill: none;
+}
+
+.axisHead {
+  fill: var(--line-strong);
+}
+
+.axisName {
+  fill: var(--text-2);
+  font-size: 12px;
+}
+
+.refMark {
+  fill: var(--bg);
+  stroke: var(--text-2);
+  stroke-width: 1.5;
+}
+
+.refLabel {
+  fill: var(--text-2);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.dist {
+  stroke: var(--data-accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+  fill: none;
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+
+.distMinus {
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+}
+
+.distLabel {
+  fill: var(--data-accent);
+  font-size: 12px;
+  font-weight: 500;
+  paint-order: stroke;
+  stroke: var(--bg);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+
+.point {
+  cursor: pointer;
+  outline: none;
+}
+
+.dot {
+  fill: var(--data-context);
+  stroke: var(--bg);
+  stroke-width: 1.5;
+  transition: fill var(--dur) var(--ease);
+}
+
+.point[aria-checked='true'] .dot {
+  fill: var(--data-accent);
+}
+
+.point:hover .dot {
+  stroke: var(--data-accent);
+}
+
+.hit {
+  fill: transparent;
+}
+
+.focusRing {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  opacity: 0;
+}
+
+.point:focus-visible .focusRing {
+  opacity: 1;
+}
+
+.pointLabel {
+  fill: var(--text-2);
+  font-size: 12px;
+  paint-order: stroke;
+  stroke: var(--bg);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.point[aria-checked='true'] .pointLabel {
+  fill: var(--text);
+  font-weight: 600;
+}
+
+/* Only a selection change moves the lines, in 200 ms; resizing redraws at once. */
+.animate .dist,
+.animate .distLabel {
+  transition: transform calc(var(--dur) * 4 / 3) var(--ease);
+}
+
+.readout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--text-2);
+}
+
+.readoutName {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.readoutC {
+  color: var(--text);
+}
+
+.readoutC b {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* CRITIC idea --------------------------------------------------------------------------------- */
+
+.colHead {
+  fill: var(--text-2);
+  font-size: 12px;
+}
+
+.critName {
+  fill: var(--text);
+  font-size: 13px;
+}
+
+.stripBase {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+
+.stripDot {
+  fill: var(--data-context);
+  stroke: var(--bg);
+  stroke-width: 1;
+}
+
+.sigma {
+  stroke: var(--text-3);
+  stroke-width: 1.5;
+  fill: none;
+}
+
+.op {
+  stroke: var(--text-3);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+.bar {
+  fill: var(--data-context);
+}
+
+.bar[data-highlight] {
+  fill: var(--data-accent);
+}
+
+.barValue {
+  fill: var(--text-2);
+  font-size: 13px;
+}
+
+.barValue[data-highlight] {
+  fill: var(--text);
+  font-weight: 600;
+}
+
+.rowRule {
+  stroke: var(--line);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+/* Step flow ----------------------------------------------------------------------------------- */
+
+.flowWrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.flow {
+  display: flex;
+  min-width: max-content;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.flowItem {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 72px;
+}
+
+/* Hairline from this node's centre to the next one's. */
+.flowItem:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 16px;
+  left: calc(50% + 14px);
+  right: calc(-50% + 14px);
+  border-top: 1px solid var(--line-strong);
+}
+
+.flowBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 4px 4px 2px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: none;
+  color: var(--text-2);
+  font: inherit;
+  cursor: pointer;
+}
+
+.flowBtn:disabled {
+  cursor: default;
+}
+
+.flowBtn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.node {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  transition:
+    background-color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+
+.flowBtn:not(:disabled):hover .node {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.flowBtn[aria-current='step'] .node {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+
+.flowLabel {
+  max-width: 112px;
+  font-size: 12px;
+  line-height: 16px;
+  text-align: center;
+}
+
+.flowBtn[aria-current='step'] .flowLabel {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* Method glyph -------------------------------------------------------------------------------- */
+
+.glyph {
+  display: inline-block;
+  flex: none;
+  vertical-align: -0.125em;
+}
+
+/* Empty matrix hint --------------------------------------------------------------------------- */
+
+.hint {
+  width: 100%;
+}
+
+.hintHead {
+  fill: var(--surface-2);
+}
+
+.hintCell {
+  fill: var(--surface);
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.hintBar {
+  fill: var(--line-strong);
+}
+
+.hintDir {
+  stroke: var(--text-3);
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+.hintFocus {
+  fill: var(--surface);
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+
+.hintCaret {
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}

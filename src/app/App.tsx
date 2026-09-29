@@ -16,6 +16,7 @@ const MethodPage = lazy(() => import('./methods/MethodPage'))
 
 // Dev-only component gallery; the constant condition drops the chunk from production builds.
 const DevUi = import.meta.env.DEV ? lazy(() => import('./dev/DevUi')) : null
+const DevIllustrations = import.meta.env.DEV ? lazy(() => import('../features/illustrations/Preview')) : null
 
 /**
  * While a page chunk loads: an empty block of full height, so nothing jumps. It is not `#main`:
@@ -57,6 +58,7 @@ export function App() {
                 </Suspense>
               )}
             </Route>
+            {DevIllustrations && <Route path="/dev/illustrations"><Suspense fallback={null}><DevIllustrations /></Suspense></Route>}
             {DevUi && (
               <Route path="/dev/ui">
                 <Suspense fallback={null}>
