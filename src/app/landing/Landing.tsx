@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'wouter'
 import { buttonClasses, Skeleton } from '../../ui'
+import { LogoMark } from '../shell/LogoMark'
 import { HeroResult } from './HeroResult'
 import { Pipeline } from './Pipeline'
 import { SiteFooter } from './SiteFooter'
@@ -43,6 +44,7 @@ export default function Landing() {
           className={`${container} grid grid-cols-1 items-start gap-10 py-10 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-center lg:gap-16 lg:py-16`}
         >
           <div className="flex flex-col items-start gap-6">
+            <LogoMark size={64} className="-ml-1 hidden text-accent lg:block" />
             <h1 className="text-32 font-semibold text-balance text-text md:text-44">{t('landing.title')}</h1>
             <p className="max-w-[48ch] text-16 text-text-2 md:text-20 md:leading-7">{t('landing.lead')}</p>
             <div className="flex flex-wrap gap-2">
