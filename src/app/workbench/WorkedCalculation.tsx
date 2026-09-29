@@ -3,6 +3,7 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { isStepKey, stepContent } from '../../content/steps'
 import type { Step } from '../../core'
+import { CRITIC_FLOW, StepFlow, TOPSIS_FLOW, type FlowNode } from '../../features/illustrations'
 import { stepToTable, tableToLatex, tableToTsv, type StepTable } from '../../features/io'
 import { useNumberFormat } from '../../i18n'
 import type { DraftProblem } from '../../state/workbench'
@@ -66,35 +67,90 @@ export type WorkedCalculationProps = {
  * one-line description, its formula, the labelled matrix or vector and copy as TSV or LaTeX.
  * The focused (or last clicked) step carries the accent on its hairline and number.
  */
+const FLOWS: readonly (readonly FlowNode[])[] = [CRITIC_FLOW, TOPSIS_FLOW]
+
+/** The step map for a group of steps (CRITIC or TOPSIS), or null for one-step groups. */
+const flowFor = (steps: readonly Step[]) => FLOWS.find((f) => steps.some((s) => s.key === f[0]!.key)) ?? null
+
+const stepDomId = (key: string) => `wb-step-${key.replace(/\./g, '-')}`
+
 export default function WorkedCalculation({ groups, problem, headingLevel = 'h3' }: WorkedCalculationProps) {
   const { t } = useTranslation()
   const [current, setCurrent] = useState(0)
   const labels = useMemo(() => stepAxisLabels(problem, t), [problem, t])
   const GroupHeading = headingLevel === 'h4' ? 'h3' : 'h2'
+  const root = useRef<HTMLDivElement>(null)
+  const keys = groups.flatMap((g) => g.steps.map((s) => s.key))
+
+  // The step crossing the upper third of the viewport is the current one while scrolling.
+  useEffect(() => {
+    const el = root.current
+    if (!el || typeof IntersectionObserver === 'undefined') return
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue
+          const i = Number((e.target as HTMLElement).dataset.index)
+          if (Number.isFinite(i)) setCurrent(i)
+        }
+      },
+      { rootMargin: '-25% 0px -70% 0px' },
+    )
+    el.querySelectorAll('section[data-step]').forEach((s) => io.observe(s))
+    return () => io.disconnect()
+  }, [groups])
+
+  const jump = (key: string) => {
+    const i = keys.indexOf(key)
+    if (i < 0) return
+    setCurrent(i)
+    const target = document.getElementById(stepDomId(key))
+    target?.scrollIntoView({ block: 'start' })
+    target?.focus({ preventScroll: true })
+  }
 
   let n = 0
   return (
-    <div className="flex flex-col gap-10">
-      {groups.map((g, gi) => (
-        <div key={gi} className="flex flex-col gap-8">
-          {g.title && <GroupHeading className="text-14 font-semibold text-text-2">{g.title}</GroupHeading>}
-          {g.steps.map((step) => {
-            const index = n++
-            return (
-              <StepBlock
-                key={`${gi}-${step.key}`}
-                step={step}
-                number={index + 1}
-                current={index === current}
-                onCurrent={() => setCurrent(index)}
-                labels={labels}
-                heading={headingLevel}
-                name={stepName(step.key, t)}
-              />
-            )
-          })}
-        </div>
-      ))}
+    <div ref={root} className="flex flex-col gap-10">
+      {groups.map((g, gi) => {
+        const flow = flowFor(g.steps)
+        const first = n
+        const activeKey = current >= first && current < first + g.steps.length ? keys[current] : undefined
+        return (
+          <div key={gi} className="flex flex-col gap-6">
+            {g.title && <GroupHeading className="text-14 font-semibold text-text-2">{g.title}</GroupHeading>}
+            {flow && (
+              <div className="sticky top-12 z-20 -mx-1 bg-bg px-1 py-2">
+                <StepFlow
+                  steps={flow.map((node) => ({ ...node, label: tr(t, `workbench.flow.${node.key}`) }))}
+                  active={activeKey}
+                  onSelect={jump}
+                  labels={{ nav: t('workbench.flow.nav') }}
+                />
+              </div>
+            )}
+            <div className="flex flex-col gap-8">
+              {g.steps.map((step) => {
+                const index = n++
+                return (
+                  <StepBlock
+                    key={`${gi}-${step.key}`}
+                    step={step}
+                    number={index + 1}
+                    index={index}
+                    domId={stepDomId(step.key)}
+                    current={index === current}
+                    onCurrent={() => setCurrent(index)}
+                    labels={labels}
+                    heading={headingLevel}
+                    name={stepName(step.key, t)}
+                  />
+                )
+              })}
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -102,6 +158,8 @@ export default function WorkedCalculation({ groups, problem, headingLevel = 'h3'
 type StepBlockProps = {
   step: Step
   number: number
+  index: number
+  domId: string
   current: boolean
   onCurrent: () => void
   labels: ReturnType<typeof stepAxisLabels>
@@ -109,7 +167,7 @@ type StepBlockProps = {
   name: string
 }
 
-function StepBlock({ step, number, current, onCurrent, labels, heading: H, name }: StepBlockProps) {
+function StepBlock({ step, number, index, domId, current, onCurrent, labels, heading: H, name }: StepBlockProps) {
   const { t, i18n } = useTranslation()
   const nf = useNumberFormat(DECIMALS.step)
   const lang = nf.lang
@@ -161,10 +219,13 @@ function StepBlock({ step, number, current, onCurrent, labels, heading: H, name 
 
   return (
     <section
+      id={domId}
+      tabIndex={-1}
       aria-labelledby={titleId}
       data-step={step.key}
+      data-index={index}
       data-current={current || undefined}
-      className="relative flex min-w-0 flex-col gap-3 border-l border-line pl-5"
+      className="relative flex min-w-0 scroll-mt-28 flex-col gap-3 border-l border-line pl-5 outline-none"
       onFocusCapture={onCurrent}
       onPointerDown={onCurrent}
     >

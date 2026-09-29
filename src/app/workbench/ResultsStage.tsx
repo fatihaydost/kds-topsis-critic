@@ -9,7 +9,7 @@ import { useRanking, useWeights, useWorkbench } from '../../state/workbench'
 import { Button, EmptyState, Notice } from '../../ui'
 import { useWorkbenchNav } from './nav'
 import { BlockedByIssues, CalculationToggle, SectionTitle } from './parts'
-import { bestIndex, ClosenessChart, RankingTable } from './RankingStage'
+import { bestIndex, ClosenessChart, RankingTable, TopsisPicture } from './RankingStage'
 import { alternativeName, criterionName, DECIMALS, downloadBlob, findStep, stepName, weightMethodLabel } from './shared'
 import { WeightsChart } from './WeightsStage'
 
@@ -136,9 +136,9 @@ export function ResultsStage() {
             {source}
           </p>
         </div>
-        <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
+        <div className="grid grid-cols-1 items-start gap-8 xl:grid-cols-2">
           <ClosenessChart problem={problem} result={result} className="min-w-0" />
-          <WeightsChart names={names} weights={w.weights} format={format4} className="min-w-0" />
+          <TopsisPicture problem={problem} weights={w.weights} className="min-w-0" />
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="primary" icon={<DownloadSimple aria-hidden />} onClick={() => void downloadXlsx()} disabled={busy !== null}>
@@ -165,8 +165,9 @@ export function ResultsStage() {
         <RankingTable problem={problem} result={result} id="wb-results-ranking" />
       </section>
 
-      {correlation && (
-        <section className="flex max-w-[640px] min-w-0 flex-col gap-2">
+      <section className="grid grid-cols-1 items-start gap-8 xl:grid-cols-2">
+        <WeightsChart names={names} weights={w.weights} format={format4} className="min-w-0" />
+        {correlation && (
           <Heatmap
             title={t('workbench.results.correlationTitle')}
             description={t('workbench.results.correlationHint')}
@@ -176,9 +177,10 @@ export function ResultsStage() {
             values={correlation}
             format={format2}
             tableLabels={{ show: t('workbench.chart.showTable'), corner: t('workbench.criterion') }}
+            className="min-w-0"
           />
-        </section>
-      )}
+        )}
+      </section>
 
       <section aria-labelledby="wb-calculation" className="flex flex-col gap-3">
         <SectionTitle>

@@ -2,8 +2,9 @@ import { useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { RankingResult } from '../../core'
 import { BarChart } from '../../features/charts'
+import { TopsisGeometry } from '../../features/illustrations'
 import { useNumberFormat } from '../../i18n'
-import { isEmptyProblem, useRanking, useWorkbench, type DraftProblem, type RankingMethodId } from '../../state/workbench'
+import { isEmptyProblem, toProblem, useRanking, useWeights, useWorkbench, type DraftProblem, type RankingMethodId } from '../../state/workbench'
 import { Button, cn, EmptyState, SegmentedControl, Table, TBody, Td, Th, THead, Tr } from '../../ui'
 import { useWorkbenchNav } from './nav'
 import { BlockedByIssues, CalculationToggle, ContinueBar, MethodWarnings, SectionTitle } from './parts'
@@ -87,6 +88,37 @@ export function ClosenessChart({ problem, result, className }: { problem: DraftP
   )
 }
 
+/** TOPSIS as a picture: alternatives, A+ and A- on the two heaviest criteria (features/illustrations). */
+export function TopsisPicture({ problem, weights, className }: { problem: DraftProblem; weights: readonly number[]; className?: string }) {
+  const { t } = useTranslation()
+  const nf = useNumberFormat(DECIMALS.score)
+  const format = useCallback((v: number) => nf.format(v), [nf])
+  const core = useMemo(() => toProblem(problem), [problem])
+  return (
+    <TopsisGeometry
+      problem={core}
+      weights={weights}
+      format={format}
+      labels={{
+        title: t('workbench.visual.topsis.title'),
+        caption: t('workbench.visual.topsis.caption'),
+        projectionNote: t('workbench.visual.topsis.projectionNote'),
+        ideal: 'A+',
+        antiIdeal: 'A−',
+        dPlus: 'D+',
+        dMinus: 'D−',
+        formula: 'C = D− / (D+ + D−)',
+        select: t('workbench.visual.topsis.select'),
+        point: (name, value) => t('workbench.visual.topsis.point', { name, value }),
+        showTable: t('workbench.chart.showTable'),
+        alternative: t('workbench.alternative'),
+        closeness: 'C',
+      }}
+      className={cn('max-w-[640px]', className)}
+    />
+  )
+}
+
 export function RankingStage() {
   const { t } = useTranslation()
   const nf = useNumberFormat(DECIMALS.score)
@@ -95,6 +127,7 @@ export function RankingStage() {
   const rankingMethod = useWorkbench((s) => s.rankingMethod)
   const setRankingMethod = useWorkbench((s) => s.setRankingMethod)
   const ranking = useRanking()
+  const weights = useWeights()
   const { goTo } = useWorkbenchNav()
 
   if (isEmptyProblem(problem)) {
@@ -141,7 +174,10 @@ export function RankingStage() {
           <p className="text-20 font-semibold text-text" data-testid="best-sentence">
             {t('workbench.ranking.best', { name: alternativeName(problem, best, t), value: nf.format(result.scores[best]) })}
           </p>
-          <ClosenessChart problem={problem} result={result} />
+          <div className="grid grid-cols-1 items-start gap-8 xl:grid-cols-2">
+            <ClosenessChart problem={problem} result={result} className="min-w-0" />
+            {weights.value && <TopsisPicture problem={problem} weights={weights.value.weights} className="min-w-0" />}
+          </div>
           <section className="flex flex-col gap-3">
             <SectionTitle>
               <span id="wb-ranking-table">{t('workbench.ranking.tableTitle')}</span>

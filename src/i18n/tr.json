@@ -387,6 +387,48 @@
       "toFix_one": "{{count}} sorun",
       "toFix_other": "{{count}} sorun",
       "checkWeights": "Ağırlıkları kontrol et"
+    },
+    "visual": {
+      "emptyMatrix": "Boş bir karar matrisi: satırlarda alternatifler, sütunlarda kriterler",
+      "critic": {
+        "title": "Kontrast çarpı çatışma ağırlığı verir",
+        "contrast": "Kontrast (σ)",
+        "conflict": "Çatışma Σ(1 − ρ)",
+        "weight": "Ağırlık",
+        "information": "Bilgi miktarı C"
+      },
+      "topsis": {
+        "title": "İdeale ve negatif ideale uzaklık",
+        "caption": "A+'ya yakın ve A−'den uzak olanın C değeri yüksektir.",
+        "projectionNote": "En ağır iki kriter üzerinde çizildi; D ve C bütün kriterlerle hesaplanır.",
+        "select": "Bir alternatif seç",
+        "point": "{{name}}, C {{value}}"
+      }
+    },
+    "flow": {
+      "nav": "Hesap adımları",
+      "critic": {
+        "normalized": "Normalize et",
+        "sigma": "Kontrast",
+        "correlation": "Korelasyon",
+        "information": "Bilgi",
+        "weights": "Ağırlıklar"
+      },
+      "topsis": {
+        "normalized": "Normalize et",
+        "weighted": "Ağırlıklandır",
+        "idealBest": "İdeal noktalar",
+        "distanceBest": "Uzaklıklar",
+        "closeness": "Yakınlık"
+      }
+    },
+    "pipeline": {
+      "data": "Karar matrisi",
+      "weights": "Ağırlıklandırma yöntemi",
+      "ranking": "Sıralama yöntemi",
+      "results": "Sonuç",
+      "robustness": "Sağlamlık",
+      "soon": "Yakında"
     }
   },
   "methods": {

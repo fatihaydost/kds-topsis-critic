@@ -387,6 +387,48 @@
       "toFix_one": "{{count}} to fix",
       "toFix_other": "{{count}} to fix",
       "checkWeights": "Check weights"
+    },
+    "visual": {
+      "emptyMatrix": "An empty decision matrix: alternatives in rows, criteria in columns",
+      "critic": {
+        "title": "Contrast times conflict gives the weight",
+        "contrast": "Contrast (σ)",
+        "conflict": "Conflict Σ(1 − ρ)",
+        "weight": "Weight",
+        "information": "Information C"
+      },
+      "topsis": {
+        "title": "Distance to the ideal and the negative ideal",
+        "caption": "Closer to A+ and farther from A− gives a higher C.",
+        "projectionNote": "Drawn on the two heaviest criteria; D and C use all criteria.",
+        "select": "Choose an alternative",
+        "point": "{{name}}, C {{value}}"
+      }
+    },
+    "flow": {
+      "nav": "Calculation steps",
+      "critic": {
+        "normalized": "Normalize",
+        "sigma": "Contrast",
+        "correlation": "Correlation",
+        "information": "Information",
+        "weights": "Weights"
+      },
+      "topsis": {
+        "normalized": "Normalize",
+        "weighted": "Weight",
+        "idealBest": "Ideal points",
+        "distanceBest": "Distances",
+        "closeness": "Closeness"
+      }
+    },
+    "pipeline": {
+      "data": "Decision matrix",
+      "weights": "Weighting method",
+      "ranking": "Ranking method",
+      "results": "Result",
+      "robustness": "Robustness",
+      "soon": "Coming later"
     }
   },
   "methods": {

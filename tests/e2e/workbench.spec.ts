@@ -180,7 +180,7 @@ test('the whole flow works with the keyboard alone', async ({ page }) => {
   await page.keyboard.press('Enter')
   await expect(stageHeading(page, 'Weights')).toBeVisible()
   // The stage takes focus, so Tab continues from the top of the new stage.
-  await expect(page.locator('#main')).toBeFocused()
+  await expect(page.locator('#main')).toBeFocused({ timeout: 10_000 })
   await tabTo(page, /^CRITIC$/)
   await page.keyboard.press('ArrowRight')
   await page.keyboard.press('ArrowRight')

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { ValidationIssue } from '../../core'
 import { doiUrl, examples, getExample, shortCitation, type ExampleDataset } from '../../data/examples'
 import { DecisionGrid, type GridError, type GridLabels } from '../../features/grid'
+import { EmptyMatrixHint } from '../../features/illustrations'
 import type { ImportIssue } from '../../features/io'
 import { useNumberFormat, type Lang } from '../../i18n'
 import { isEmptyProblem, useValidation, useWorkbench, type DraftProblem } from '../../state/workbench'
@@ -29,7 +30,6 @@ import {
 } from '../../ui'
 import { cellRef, IMPORT_ACCEPT, isLocated, readDecisionFile } from './importFile'
 import { useWorkbenchNav, type ImportReport } from './nav'
-import { MatrixHint } from './MatrixHint'
 import { ContinueBar } from './parts'
 import { alternativeName, criterionName, ids, placeIssue, tr } from './shared'
 
@@ -264,7 +264,7 @@ export function DataStage() {
         {fileControl}
         {statusNode && <div className="pt-4">{statusNode}</div>}
         <div className="flex flex-col gap-5 py-8 sm:flex-row sm:items-center sm:gap-10">
-          <MatrixHint className="shrink-0" />
+          <EmptyMatrixHint label={t('workbench.visual.emptyMatrix')} className="w-full max-w-[216px] shrink-0" />
           <div className="flex max-w-[480px] flex-col items-start gap-2">
             <h2 className="text-16 font-semibold text-text">{t('workbench.empty.data.title')}</h2>
             <p className="text-14 text-text-2">{t('workbench.empty.data.body')}</p>

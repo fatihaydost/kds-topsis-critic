@@ -3,9 +3,11 @@ import { useTranslation } from 'react-i18next'
 import type { ValidationIssue, WeightingResult } from '../../core'
 import { getExample, shortCitation } from '../../data/examples'
 import { BarChart } from '../../features/charts'
+import { CriticIdea } from '../../features/illustrations'
 import { useNumberFormat } from '../../i18n'
 import {
   computeWeights,
+  toProblem,
   isEmptyProblem,
   useWeights,
   useWorkbench,
@@ -100,7 +102,22 @@ function ComputedWeights({ problem, method, result }: { problem: DraftProblem; m
       {method === 'equal' && (
         <p className="text-14 text-text">{t('workbench.weights.equalNote', { n, value: nf.format(1 / n) })}</p>
       )}
-      {method === 'critic' && <WeightsChart names={names} weights={result.weights} format={format} />}
+      {method === 'critic' && (
+        <CriticIdea
+          problem={toProblem(problem)}
+          format={format}
+          labels={{
+            title: t('workbench.visual.critic.title'),
+            contrast: t('workbench.visual.critic.contrast'),
+            conflict: t('workbench.visual.critic.conflict'),
+            weight: t('workbench.visual.critic.weight'),
+            information: t('workbench.visual.critic.information'),
+            showTable: t('workbench.chart.showTable'),
+            criterion: t('workbench.criterion'),
+          }}
+          className="max-w-[760px]"
+        />
+      )}
       <section className="flex flex-col gap-3" aria-labelledby="wb-weights-table">
         <SectionTitle>
           <span id="wb-weights-table">{t('workbench.weights.tableTitle')}</span>
