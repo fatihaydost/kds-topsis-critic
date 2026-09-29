@@ -22,7 +22,7 @@ export function SiteFooter({ privacy = true }: { privacy?: boolean }) {
             </a>
           </li>
           <li>
-            <a href={`${REPO_URL}/blob/master/LICENSE`} target="_blank" rel="noreferrer" className={textLink}>
+            <a href={`${REPO_URL}/blob/main/LICENSE`} target="_blank" rel="noreferrer" className={textLink}>
               {t('landing.footer.license')}
             </a>
           </li>
