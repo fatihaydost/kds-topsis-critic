@@ -1,0 +1,147 @@
+import type { MethodContent } from '../types'
+
+// Source: docs/research/methods/cilos.md
+export const cilos: MethodContent = {
+  id: 'cilos',
+  name: { en: 'CILOS', tr: 'CILOS' },
+  fullName: { en: 'Criterion Impact LOSs', tr: 'Kriter etki kaybı' },
+  family: 'weighting-objective',
+  status: 'research',
+  year: 2016,
+  origin: {
+    authors: 'Zavadskas, E.K.; Podvezko, V.',
+    year: 2016,
+    title: 'Integrated Determination of Objective CRIteria Weights in MCDM',
+    venue: 'International Journal of Information Technology & Decision Making 15(2), 267-283',
+    doi: '10.1142/S0219622016500036',
+    note: {
+      en: 'The idea goes back to Mirkin (1974), a Russian book on group choice (not read). The 2016 paper was not read either; the algorithm follows the same authors\' open-access paper Zavadskas et al. (2017), section 5.1.2.',
+      tr: "Fikir, grup seçimi üzerine Rusça bir kitap olan Mirkin'e (1974) dayanır (okunmadı). 2016 makalesi de okunmadı; algoritma aynı yazarların açık erişimli Zavadskas vd. (2017) makalesinin 5.1.2 bölümünü izler.",
+    },
+  },
+  steps: [
+    {
+      title: { en: 'Turn cost criteria into benefit', tr: 'Maliyet kriterlerini faydaya çevir' },
+      tex: String.raw`x_{ij} \leftarrow \frac{\min_i x_{ij}}{x_{ij}}, \qquad j \in J^{-}`,
+    },
+    {
+      title: { en: 'Sum normalization', tr: 'Toplam normalizasyonu' },
+      tex: String.raw`\bar x_{ij} = \frac{x_{ij}}{\sum_{i=1}^{m} x_{ij}}`,
+    },
+    {
+      title: { en: 'Matrix of column winners', tr: 'Sütun birincileri matrisi' },
+      tex: String.raw`k_j = \arg\max_i \bar x_{ij}, \qquad a_{ij} = \bar x_{k_i j}`,
+      note: {
+        en: 'Row i of the n x n matrix A is the alternative that is best on criterion i, so a_ii is the column maximum. Ties: first occurrence.',
+        tr: "n x n boyutlu A matrisinin i. satırı, i. kriterde en iyi olan alternatiftir; yani a_ii sütunun en büyük değeridir. Eşitlikte ilk bulunan alınır.",
+      },
+    },
+    {
+      title: { en: 'Relative losses', tr: 'Göreli kayıplar' },
+      tex: String.raw`p_{ij} = \frac{a_{jj} - a_{ij}}{a_{jj}}, \qquad p_{ii} = 0`,
+      note: {
+        en: 'The loss on criterion j when the alternative that is best on criterion i is chosen.',
+        tr: 'i. kriterde en iyi olan alternatif seçilince j. kriterde uğranan kayıp.',
+      },
+    },
+    {
+      title: { en: 'Loss matrix with column sums on the diagonal', tr: 'Köşegeninde sütun toplamları olan kayıp matrisi' },
+      tex: String.raw`F = P, \qquad f_{jj} = -\sum_{i=1}^{n} p_{ij}`,
+    },
+    {
+      title: { en: 'Weights from a homogeneous system', tr: 'Homojen sistemden ağırlıklar' },
+      tex: String.raw`F\,q = 0, \qquad \sum_{j=1}^{n} q_j = 1, \qquad w = q`,
+      note: {
+        en: 'The columns of F sum to zero, so F is singular by construction; a unique normalized solution exists when F has rank n - 1.',
+        tr: "F'nin sütunları sıfıra toplanır, yani F yapısı gereği tekildir; F'nin rankı n - 1 ise tek bir normalize çözüm vardır.",
+      },
+    },
+  ],
+  combinedWith: [
+    {
+      methodId: 'entropy',
+      text: {
+        en: 'CILOS times Entropy gives IDOCRIW, which Zavadskas et al. (2017) then use with EDAS and other ranking methods.',
+        tr: 'CILOS ile Entropi çarpılınca IDOCRIW elde edilir; Zavadskas vd. (2017) bunu EDAS ve başka sıralama yöntemleriyle kullanır.',
+      },
+    },
+    {
+      methodId: 'critic',
+      text: {
+        en: 'Compared with Entropy, IDOCRIW, CRITIC and D-CRITIC on one matrix by Krishnan et al. (2021).',
+        tr: 'Krishnan vd. (2021) tek bir matris üzerinde Entropi, IDOCRIW, CRITIC ve D-CRITIC ile karşılaştırır.',
+      },
+    },
+    {
+      text: {
+        en: 'Fuzzy extensions FCILOS and FIDOCRIW: Podvezko, Zavadskas & Podviezko (2020).',
+        tr: 'Bulanık uzantılar FCILOS ve FIDOCRIW: Podvezko, Zavadskas ve Podviezko (2020).',
+      },
+    },
+  ],
+  reference: {
+    source: 'Zavadskas, E.K.; Cavallaro, F.; Podvezko, V.; Ubarte, I.; Kaklauskas, A. (2017). MCDM Assessment of a Healthy and Safe Built Environment According to Sustainable Development Principles: A Practical Neighborhood Approach in Vilnius. Sustainability 9(5), 702',
+    doi: '10.3390/su9050702',
+    table: 'Table 4 (input, social block), Table 10 (CILOS)',
+    match: 'partial',
+    note: {
+      en: 'Twenty-one Vilnius neighbourhoods, five social criteria. All published CILOS values are reproduced to 4 decimals, but the paper attaches them to the wrong criteria: in Table 10 the first two rows are swapped (the same happens in Tables 8 and 12). Matched after undoing the swap.',
+      tr: 'Yirmi bir Vilnius mahallesi, beş sosyal kriter. Yayımlanan tüm CILOS değerleri 4 basamakta elde ediliyor, ama makale onları yanlış kriterlere bağlamış: Tablo 10\'da ilk iki satır yer değiştirmiş (Tablo 8 ve 12\'de de benzeri var). Yer değişimi geri alınınca örtüşüyor.',
+    },
+  },
+  sources: [
+    { label: 'Zavadskas & Podvezko (2016), International Journal of Information Technology & Decision Making 15(2), 267-283', doi: '10.1142/S0219622016500036' },
+    { label: 'Zavadskas, Cavallaro, Podvezko, Ubarte & Kaklauskas (2017), Sustainability 9(5), 702', doi: '10.3390/su9050702' },
+    { label: 'Krishnan, Kasim, Hamid & Ghazali (2021), Symmetry 13(6), 973', doi: '10.3390/sym13060973' },
+    { label: 'Mirkin (1974), Problema gruppovogo vybora, Nauka, Moscow' },
+    { label: 'Podvezko, Zavadskas & Podviezko (2020), Economic Computation and Economic Cybernetics Studies and Research 54(2)', doi: '10.24818/18423264/54.2.20.04' },
+  ],
+  en: {
+    summary:
+      'CILOS asks: if we pick the alternative that is best on criterion i, how much do we lose on every other criterion? A criterion whose best choice costs a lot elsewhere gets less weight; one that can be optimized with little loss gets more. It is the counterpart of Entropy and is often multiplied with it (IDOCRIW).',
+    whenToUse: [
+      'Data are positive.',
+      'You want to combine it with Entropy (IDOCRIW), as in the Vilnius-school papers.',
+    ],
+    whenNot: [
+      'A criterion is constant: its loss column is zero and the linear system becomes singular, as the authors note.',
+      'One alternative is best on several criteria at once: duplicate rows make the system sensitive.',
+      'Cost criteria contain zeros (min/x).',
+    ],
+    inputs: [
+      'Decision matrix with positive values.',
+      'Criterion type per column: benefit or cost.',
+      'At least 2 criteria. No parameters.',
+    ],
+    pitfalls: [
+      'A constant column makes the system rank-deficient. Our choice: drop the column (weight 0), warn, and solve for the rest.',
+      'Ties for the column maximum change the matrix A. We take the first occurrence and say so.',
+      'Ill-conditioned systems can produce negative weights. That is not part of the method; we show an error instead of clipping.',
+      'pyDecision\'s cilos_method never inverts cost criteria and adds random noise to constant columns, so it cannot serve as a reference.',
+    ],
+  },
+  tr: {
+    summary:
+      'CILOS şunu sorar: i. kriterde en iyi alternatifi seçersek diğer her kriterde ne kadar kaybederiz? En iyi seçimi başka yerlerde çok kayba yol açan kriter daha az, az kayıpla optimize edilebilen kriter daha çok ağırlık alır. Entropinin tamamlayıcısıdır ve çoğu zaman onunla çarpılır (IDOCRIW).',
+    whenToUse: [
+      'Veriler pozitif.',
+      'Vilnius okulu makalelerinde olduğu gibi Entropi ile birleştirmek istiyorsun (IDOCRIW).',
+    ],
+    whenNot: [
+      'Bir kriter sabit: kayıp sütunu sıfır olur ve yazarların da belirttiği gibi doğrusal sistem tekilleşir.',
+      'Bir alternatif aynı anda birkaç kriterde en iyi: tekrarlanan satırlar sistemi hassaslaştırır.',
+      'Maliyet kriterlerinde sıfır var (min/x).',
+    ],
+    inputs: [
+      'Pozitif değerli karar matrisi.',
+      'Her sütun için kriter türü: fayda ya da maliyet.',
+      'En az 2 kriter. Parametre yok.',
+    ],
+    pitfalls: [
+      'Sabit bir sütun sistemin rankını düşürür. Tercihimiz: sütunu çıkarmak (ağırlık 0), uyarmak ve kalanları çözmek.',
+      'Sütun maksimumunda eşitlik A matrisini değiştirir. İlk bulunanı alır ve bunu belirtiriz.',
+      'Kötü koşullu sistemler negatif ağırlık üretebilir. Bu yöntemin parçası değildir; kırpmak yerine hata gösteririz.',
+      "pyDecision'daki cilos_method maliyet kriterlerini hiç ters çevirmez ve sabit sütunlara rastgele gürültü ekler; referans olarak kullanılamaz.",
+    ],
+  },
+}

@@ -1,0 +1,90 @@
+import type { MethodContent } from '../types'
+
+// Source: docs/research/methods/equal.md
+export const equal: MethodContent = {
+  id: 'equal',
+  name: { en: 'Equal weights', tr: 'Eşit ağırlık' },
+  fullName: { en: 'Equal weights', tr: 'Eşit ağırlık' },
+  family: 'weighting-objective',
+  status: 'research',
+  year: 1974,
+  origin: {
+    authors: 'Dawes, R.M.; Corrigan, B.',
+    year: 1974,
+    title: 'Linear models in decision making',
+    venue: 'Psychological Bulletin 81(2), 95-106',
+    doi: '10.1037/h0037613',
+    note: {
+      en: 'Equal weights have no inventor. Dawes & Corrigan (1974) is the usual "unit weights" reference (not read).',
+      tr: 'Eşit ağırlığın bir mucidi yoktur. Dawes ve Corrigan (1974), "birim ağırlık" için genelde verilen kaynaktır (okunmadı).',
+    },
+  },
+  steps: [
+    {
+      title: { en: 'Same weight for every criterion', tr: 'Her kritere aynı ağırlık' },
+      tex: String.raw`w_j = \frac{1}{n}, \qquad j = 1, \dots, n`,
+    },
+  ],
+  combinedWith: [
+    {
+      methodId: 'lopcow',
+      text: {
+        en: 'Any ranking method, as the "no weighting" scenario: Trung et al. (2024) run MARA, RAM and PIV with mean weights next to Entropy, MEREC, LOPCOW and CRITIC.',
+        tr: 'Herhangi bir sıralama yöntemiyle, "ağırlıksız" senaryo olarak: Trung vd. (2024) MARA, RAM ve PIV yöntemlerini Entropi, MEREC, LOPCOW ve CRITIC yanında ortalama ağırlıklarla da çalıştırır.',
+      },
+    },
+    {
+      methodId: 'edas',
+      text: {
+        en: 'The worked example of the EDAS origin paper uses equal weights.',
+        tr: 'EDAS özgün makalesindeki çözümlü örnek eşit ağırlık kullanır.',
+      },
+    },
+  ],
+  reference: {
+    source: 'Roszkowska, E. (2013). Rank Ordering Criteria Weighting Methods: a Comparative Overview. Optimum. Studia Ekonomiczne 5(65), 14-33',
+    doi: '10.15290/ose.2013.05.65.02',
+    table: 'Table 4, column EW',
+    match: 'match',
+    note: {
+      en: 'The published 1/n values for n = 3 and n = 4 are reproduced exactly.',
+      tr: 'n = 3 ve n = 4 için yayımlanan 1/n değerleri birebir elde ediliyor.',
+    },
+  },
+  sources: [
+    { label: 'Dawes & Corrigan (1974), Psychological Bulletin 81(2), 95-106', doi: '10.1037/h0037613' },
+    { label: 'Roszkowska (2013), Optimum. Studia Ekonomiczne 5(65), 14-33', doi: '10.15290/ose.2013.05.65.02' },
+    { label: 'Trung et al. (2024), EUREKA: Physics and Engineering', doi: '10.21303/2461-4262.2024.003171' },
+    { label: 'Keshavarz-Ghorabaee et al. (2021), Symmetry 13(4), 525', doi: '10.3390/sym13040525' },
+  ],
+  en: {
+    summary:
+      'Every criterion gets the same weight, 1/n. Use it when you have no reason to prefer one criterion, or as a neutral baseline to see how much another weighting changes the ranking.',
+    whenToUse: ['No information about importance.', 'As a baseline for sensitivity checks.'],
+    whenNot: [
+      'Criteria overlap: equal weights count correlated criteria twice.',
+      'Themes have different numbers of criteria: a theme with 5 criteria quietly gets 5 times the weight of a theme with 1.',
+    ],
+    inputs: ['Number of criteria n, at least 1. No matrix needed.'],
+    pitfalls: [
+      'Hidden weighting through the number of criteria per theme.',
+      'Weights are equal only after normalization: the ranking method\'s normalization decides how much each criterion really counts.',
+      'In floating point, 1/3 three times does not sum exactly to 1; tests need a tolerance.',
+    ],
+  },
+  tr: {
+    summary:
+      'Her kriter aynı ağırlığı alır: 1/n. Bir kriteri öne çıkarmak için nedenin yoksa ya da başka bir ağırlıklandırmanın sıralamayı ne kadar değiştirdiğini görmek için tarafsız bir karşılaştırma tabanı olarak kullan.',
+    whenToUse: ['Önem hakkında hiçbir bilgi yok.', 'Duyarlılık kontrolleri için karşılaştırma tabanı olarak.'],
+    whenNot: [
+      'Kriterler örtüşüyor: eşit ağırlık birbiriyle ilişkili kriterleri iki kez sayar.',
+      'Temaların kriter sayıları farklı: 5 kriterli bir tema, 1 kriterli bir temanın sessizce 5 katı ağırlık alır.',
+    ],
+    inputs: ['Kriter sayısı n, en az 1. Matris gerekmez.'],
+    pitfalls: [
+      'Tema başına kriter sayısı üzerinden gizli ağırlıklandırma.',
+      'Ağırlıklar ancak normalizasyondan sonra eşittir: her kriterin gerçekte ne kadar sayılacağını sıralama yönteminin normalizasyonu belirler.',
+      "Kayan noktalı sayılarda üç kez 1/3 tam olarak 1'e toplanmaz; testler tolerans gerektirir.",
+    ],
+  },
+}

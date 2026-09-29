@@ -1,0 +1,165 @@
+import type { MethodContent } from '../types'
+
+// Source: docs/research/methods/ahp.md
+export const ahp: MethodContent = {
+  id: 'ahp',
+  name: { en: 'AHP', tr: 'AHP' },
+  fullName: { en: 'Analytic Hierarchy Process', tr: 'Analitik hiyerarşi süreci' },
+  family: 'weighting-subjective',
+  status: 'research',
+  year: 1977,
+  origin: {
+    authors: 'Saaty, T.L.',
+    year: 1977,
+    title: 'A scaling method for priorities in hierarchical structures',
+    venue: 'Journal of Mathematical Psychology 15(3), 234-281',
+    doi: '10.1016/0022-2496(77)90033-5',
+    note: {
+      en: 'Not read. The book is Saaty (1980). The algorithm and the consistency rule are taken from Saaty (2008) and Saaty (1988). The geometric-mean variant is from Crawford & Williams (1985).',
+      tr: 'Okunmadı. Kitap Saaty (1980). Algoritma ve tutarlılık kuralı Saaty (2008) ile Saaty (1988) kaynaklarından alındı. Geometrik ortalama varyantı Crawford ve Williams (1985) kaynaklıdır.',
+    },
+  },
+  steps: [
+    {
+      title: { en: 'Pairwise comparison matrix', tr: 'İkili karşılaştırma matrisi' },
+      tex: String.raw`A = \left(a_{ij}\right)_{n \times n}, \qquad a_{ii} = 1, \qquad a_{ji} = \frac{1}{a_{ij}}, \qquad a_{ij} \in \left\{\tfrac19, \dots, 1, \dots, 9\right\}`,
+      note: {
+        en: 'Only the upper triangle is asked; the rest follows from reciprocity.',
+        tr: 'Yalnız üst üçgen sorulur; gerisi karşılıklılıktan gelir.',
+      },
+    },
+    {
+      title: { en: 'Priority vector (eigenvector)', tr: 'Öncelik vektörü (özvektör)' },
+      tex: String.raw`A\,w = \lambda_{\max}\, w, \qquad \sum_{j=1}^{n} w_j = 1`,
+      note: {
+        en: 'w is the principal right eigenvector. Power iteration finds it: multiply by A and renormalize until the change is below 1e-12.',
+        tr: 'w, en büyük özdeğere ait sağ özvektördür. Kuvvet yinelemesiyle bulunur: A ile çarpıp yeniden normalize etmek, değişim 1e-12 altına inene kadar sürer.',
+      },
+    },
+    {
+      title: { en: 'Geometric-mean variant (option)', tr: 'Geometrik ortalama varyantı (seçenek)' },
+      tex: String.raw`g_i = \left(\prod_{j=1}^{n} a_{ij}\right)^{1/n}, \qquad w_i = \frac{g_i}{\sum_{k} g_k}, \qquad \lambda_{\max} = \frac{1}{n}\sum_{i=1}^{n} \frac{(A w)_i}{w_i}`,
+      note: {
+        en: 'For n = 3 it gives the same weights as the eigenvector; for n of 4 or more they differ slightly.',
+        tr: 'n = 3 için özvektörle aynı ağırlıkları verir; n 4 ve üzerindeyse biraz ayrışır.',
+      },
+    },
+    {
+      title: { en: 'Consistency index and ratio', tr: 'Tutarlılık indeksi ve oranı' },
+      tex: String.raw`CI = \frac{\lambda_{\max} - n}{n - 1}, \qquad CR = \frac{CI}{RI_n}, \qquad CR \le 0.10`,
+      note: {
+        en: 'Random index RI: n = 3: 0.58, 4: 0.90, 5: 1.12, 6: 1.24, 7: 1.32, 8: 1.41, 9: 1.45, 10: 1.49. For n = 1 or 2, CR is not applicable.',
+        tr: 'Rastgele indeks RI: n = 3: 0,58, 4: 0,90, 5: 1,12, 6: 1,24, 7: 1,32, 8: 1,41, 9: 1,45, 10: 1,49. n = 1 veya 2 için CR anlamsızdır.',
+      },
+    },
+  ],
+  combinedWith: [
+    {
+      methodId: 'topsis',
+      text: {
+        en: 'AHP then TOPSIS is the most common pipeline: 10,451 title or abstract co-mentions in OpenAlex, and TOPSIS is AHP\'s first partner every year in the review by Çebi et al. (2022).',
+        tr: "AHP ardından TOPSIS en yaygın boru hattıdır: OpenAlex'te başlık ya da özette birlikte geçtiği 10.451 çalışma; Çebi vd. (2022) incelemesinde TOPSIS her yıl AHP'nin ilk ortağı.",
+      },
+    },
+    {
+      methodId: 'vikor',
+      text: {
+        en: 'AHP then VIKOR (1,753 co-mentions), for example Kaya & Kahraman (2010) on energy planning in Istanbul.',
+        tr: 'AHP ardından VIKOR (1.753 ortak geçiş); örneğin Kaya ve Kahraman (2010), İstanbul enerji planlaması.',
+      },
+    },
+    {
+      methodId: 'promethee-ii',
+      text: {
+        en: 'AHP then PROMETHEE (1,484 co-mentions), for example Dağdeviren (2008) on equipment selection.',
+        tr: 'AHP ardından PROMETHEE (1.484 ortak geçiş); örneğin Dağdeviren (2008), ekipman seçimi.',
+      },
+    },
+    {
+      methodId: 'electre-i',
+      text: {
+        en: 'AHP then ELECTRE (817 co-mentions), for example Soner & Önüt (2006) on supplier selection.',
+        tr: 'AHP ardından ELECTRE (817 ortak geçiş); örneğin Soner ve Önüt (2006), tedarikçi seçimi.',
+      },
+    },
+    {
+      methodId: 'roc',
+      text: {
+        en: 'Roszkowska (2013) compares AHP weights with the rank formulas ROC, RS and RR for five criteria.',
+        tr: 'Roszkowska (2013), beş kriter için AHP ağırlıklarını ROC, RS ve RR sıra formülleriyle karşılaştırır.',
+      },
+    },
+  ],
+  reference: {
+    source: 'Saaty, T.L. (2008). Decision making with the analytic hierarchy process. International Journal of Services Sciences 1(1), 83-98',
+    doi: '10.1504/IJSSCI.2008.017590',
+    table: 'Table 3 (job criteria), Table 4 (3 x 3), Table 2 (drinks)',
+    match: 'match',
+    note: {
+      en: 'Eigenvector weights match Tables 3 and 4 to the printed 3 decimals. The drinks matrix of Table 2 is not reciprocal as printed (Tea/Wine = 2 but Wine/Tea = 1/3); with Tea/Wine = 3 every published value and CR = 0.022 are reproduced, so the 2 is a typo.',
+      tr: "Özvektör ağırlıkları Tablo 3 ve 4 ile basılı 3 basamakta örtüşüyor. Tablo 2'deki içecek matrisi basıldığı haliyle karşılıklı değil (Çay/Şarap = 2 ama Şarap/Çay = 1/3); Çay/Şarap = 3 alınınca yayımlanan tüm değerler ve CR = 0,022 elde ediliyor, yani 2 bir baskı hatası.",
+    },
+  },
+  sources: [
+    { label: 'Saaty (1977), Journal of Mathematical Psychology 15(3), 234-281', doi: '10.1016/0022-2496(77)90033-5' },
+    { label: 'Saaty (2008), International Journal of Services Sciences 1(1), 83-98', doi: '10.1504/IJSSCI.2008.017590' },
+    { label: 'Crawford & Williams (1985), Journal of Mathematical Psychology 29(4), 387-405', doi: '10.1016/0022-2496(85)90002-1' },
+    { label: 'Saaty (1988), How to make a decision: the analytic hierarchy process, ISAHP proceedings' },
+    { label: 'Roszkowska (2013), Optimum. Studia Ekonomiczne 5(65), 14-33', doi: '10.15290/ose.2013.05.65.02' },
+    { label: 'Çebi, Onar, Öztayşi & Kahraman (2022), Integration of AHP with other MCDM methods: a literature review, ISAHP 2022', url: 'https://isahp.org/uploads/36_001.pdf' },
+  ],
+  en: {
+    summary:
+      'In AHP you compare criteria two at a time ("how much more important is A than B?", on a 1-9 scale). The method turns these judgements into weights and tells you how consistent they were (consistency ratio CR; below 0.10 is usually acceptable). Use it when an expert or a group can judge importance but cannot assign numbers directly.',
+    whenToUse: [
+      'Importance comes from people.',
+      'Up to about 9 criteria: n(n-1)/2 comparisons, 36 at n = 9.',
+      'You want a check of how consistent the judgements are.',
+    ],
+    whenNot: [
+      'Many criteria: comparison fatigue. BWM needs only 2n - 3 judgements.',
+      'Weights must be objective.',
+      'The judges do not accept statements of the form "A is 3 times as important as B".',
+    ],
+    inputs: [
+      'Positive reciprocal n x n matrix: 1 on the diagonal, a_ji = 1/a_ij, values from Saaty\'s 1-9 scale and their reciprocals.',
+      'Method option: eigenvector (default), geometric mean or column-average approximation.',
+      'Output: weights, lambda max, CI and CR.',
+    ],
+    pitfalls: [
+      'A non-reciprocal matrix (a typo) still gives an eigenvector, but CR is meaningless. The input should enforce reciprocity.',
+      'CR above 0.10: show it clearly and point to the most inconsistent judgement.',
+      'For n = 1 or 2, CI is 0 by construction and RI is 0, so CR is undefined; report it as not applicable.',
+      'Zero is not a judgement. Every entry must be positive.',
+      'Rank reversal is a known AHP issue when alternatives are added, but only when AHP also scores the alternatives, not when it only weights criteria as here.',
+      'Random index values for n of 11 or more differ between published tables.',
+    ],
+  },
+  tr: {
+    summary:
+      'AHP\'de kriterleri ikişer ikişer karşılaştırırsın ("A, B\'den ne kadar önemli?", 1-9 ölçeği). Yöntem bu yargıları ağırlığa çevirir ve ne kadar tutarlı olduklarını söyler (tutarlılık oranı CR; 0,10\'un altı genelde kabul edilir). Bir uzman ya da grup önemi yargılayabiliyor ama doğrudan sayı veremiyorsa kullan.',
+    whenToUse: [
+      'Önem kişilerin yargısından geliyor.',
+      'En fazla 9 civarında kriter: n(n-1)/2 karşılaştırma, n = 9 için 36.',
+      'Yargıların ne kadar tutarlı olduğunu denetlemek istiyorsun.',
+    ],
+    whenNot: [
+      'Kriter sayısı fazla: karşılaştırma yorgunluğu olur. BWM yalnız 2n - 3 yargı ister.',
+      'Ağırlıklar nesnel olmalı.',
+      'Yargıda bulunanlar "A, B\'den 3 kat önemli" türü ifadeleri kabul etmiyor.',
+    ],
+    inputs: [
+      "Pozitif, karşılıklı n x n matris: köşegende 1, a_ji = 1/a_ij, değerler Saaty'nin 1-9 ölçeğinden ve bunların tersleri.",
+      'Yöntem seçeneği: özvektör (varsayılan), geometrik ortalama ya da sütun ortalaması yaklaşımı.',
+      'Çıktı: ağırlıklar, lambda maks, CI ve CR.',
+    ],
+    pitfalls: [
+      'Karşılıklı olmayan bir matris (yazım hatası) yine özvektör verir, ama CR anlamını yitirir. Giriş ekranı karşılıklılığı zorunlu kılmalı.',
+      "CR 0,10'un üstündeyse bunu açıkça göster ve en tutarsız yargıyı işaret et.",
+      "n = 1 veya 2 için CI yapısı gereği 0'dır ve RI da 0'dır; CR tanımsızdır, uygulanamaz diye raporla.",
+      'Sıfır bir yargı değildir. Her değer pozitif olmalı.',
+      "Alternatif eklendiğinde sıralamanın tersine dönmesi bilinen bir AHP sorunudur, ama yalnız AHP alternatifleri de puanlıyorsa; burada olduğu gibi yalnız kriter ağırlığı için kullanıldığında geçerli değildir.",
+      "n 11 ve üzerinde rastgele indeks değerleri yayımlanmış tablolar arasında farklılık gösterir.",
+    ],
+  },
+}
