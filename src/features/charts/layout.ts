@@ -160,6 +160,12 @@ export type HeatmapLayout = {
   cellHeight: number
   rowLabels: string[]
   colLabels: string[]
+  /**
+   * True when the column labels did not fit and the matrix is square with the same labels on
+   * both axes (a correlation matrix): columns then show 1..n and rows "1 Price", so the rows are
+   * the legend instead of every column being cut ("Screen…", "Pixel de…").
+   */
+  numbered: boolean
 }
 
 export function layoutHeatmap({
@@ -176,6 +182,9 @@ export function layoutHeatmap({
   const labelWidth = Math.ceil(Math.min(maxLabel + GAP * 2, Math.max(width * 0.3, 64)))
   const cellWidth = Math.floor(Math.min(maxCellWidth, Math.max(minCellWidth, (width - labelWidth) / cols)))
   const headerHeight = 24
+  const cut = colLabels.some((l) => estimateTextWidth(l, fontSize) > cellWidth - 6)
+  const same = rowLabels.length === colLabels.length && rowLabels.every((l, i) => l === colLabels[i])
+  const numbered = cut && same && colLabels.length > 1
   return {
     width: labelWidth + cellWidth * colLabels.length,
     height: headerHeight + cellHeight * rowLabels.length,
@@ -183,8 +192,9 @@ export function layoutHeatmap({
     headerHeight,
     cellWidth,
     cellHeight,
-    rowLabels: rowLabels.map((l) => truncate(l, labelWidth - GAP * 2, fontSize)),
-    colLabels: colLabels.map((l) => truncate(l, cellWidth - 6, fontSize)),
+    rowLabels: rowLabels.map((l, i) => truncate(numbered ? `${i + 1} ${l}` : l, labelWidth - GAP * 2, fontSize)),
+    colLabels: colLabels.map((l, j) => (numbered ? String(j + 1) : truncate(l, cellWidth - 6, fontSize))),
+    numbered,
   }
 }
 

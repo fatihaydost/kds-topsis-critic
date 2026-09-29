@@ -149,6 +149,17 @@ describe('heatmap', () => {
     expect(narrow.width).toBeGreaterThan(320) // scrolls inside the figure
   })
 
+  it('numbers the columns of a square matrix whose names do not fit, with the rows as the legend', () => {
+    const names = ['Price', 'Screen size', 'Pixel density', 'Thickness', 'Mass']
+    const l = layoutHeatmap({ rowLabels: names, colLabels: names, width: 420 })
+    expect(l.numbered).toBe(true)
+    expect(l.colLabels).toEqual(['1', '2', '3', '4', '5'])
+    expect(l.rowLabels[0]).toBe('1 Price')
+    const wide = layoutHeatmap({ rowLabels: ['A', 'B'], colLabels: ['A', 'B'], width: 420 })
+    expect(wide.numbered).toBe(false)
+    expect(wide.colLabels).toEqual(['A', 'B'])
+  })
+
   it('mixes sequential colours from the heat tokens', () => {
     expect(heatColor(0, 'sequential').fill).toBe('var(--data-heat-0)')
     expect(heatColor(1, 'sequential').fill).toBe('var(--data-heat-1)')

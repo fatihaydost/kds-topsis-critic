@@ -32,7 +32,7 @@ export function RankingTable({ problem, result, id, compact = false }: { problem
   const order = rankOrder(result)
   return (
     <div className="min-w-0">
-      <Table density="regular" className={cn('w-auto', compact ? 'min-w-[min(100%,360px)]' : 'min-w-[min(100%,560px)]')} aria-labelledby={id}>
+      <Table density="regular" className={cn('w-auto', compact ? 'min-w-[min(100%,360px)]' : 'min-w-[min(100%,560px)]')} aria-labelledby={id} containerClassName={compact ? 'max-w-[560px]' : undefined}>
         <THead>
           <Tr>
             <Th numeric className="w-16">
