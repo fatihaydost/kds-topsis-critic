@@ -1,0 +1,58 @@
+{
+  "id": "opricovic-tzeng-2004-phi",
+  "alternatives": [
+    "A1",
+    "A2",
+    "A3"
+  ],
+  "criteria": [
+    "risk (6-10)",
+    "altitude (km above foothill)"
+  ],
+  "types": [
+    "cost",
+    "benefit"
+  ],
+  "weights": [
+    0.5,
+    0.5
+  ],
+  "matrix": [
+    [
+      6,
+      2.0
+    ],
+    [
+      7,
+      2.75
+    ],
+    [
+      10,
+      3.5
+    ]
+  ],
+  "expected": {
+    "d_plus": [
+      0.154,
+      0.085,
+      0.147
+    ],
+    "d_minus": [
+      0.147,
+      0.134,
+      0.154
+    ],
+    "closeness": [
+      0.489,
+      0.612,
+      0.511
+    ],
+    "ranking": [
+      3,
+      1,
+      2
+    ],
+    "tolerance": 0.0005
+  },
+  "card": "docs/research/methods/topsis.md"
+}

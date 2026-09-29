@@ -1,0 +1,80 @@
+{
+  "id": "critic-krishnan2021",
+  "source": "Krishnan et al. 2021, Symmetry 13(6):973, Table 1 (input), Table 2 and Table 5 (output)",
+  "alternatives": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E"
+  ],
+  "criteria": [
+    "price",
+    "screen",
+    "pixel_density",
+    "thickness",
+    "mass"
+  ],
+  "types": [
+    "cost",
+    "benefit",
+    "benefit",
+    "cost",
+    "cost"
+  ],
+  "matrix": [
+    [
+      649,
+      4.7,
+      326,
+      7.1,
+      143
+    ],
+    [
+      749,
+      5.5,
+      401,
+      7.3,
+      192
+    ],
+    [
+      740,
+      5.7,
+      520,
+      7.6,
+      171
+    ],
+    [
+      400,
+      5.7,
+      520,
+      11.1,
+      179
+    ],
+    [
+      600,
+      5.5,
+      538,
+      8.9,
+      152
+    ]
+  ],
+  "expected": {
+    "sigma_sample": [
+      0.4062,
+      0.4147,
+      0.4394,
+      0.4161,
+      0.4063
+    ],
+    "weights": [
+      0.1872,
+      0.1838,
+      0.1691,
+      0.2599,
+      0.2
+    ],
+    "tolerance": 5e-05
+  },
+  "card": "docs/research/methods/critic.md"
+}
