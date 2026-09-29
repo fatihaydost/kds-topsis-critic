@@ -47,7 +47,8 @@ function LanguageSwitch() {
       options={LANGS.map((l) => ({
         value: l,
         label: l.toUpperCase(),
-        ariaLabel: l === 'tr' ? 'Türkçe' : 'English',
+        // Starts with the visible text (WCAG 2.5.3 label in name), then the language's own name.
+        ariaLabel: t(`nav.languageNames.${l}`),
       }))}
     />
   )
@@ -81,7 +82,7 @@ function ThemeMenu() {
   )
 }
 
-/** 48 px top bar: wordmark, main nav, language, theme, GitHub (from 640 px; the footer carries it below). */
+/** 48 px top bar: wordmark (subtitle from 1024 px), main nav, language, theme, GitHub (from 640 px; the footer carries it below). */
 export function TopBar() {
   const { t } = useTranslation()
   return (
@@ -92,9 +93,13 @@ export function TopBar() {
       >
         {t('nav.skipToContent')}
       </a>
-      <Link href="/" className="mr-2 flex items-baseline gap-2 rounded-control no-underline">
-        <span className="text-14 font-semibold tracking-wide text-text">{t('common.wordmark')}</span>
-        <span className="hidden text-13 text-text-2 sm:inline">{t('common.productName')}</span>
+      <Link href="/" className="mr-2 flex shrink-0 items-baseline gap-2 rounded-control no-underline">
+        {/* Phones: "MCDM" only, so the nav and the controls fit in 360 px. */}
+        <span aria-hidden className="text-14 font-semibold text-text sm:hidden">
+          {t('common.wordmark').split(' ')[0]}
+        </span>
+        <span className="sr-only text-14 font-semibold text-text sm:not-sr-only">{t('common.wordmark')}</span>
+        <span className="hidden text-13 text-text-2 lg:inline">{t('common.productName')}</span>
       </Link>
       <nav aria-label={t('nav.main')} className="flex items-center">
         <NavLink href="/app">{t('nav.workbench')}</NavLink>

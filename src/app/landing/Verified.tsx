@@ -23,9 +23,12 @@ function formatPower(tol: number): string {
   return `±10${String(exp).replace(/./g, (c) => sup[c] ?? c)}`
 }
 
+/** Printed decimals a half-unit tolerance stands for: 0.00005 -> 4, 0.0005 -> 3. */
+const decimalsOf = (tol: number): number => Math.max(0, Math.round(-Math.log10(tol * 2)))
+
 /**
- * "Checked against published results": method, paper, tolerance. What exactly is compared sits
- * behind a disclosure.
+ * "Checked against published results": a two-row ledger, the claim in words first and the
+ * tolerance as small secondary text. Other checks sit behind a disclosure.
  */
 export function Verified() {
   const { t } = useTranslation()
@@ -41,36 +44,35 @@ export function Verified() {
         <h2 id="verified-title" className="text-24 font-semibold text-text">
           {t('landing.verified.title')}
         </h2>
-        <p className="text-16 text-text-2">{t('landing.verified.lead')}</p>
+        <p className="max-w-[65ch] text-16 text-text-2">{t('landing.verified.lead')}</p>
       </div>
 
-      <ul className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <ul className="flex flex-col border-t border-line">
         {rows.map((r) => (
-          <li key={r.method} className="flex flex-col gap-4 rounded-control border border-line bg-surface p-5">
-            <div className="flex items-baseline justify-between gap-4">
-              <Link href={`/methods/${r.method}`} className="text-20 font-semibold text-text no-underline hover:underline">
-                {t(`methods.names.${r.method}`)}
-              </Link>
-              <span className="num font-mono text-24 text-text">{formatTolerance(r.tolerance, lang)}</span>
+          <li key={r.method} className="grid grid-cols-1 gap-x-8 gap-y-1 border-b border-line py-4 md:grid-cols-[120px_minmax(0,1fr)_auto] md:items-baseline">
+            <Link href={`/methods/${r.method}`} className="text-20 font-semibold text-text no-underline hover:underline">
+              {t(`methods.names.${r.method}`)}
+            </Link>
+            <div className="flex flex-col gap-1">
+              <p className="text-16 text-text">
+                {t(`landing.verified.${r.method}.claim`, { citation: shortCitation(r.citation, lang), decimals: decimalsOf(r.tolerance) })}
+              </p>
+              <p className="text-13 text-text-2">
+                {r.citation.venue.split(',')[0]}.{' '}
+                <a href={doiUrl(r.citation.doi)} className={textLink} target="_blank" rel="noreferrer">
+                  doi:{r.citation.doi}
+                </a>
+              </p>
             </div>
-            <p className="text-14 text-text-2">
-              {shortCitation(r.citation, lang)}, {r.citation.venue.split(',')[0]}.{' '}
-              <a href={doiUrl(r.citation.doi)} className={textLink} target="_blank" rel="noreferrer">
-                doi:{r.citation.doi}
-              </a>
-            </p>
-            <details className="text-13 text-text-2">
-              <summary className="cursor-pointer hover:text-text">{t('landing.verified.more')}</summary>
-              <p className="mt-2">{t(`landing.verified.${r.method}.compared`)}</p>
-              <p className="mt-1">{t('landing.verified.toleranceNote')}</p>
-            </details>
+            <span className="num text-13 text-text-2">{t('landing.verified.tolerance', { tol: formatTolerance(r.tolerance, lang) })}</span>
           </li>
         ))}
       </ul>
 
       <details className="text-13 text-text-2">
         <summary className="cursor-pointer hover:text-text">{t('landing.verified.alsoTitle')}</summary>
-        <p className="mt-2 max-w-[80ch]">{t('landing.verified.also', { tol: formatPower(xlsx.expected.tolerance) })}</p>
+        <p className="mt-2 max-w-[80ch]">{t('landing.verified.toleranceNote')}</p>
+        <p className="mt-1 max-w-[80ch]">{t('landing.verified.also', { tol: formatPower(xlsx.expected.tolerance) })}</p>
       </details>
     </section>
   )

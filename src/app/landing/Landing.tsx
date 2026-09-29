@@ -40,9 +40,9 @@ export default function Landing() {
     <>
       <main id="main" tabIndex={-1} className="flex flex-col outline-none">
         <div
-          className={`${container} grid grid-cols-1 items-start gap-10 py-10 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-16 lg:py-16`}
+          className={`${container} grid grid-cols-1 items-start gap-10 py-10 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-center lg:gap-16 lg:py-16`}
         >
-          <div className="flex flex-col items-start gap-6 lg:pt-10">
+          <div className="flex flex-col items-start gap-6">
             <h1 className="text-32 font-semibold text-balance text-text md:text-44">{t('landing.title')}</h1>
             <p className="max-w-[48ch] text-16 text-text-2 md:text-20 md:leading-7">{t('landing.lead')}</p>
             <div className="flex flex-wrap gap-2">

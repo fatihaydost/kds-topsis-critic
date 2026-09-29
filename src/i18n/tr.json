@@ -1,8 +1,8 @@
 {
   "common": {
-    "wordmark": "KDS",
-    "productName": "Çok kriterli karar aracı",
-    "documentTitle": "KDS: çok kriterli karar aracı",
+    "wordmark": "MCDM Workbench",
+    "productName": "Çok kriterli karar analizi",
+    "documentTitle": "MCDM Workbench: çok kriterli karar analizi",
     "actions": {
       "add": "Ekle",
       "remove": "Kaldır",
@@ -18,8 +18,9 @@
     "loading": "Yükleniyor",
     "notFound": {
       "title": "Sayfa bulunamadı",
-      "body": "Bu adreste bir sayfa yok. Taşınmış olabilir ya da bağlantıda yazım hatası var.",
-      "action": "Ana sayfaya dön"
+      "body": "Bu adreste bir sayfa yok. Taşınmış olabilir ya da bağlantıda bir yazım hatası var.",
+      "action": "Ana sayfaya dön",
+      "metaTitle": "Sayfa bulunamadı: MCDM Workbench"
     },
     "stub": "Yer tutucu. Bu sayfa bir sonraki adımda yapılacak."
   },
@@ -37,16 +38,20 @@
       "light": "Açık",
       "dark": "Koyu",
       "button": "Tema: {{mode}}. Temayı değiştir"
+    },
+    "languageNames": {
+      "en": "EN, English",
+      "tr": "TR, Türkçe"
     }
   },
   "landing": {
     "title": "Literatürle doğrulanmış karar analizi",
-    "lead": "Kriterleri CRITIC ile ağırlıklandır, TOPSIS ile sırala, her adımı gör. Tarayıcında çalışır: hesap yok, yükleme yok.",
+    "lead": "Kriterleri CRITIC ile ağırlıklandırın, TOPSIS ile sıralayın ve her adımı görün. Tarayıcınızda çalışır; üyelik yok, veri yüklenmez.",
     "openWorkbench": "Çalışma alanını aç",
     "methods": "Yöntemler",
     "meta": {
-      "title": "KDS: tarayıcıda çok kriterli karar analizi",
-      "description": "Kriterleri CRITIC ile ağırlıklandır, alternatifleri TOPSIS ile sırala. Her ara adım görünür ve yayımlanmış örneklerle doğrulanmıştır. Tarayıcında, Türkçe ve İngilizce çalışır."
+      "title": "MCDM Workbench: tarayıcıda çok kriterli karar analizi",
+      "description": "Kriterleri CRITIC ile ağırlıklandırın, alternatifleri TOPSIS ile sıralayın. Her ara adım görünür ve yayımlanmış örneklerle doğrulanmıştır. Tarayıcınızda, Türkçe ve İngilizce çalışır."
     },
     "result": {
       "title": "Beş akıllı telefonun TOPSIS sıralaması",
@@ -69,26 +74,26 @@
         "ranking": "Sıralama",
         "results": "Sonuç",
         "robustness": "Sağlamlık",
-        "soon": "Sonra gelecek"
+        "soon": "Sonraki sürümde"
       }
     },
     "verified": {
       "title": "Yayımlanmış sonuçlarla doğrulandı",
-      "lead": "Testler yayımlanmış sayıları bu toleranslar içinde üretir.",
+      "lead": "Test takımı yayımlanmış örnekleri yeniden hesaplar ve basılı her basamağı karşılaştırır.",
       "toleranceNote": "Tolerans, son basılı basamağın yarım birimidir.",
       "critic": {
-        "compared": "Beş akıllı telefonun standart sapmaları (Tablo 2) ve ağırlıkları (Tablo 5)."
+        "claim": "Ağırlıklar ve standart sapmalar {{citation}} ile {{decimals}} basamağa kadar aynı."
       },
       "topsis": {
-        "compared": "D+ ve D- uzaklıkları, yakınlık C ve sıralar (Tablo 3); aynı veri, birincinin değiştiği iki farklı birimde."
+        "claim": "D+, D−, C ve sıralar {{citation}} ile {{decimals}} basamağa kadar aynı."
       },
       "also": "Ayrıca test edilenler: ilk ders projesindeki elle çözülmüş CRITIC tablosu, her ara matris {{tol}} içinde; CRITIC ardından TOPSIS zincirinin ilk Python koduyla eşliği, {{tol}} içinde. Tablo ve Python kodu bağımsız kaynak değildir.",
-      "more": "Neler karşılaştırılıyor",
-      "alsoTitle": "Diğer kontroller"
+      "alsoTitle": "Diğer kontroller",
+      "tolerance": "Tolerans {{tol}}"
     },
     "catalogue": {
       "title": "Yöntemler",
-      "lead": "{{total}} yöntemden {{available}} tanesi bugün çalışıyor. Diğerleri araştırmada.",
+      "lead": "{{total}} yöntemden {{available}} tanesi burada hesaplanıyor; diğerleri araştırma taslağı.",
       "available": "Mevcut",
       "research": "Araştırmada"
     },

@@ -1,8 +1,8 @@
 {
   "common": {
-    "wordmark": "KDS",
-    "productName": "Multi-criteria decision tool",
-    "documentTitle": "KDS: multi-criteria decision tool",
+    "wordmark": "MCDM Workbench",
+    "productName": "Multi-criteria decision analysis",
+    "documentTitle": "MCDM Workbench: multi-criteria decision analysis",
     "actions": {
       "add": "Add",
       "remove": "Remove",
@@ -19,7 +19,8 @@
     "notFound": {
       "title": "Page not found",
       "body": "There is no page at this address. It may have moved, or the link has a typo.",
-      "action": "Go to the home page"
+      "action": "Go to the home page",
+      "metaTitle": "Page not found: MCDM Workbench"
     },
     "stub": "Placeholder. This page is built in the next step."
   },
@@ -37,15 +38,19 @@
       "light": "Light",
       "dark": "Dark",
       "button": "Theme: {{mode}}. Change theme"
+    },
+    "languageNames": {
+      "en": "EN, English",
+      "tr": "TR, Türkçe"
     }
   },
   "landing": {
     "title": "Decision analysis checked against the literature",
-    "lead": "Weight criteria with CRITIC and rank with TOPSIS, step by step. It runs in your browser: no account, no upload.",
+    "lead": "Weight criteria with CRITIC, rank with TOPSIS and see every step. It runs in your browser: no sign-up, nothing uploaded.",
     "openWorkbench": "Open workbench",
     "methods": "Methods",
     "meta": {
-      "title": "KDS: multi-criteria decision analysis in the browser",
+      "title": "MCDM Workbench: multi-criteria decision analysis in the browser",
       "description": "Weight criteria with CRITIC and rank alternatives with TOPSIS, with every intermediate step shown and checked against published examples. Runs in your browser, in English and Turkish."
     },
     "result": {
@@ -69,26 +74,26 @@
         "ranking": "Ranking method",
         "results": "Result",
         "robustness": "Robustness",
-        "soon": "Coming later"
+        "soon": "Next version"
       }
     },
     "verified": {
       "title": "Checked against published results",
-      "lead": "The tests reproduce the published numbers within these tolerances.",
+      "lead": "The test suite recomputes the published examples and compares every printed digit.",
       "toleranceNote": "The tolerance is half a unit of the last printed digit.",
       "critic": {
-        "compared": "Standard deviations (Table 2) and weights (Table 5) of five smartphones."
+        "claim": "Weights and standard deviations match {{citation}} to {{decimals}} decimals."
       },
       "topsis": {
-        "compared": "Distances D+ and D-, closeness C and ranks (Table 3), for the same data in two units where the winner changes."
+        "claim": "D+, D−, C and ranks match {{citation}} to {{decimals}} decimals."
       },
       "also": "Also tested: the hand-solved CRITIC spreadsheet from the original coursework, every intermediate matrix within {{tol}}, and parity of CRITIC then TOPSIS with the original Python code within {{tol}}. The spreadsheet and the Python code are not independent references.",
-      "more": "What is compared",
-      "alsoTitle": "Other checks"
+      "alsoTitle": "Other checks",
+      "tolerance": "Tolerance {{tol}}"
     },
     "catalogue": {
       "title": "Methods",
-      "lead": "{{available}} of {{total}} run today. The rest are in research.",
+      "lead": "{{available}} of {{total}} methods compute here; the rest are researched drafts.",
       "available": "Available",
       "research": "In research"
     },
