@@ -61,7 +61,7 @@ const DevIllustrations = import.meta.env.DEV ? lazy(() => import('../features/il
  * the page renders its own, and tools that wait for `#main` wait for the real content.
  */
 function PageFallback() {
-  return <div aria-busy="true" className="min-h-[calc(100dvh-48px)]" />
+  return <div aria-busy="true" className="min-h-[calc(100dvh-60px)]" />
 }
 
 /** `ssrPath` only for the build-time prerender (src/app/prerender.tsx). */

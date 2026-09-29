@@ -21,7 +21,7 @@ const disclosure = 'cursor-pointer text-13 text-text-2 hover:text-text'
 
 function Section({ id, title, children }: { id: SectionId; title: string; children: ReactNode }) {
   return (
-    <section id={id} aria-labelledby={`${id}-title`} className="flex scroll-mt-16 flex-col gap-4">
+    <section id={id} aria-labelledby={`${id}-title`} className="flex scroll-mt-20 flex-col gap-4">
       <h2 id={`${id}-title`} className="text-20 font-semibold text-text">
         {title}
       </h2>

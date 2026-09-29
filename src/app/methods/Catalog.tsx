@@ -120,7 +120,7 @@ export default function Catalog() {
           </div>
 
           <aside className="min-w-0">
-            <div className="rounded-control border border-line bg-surface p-4 md:p-5 xl:sticky xl:top-16 xl:max-h-[calc(100dvh-80px)] xl:overflow-y-auto">
+            <div className="rounded-control border border-line bg-surface p-4 md:p-5 xl:sticky xl:top-20 xl:max-h-[calc(100dvh-96px)] xl:overflow-y-auto">
               <Guide />
             </div>
           </aside>

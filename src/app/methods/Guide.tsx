@@ -67,7 +67,7 @@ export function Guide() {
   }
 
   return (
-    <section aria-labelledby="guide-title" id="guide" className="flex scroll-mt-16 flex-col gap-5">
+    <section aria-labelledby="guide-title" id="guide" className="flex scroll-mt-20 flex-col gap-5">
       <div className="flex flex-col gap-2">
         <h2 id="guide-title" className="text-20 font-semibold text-text">
           {t('methods.guide.title')}

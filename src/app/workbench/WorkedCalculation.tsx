@@ -120,7 +120,7 @@ export default function WorkedCalculation({ groups, problem, headingLevel = 'h3'
           <div key={gi} className="flex flex-col gap-6">
             {g.title && <GroupHeading className="text-14 font-semibold text-text-2">{g.title}</GroupHeading>}
             {flow && (
-              <div className="sticky top-12 z-20 -mx-1 bg-bg px-1 py-2">
+              <div className="sticky top-15 z-20 -mx-1 bg-bg px-1 py-2">
                 <StepFlow
                   steps={flow.map((node) => ({ ...node, label: tr(t, `workbench.flow.${node.key}`) }))}
                   active={activeKey}
@@ -225,7 +225,7 @@ function StepBlock({ step, number, index, domId, current, onCurrent, labels, hea
       data-step={step.key}
       data-index={index}
       data-current={current || undefined}
-      className="relative flex min-w-0 scroll-mt-28 flex-col gap-3 border-l border-line pl-5 outline-none"
+      className="relative flex min-w-0 scroll-mt-32 flex-col gap-3 border-l border-line pl-5 outline-none"
       onFocusCapture={onCurrent}
       onPointerDown={onCurrent}
     >
