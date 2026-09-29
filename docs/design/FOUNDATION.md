@@ -78,7 +78,7 @@ empty, disabled) and both table densities.
 
 ## Shell
 
-- `TopBar`: 48 px; wordmark "KDS" + product name (from 640 px), Workbench and Methods links
+- `TopBar`: 48 px; wordmark "MCDM Workbench" ("MCDM" below 640 px) + subtitle (from 1024 px), Workbench and Methods links
   (`aria-current="page"`), TR/EN segmented control, theme menu (System / Light / Dark), GitHub link
   (from 640 px; the landing footer should carry the source link for phones). Skip link to `#main`.
 - `WorkbenchLayout` (`src/app/shell/WorkbenchLayout.tsx`): props `stage`, `onStageChange`, `stageMeta`
@@ -92,6 +92,8 @@ empty, disabled) and both table densities.
   Route components are stubs to be replaced.
 - GitHub Pages: `base` is `/kds-topsis-critic/` for `build` and `preview`, `/` for dev. The build copies
   `dist/index.html` to `dist/404.html`, so deep links boot the app without a hash router or redirect.
+  Then it prerenders the home page into `dist/index.html` (EN in `#root`, TR in a template;
+  `src/app/prerender.tsx`, `vite.config.ts`), and preloads the Plex Sans faces of the first screen.
 - `index.html` has an inline script that applies the saved theme and language before first paint.
 
 ## Theme
@@ -125,8 +127,9 @@ localStorage `kds.theme`.
   - A test (`tests/i18n.test.ts`) checks: same keys and same `{{vars}}` in both files, no em or en dash,
     no emoji, no empty strings, a few banned buzzwords, and that every core step key, warning code and
     validation code has a string. Add new strings to both files.
-- Turkish copy uses "sen", "kriter", "fayda / maliyet", "ağırlık"; "kütle" for mass (so it never
-  collides with "ağırlık" = weight).
+- Turkish copy addresses the reader as "siz" (owner decision, 29.09; short button labels stay in
+  the plain imperative, "Çalışma alanını aç"), and uses "kriter", "fayda / maliyet", "ağırlık";
+  "kütle" for mass (so it never collides with "ağırlık" = weight).
 - Numbers (`src/i18n/number.ts`, re-exported from `src/i18n`):
   - `useNumberFormat(decimals = 4)` returns `{ lang, format(v, d?), formatRaw(v), parse(text), isAmbiguous(text) }`.
   - `formatNumber(v, lang, decimals)`: fixed decimals, grouping, `''` for null / NaN, never `-0`.
