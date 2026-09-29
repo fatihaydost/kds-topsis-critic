@@ -285,6 +285,14 @@ describe.skipIf(!X)('xlsx (real SheetJS)', () => {
     // Computed numbers keep full precision and show 4 decimals; raw input has no format.
     expect(wb.Sheets['Weights']!['F4']).toMatchObject({ t: 'n', v: w.weights[0], z: '0.0000' })
     expect(data['B3']!.z).toBeUndefined()
+    // A computed 0 or 1 (min-max normalization, the correlation diagonal) has the same 4 decimals.
+    const exact = Object.entries(calc).filter(([k, c]) => !k.startsWith('!') && (c as { t?: string; v?: unknown }).t === 'n' && Number.isInteger((c as { v: number }).v))
+    expect(exact.length).toBeGreaterThan(0)
+    for (const [k, c] of exact) expect((c as { z?: string }).z, k).toBe('0.0000')
+    // The rank is a count and keeps the general format.
+    expect(wb.Sheets['Ranking']!['E4']).toMatchObject({ t: 'n', v: r.ranking[0] })
+    expect(wb.Sheets['Ranking']!['E4']!.z).toBeUndefined()
+    expect(wb.Sheets['Ranking']!['D4']!.z).toBe('0.0000')
   })
 
   it('writes a last About sheet with the provenance, after the re-importable Data sheet', () => {

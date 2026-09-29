@@ -119,13 +119,17 @@ function sheetName(name: string, taken: Set<string>): string {
 const finite = (x: number | null | undefined): number | null =>
   typeof x === 'number' && Number.isFinite(x) ? x : null
 
-/** `numFmt`: display format for non-integer number cells (computed values); raw input keeps none. */
-function toSheet(X: SheetJS, rows: Cell[][], numFmt?: string): XLSX.WorkSheet {
+/**
+ * `numFmt`: display format for every number cell of a computed sheet, so a normalized 0 or 1 reads
+ * "0.0000" like its neighbours (fixed decimals per column); raw input keeps none. `countColumns`:
+ * columns that hold counts such as the rank, which stay as they are.
+ */
+function toSheet(X: SheetJS, rows: Cell[][], numFmt?: string, countColumns: readonly number[] = []): XLSX.WorkSheet {
   const ws = X.utils.aoa_to_sheet(rows)
   if (numFmt) {
     rows.forEach((row, r) =>
       row.forEach((c, j) => {
-        if (typeof c !== 'number' || Number.isInteger(c)) return
+        if (typeof c !== 'number' || countColumns.includes(j)) return
         const cell = ws[X.utils.encode_cell({ r, c: j })] as XLSX.CellObject | undefined
         if (cell && cell.t === 'n') cell.z = numFmt
       }),
@@ -158,8 +162,8 @@ export function buildWorkbook(X: SheetJS, input: WorkbookInput): WorkBook {
   const axisLabels: StepLabels = { alternatives: problem.alternatives, criteria: problem.criteria.map((c) => c.name) }
   const wb = X.utils.book_new()
   const taken = new Set<string>()
-  const add = (rows: Cell[][], name: string, numFmt?: string) =>
-    X.utils.book_append_sheet(wb, toSheet(X, rows, numFmt), sheetName(name, taken))
+  const add = (rows: Cell[][], name: string, numFmt?: string, countColumns?: readonly number[]) =>
+    X.utils.book_append_sheet(wb, toSheet(X, rows, numFmt, countColumns), sheetName(name, taken))
 
   // Data
   add(problemToGrid(problem, { corner: L.alternative, typeLabel: L.type, typeWords: L.typeWords }), L.sheets.data)
@@ -208,6 +212,7 @@ export function buildWorkbook(X: SheetJS, input: WorkbookInput): WorkBook {
       ],
       L.sheets.ranking,
       COMPUTED_NUMBER_FORMAT,
+      [columns.length + 2], // the rank
     )
   }
 
