@@ -95,13 +95,13 @@ export function TopBar() {
         {t('nav.skipToContent')}
       </a>
       <Link href="/" className="mr-2 flex shrink-0 items-center gap-2 rounded-control no-underline">
-        <LogoMark size={18} className="shrink-0 text-accent" />
-        {/* Phones: "MCDM" only, so the nav and the controls fit in 360 px. */}
-        <span aria-hidden className="text-14 font-semibold text-text sm:hidden">
-          {t('common.wordmark').split(' ')[0]}
+        {/* Phones show the mark alone so the nav and the controls fit in 360 px; the name stays in the accessible label. */}
+        <LogoMark size={24} className="shrink-0 text-accent lg:hidden" />
+        <LogoMark size={32} className="hidden shrink-0 text-accent lg:block" />
+        <span className="flex flex-col leading-tight">
+          <span className="sr-only text-14 font-semibold text-text sm:not-sr-only">{t('common.wordmark')}</span>
+          <span className="hidden text-12 text-text-2 lg:inline">{t('common.productName')}</span>
         </span>
-        <span className="sr-only text-14 font-semibold text-text sm:not-sr-only">{t('common.wordmark')}</span>
-        <span className="hidden text-13 text-text-2 lg:inline">{t('common.productName')}</span>
       </Link>
       <nav aria-label={t('nav.main')} className="flex items-center">
         <NavLink href="/app">{t('nav.workbench')}</NavLink>
