@@ -41,12 +41,16 @@ export type WorkbenchData = {
   stage: Stage
   /** Id of the loaded example (src/data/examples.ts), cleared by the first edit of the data. */
   exampleId: string | null
+  /** File name of the last import, cleared by the first edit of the data (like exampleId). */
+  importedFrom?: string | null
 }
 
 export type WorkbenchActions = {
   setStage: (stage: Stage) => void
   /** Replaces the whole problem (import, paste of a full table). Keeps manual weights in length. */
   setProblem: (problem: DraftProblem) => void
+  /** Replaces the problem with one read from a file and remembers the file name as the source. */
+  importProblem: (problem: DraftProblem, fileName: string) => void
   /** Loads a published example; criterion names in `lang`. Sets manual weights when the paper gives them. */
   loadExample: (id: string, lang: Lang) => void
   /** Empty m x n table with default names (A1.., C1..). */
@@ -108,6 +112,7 @@ export const initialWorkbench = (): WorkbenchData => ({
   rankingMethod: 'topsis',
   stage: 'data',
   exampleId: null,
+  importedFrom: null,
 })
 
 const fitWeights = (w: (number | null)[], n: number): (number | null)[] =>
@@ -121,7 +126,20 @@ export const useWorkbench = create<WorkbenchState>()(
       setStage: (stage) => set({ stage }),
 
       setProblem: (problem) =>
-        set((s) => ({ problem, exampleId: null, manualWeights: fitWeights(s.manualWeights, problem.criteria.length) })),
+        set((s) => ({
+          problem,
+          exampleId: null,
+          importedFrom: null,
+          manualWeights: fitWeights(s.manualWeights, problem.criteria.length),
+        })),
+
+      importProblem: (problem, fileName) =>
+        set((s) => ({
+          problem,
+          exampleId: null,
+          importedFrom: fileName,
+          manualWeights: fitWeights(s.manualWeights, problem.criteria.length),
+        })),
 
       loadExample: (id, lang) => {
         const ex = getExample(id)
@@ -133,6 +151,7 @@ export const useWorkbench = create<WorkbenchState>()(
             matrix: ex.matrix.map((row) => [...row]),
           },
           exampleId: ex.id,
+          importedFrom: null,
           weightMethod: ex.weights ? 'manual' : 'critic',
           manualWeights: ex.weights ? [...ex.weights] : new Array<number | null>(ex.criteria.length).fill(null),
         })
@@ -146,12 +165,14 @@ export const useWorkbench = create<WorkbenchState>()(
             matrix: Array.from({ length: m }, () => new Array<number | null>(n).fill(null)),
           },
           exampleId: null,
+          importedFrom: null,
           manualWeights: new Array<number | null>(n).fill(null),
         }),
 
       setCell: (row, col, value) =>
         set((s) => ({
           exampleId: null,
+          importedFrom: null,
           problem: {
             ...s.problem,
             matrix: s.problem.matrix.map((r, i) => (i === row ? r.map((v, j) => (j === col ? value : v)) : r)),
@@ -166,12 +187,14 @@ export const useWorkbench = create<WorkbenchState>()(
       setCriterion: (col, patch) =>
         set((s) => ({
           exampleId: patch.type !== undefined ? null : s.exampleId,
+          importedFrom: patch.type !== undefined ? null : (s.importedFrom ?? null),
           problem: { ...s.problem, criteria: s.problem.criteria.map((c, j) => (j === col ? { ...c, ...patch } : c)) },
         })),
 
       addAlternative: (name) =>
         set((s) => ({
           exampleId: null,
+          importedFrom: null,
           problem: {
             ...s.problem,
             alternatives: [...s.problem.alternatives, name],
@@ -182,6 +205,7 @@ export const useWorkbench = create<WorkbenchState>()(
       removeAlternative: (row) =>
         set((s) => ({
           exampleId: null,
+          importedFrom: null,
           problem: {
             ...s.problem,
             alternatives: s.problem.alternatives.filter((_, i) => i !== row),
@@ -192,6 +216,7 @@ export const useWorkbench = create<WorkbenchState>()(
       addCriterion: (criterion) =>
         set((s) => ({
           exampleId: null,
+          importedFrom: null,
           problem: {
             ...s.problem,
             criteria: [...s.problem.criteria, criterion],
@@ -203,6 +228,7 @@ export const useWorkbench = create<WorkbenchState>()(
       removeCriterion: (col) =>
         set((s) => ({
           exampleId: null,
+          importedFrom: null,
           problem: {
             ...s.problem,
             criteria: s.problem.criteria.filter((_, j) => j !== col),
@@ -233,6 +259,7 @@ export const useWorkbench = create<WorkbenchState>()(
         rankingMethod: s.rankingMethod,
         stage: s.stage,
         exampleId: s.exampleId,
+        importedFrom: s.importedFrom ?? null,
       }),
     },
   ),
