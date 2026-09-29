@@ -15,8 +15,8 @@ export const equal: MethodContent = {
     venue: 'Psychological Bulletin 81(2), 95-106',
     doi: '10.1037/h0037613',
     note: {
-      en: 'Equal weights have no inventor. Dawes & Corrigan (1974) is the usual "unit weights" reference (not read).',
-      tr: 'Eşit ağırlığın bir mucidi yoktur. Dawes ve Corrigan (1974), "birim ağırlık" için genelde verilen kaynaktır (okunmadı).',
+      en: 'Equal weights have no inventor; Dawes & Corrigan (1974) is the usual "unit weights" reference.',
+      tr: 'Eşit ağırlığın bir mucidi yoktur; "birim ağırlık" için genelde Dawes ve Corrigan (1974) gösterilir.',
     },
   },
   steps: [
@@ -44,11 +44,10 @@ export const equal: MethodContent = {
   reference: {
     source: 'Roszkowska, E. (2013). Rank Ordering Criteria Weighting Methods: a Comparative Overview. Optimum. Studia Ekonomiczne 5(65), 14-33',
     doi: '10.15290/ose.2013.05.65.02',
-    table: 'Table 4, column EW',
     match: 'match',
     note: {
-      en: 'The published 1/n values for n = 3 and n = 4 are reproduced exactly.',
-      tr: 'n = 3 ve n = 4 için yayımlanan 1/n değerleri birebir elde ediliyor.',
+      en: 'Table 4, column EW. The published 1/n values for n = 3 and n = 4 are reproduced exactly.',
+      tr: 'Tablo 4, EW sütunu. n = 3 ve n = 4 için yayımlanan 1/n değerleri birebir elde ediliyor.',
     },
   },
   sources: [
@@ -59,26 +58,26 @@ export const equal: MethodContent = {
   ],
   en: {
     summary:
-      'Every criterion gets the same weight, 1/n. Use it when you have no reason to prefer one criterion, or as a neutral baseline to see how much another weighting changes the ranking.',
+      'Every criterion gets the same weight, 1/n. Use it when no criterion deserves priority, or as a neutral baseline to see how much another weighting changes the ranking.',
     whenToUse: ['No information about importance.', 'As a baseline for sensitivity checks.'],
     whenNot: [
       'Criteria overlap: equal weights count correlated criteria twice.',
-      'Themes have different numbers of criteria: a theme with 5 criteria quietly gets 5 times the weight of a theme with 1.',
+      'Uneven themes: a 5-criterion theme weighs 5 times a 1-criterion one.',
     ],
     inputs: ['Number of criteria n, at least 1. No matrix needed.'],
     pitfalls: [
       'Hidden weighting through the number of criteria per theme.',
-      'Weights are equal only after normalization: the ranking method\'s normalization decides how much each criterion really counts.',
+      "Weights are equal only after normalization: the ranking method's normalization decides how much each criterion really counts.",
       'In floating point, 1/3 three times does not sum exactly to 1; tests need a tolerance.',
     ],
   },
   tr: {
     summary:
-      'Her kriter aynı ağırlığı alır: 1/n. Bir kriteri öne çıkarmak için nedenin yoksa ya da başka bir ağırlıklandırmanın sıralamayı ne kadar değiştirdiğini görmek için tarafsız bir karşılaştırma tabanı olarak kullan.',
+      'Her kriter aynı ağırlığı alır: 1/n. Hiçbir kriteri öne çıkarmak için nedeniniz yoksa ya da başka bir ağırlıklandırmanın etkisini görmek için tarafsız bir taban olarak kullanın.',
     whenToUse: ['Önem hakkında hiçbir bilgi yok.', 'Duyarlılık kontrolleri için karşılaştırma tabanı olarak.'],
     whenNot: [
-      'Kriterler örtüşüyor: eşit ağırlık birbiriyle ilişkili kriterleri iki kez sayar.',
-      'Temaların kriter sayıları farklı: 5 kriterli bir tema, 1 kriterli bir temanın sessizce 5 katı ağırlık alır.',
+      'Kriterler örtüşüyor: eşit ağırlık ilişkili kriterleri iki kez sayar.',
+      'Temaların büyüklüğü farklı: 5 kriterli tema, 1 kriterlinin 5 katı ağırlık alır.',
     ],
     inputs: ['Kriter sayısı n, en az 1. Matris gerekmez.'],
     pitfalls: [

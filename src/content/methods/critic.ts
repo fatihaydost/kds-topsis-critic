@@ -18,8 +18,8 @@ export const critic: MethodContent = {
     venue: 'Computers & Operations Research 22(7), 763-770',
     doi: '10.1016/0305-0548(94)00059-H',
     note: {
-      en: 'The origin paper is paywalled and was not read. The steps follow the open-access restatements by Krishnan et al. (2021) and Mukhametzyanov (2021), which agree with each other.',
-      tr: 'Özgün makale ücretli erişimde olduğu için okunmadı. Adımlar, birbiriyle uyumlu olan açık erişimli Krishnan vd. (2021) ve Mukhametzyanov (2021) anlatımlarından alındı.',
+      en: 'The steps follow the open-access restatements by Krishnan et al. (2021) and Mukhametzyanov (2021), which agree with each other.',
+      tr: 'Adımlar, birbiriyle uyumlu iki açık erişimli anlatımı izler: Krishnan vd. (2021) ve Mukhametzyanov (2021).',
     },
   },
   steps: [
@@ -27,16 +27,16 @@ export const critic: MethodContent = {
       title: { en: 'Min-max normalization', tr: 'Min-maks normalizasyonu' },
       tex: String.raw`r_{ij} = \begin{cases} \dfrac{x_{ij} - x_j^{\min}}{x_j^{\max} - x_j^{\min}} & j \in J^{+} \\[2ex] \dfrac{x_j^{\max} - x_{ij}}{x_j^{\max} - x_j^{\min}} & j \in J^{-} \end{cases}`,
       note: {
-        en: 'J+ are the benefit criteria, J- the cost criteria. This is the "ideal point" transformation of the origin paper: every column ends up between 0 and 1, with 1 the best value.',
-        tr: 'J+ fayda, J- maliyet kriterleridir. Özgün makaledeki "ideal nokta" dönüşümüdür: her sütun 0 ile 1 arasına iner, 1 en iyi değerdir.',
+        en: 'J+ are benefit and J- cost criteria; the origin paper\'s "ideal point" transformation maps every column to 0-1, with 1 the best value.',
+        tr: 'J+ fayda, J- maliyet kriterleridir; özgün makaledeki "ideal nokta" dönüşümü her sütunu 0-1 aralığına indirir, 1 en iyi değerdir.',
       },
     },
     {
       title: { en: 'Contrast: standard deviation', tr: 'Kontrast: standart sapma' },
       tex: String.raw`\sigma_j = \sqrt{\frac{1}{m-1}\sum_{i=1}^{m} \left(r_{ij} - \bar r_j\right)^2}`,
       note: {
-        en: 'Sample standard deviation, as Excel STDEV. Using m instead of m - 1 scales every sigma by the same factor, so the weights do not change.',
-        tr: "Örneklem standart sapması (Excel'deki STDEV). m - 1 yerine m kullanmak her sigmayı aynı çarpanla ölçekler, ağırlıklar değişmez.",
+        en: 'Sample standard deviation (Excel STDEV); using m instead of m - 1 scales every sigma equally, so the weights do not change.',
+        tr: "Örneklem standart sapması (Excel'deki STDEV); m - 1 yerine m kullanmak her sigmayı aynı çarpanla ölçekler, ağırlıklar değişmez.",
       },
     },
     {
@@ -51,8 +51,8 @@ export const critic: MethodContent = {
       title: { en: 'Information content', tr: 'Bilgi miktarı' },
       tex: String.raw`C_j = \sigma_j \sum_{k=1}^{n} \left(1 - \rho_{jk}\right)`,
       note: {
-        en: 'Contrast times conflict. A criterion that is spread out and disagrees with the others carries more information.',
-        tr: 'Kontrast çarpı çatışma. Değerleri yayılan ve diğer kriterlerle çelişen kriter daha çok bilgi taşır.',
+        en: 'Contrast times conflict: a criterion that is spread out and disagrees with the others carries more information.',
+        tr: 'Kontrast ile çatışmanın çarpımı: değerleri yayılan ve diğer kriterlerle çelişen kriter daha çok bilgi taşır.',
       },
     },
     {
@@ -86,11 +86,10 @@ export const critic: MethodContent = {
   reference: {
     source: 'Krishnan, A.R.; Kasim, M.M.; Hamid, R.; Ghazali, M.F. (2021). A Modified CRITIC Method to Estimate the Objective Weights of Decision Criteria. Symmetry 13(6), 973',
     doi: '10.3390/sym13060973',
-    table: 'Table 1 (input), Table 2 and Table 5 (output)',
     match: 'match',
     note: {
-      en: 'Five smartphones and five criteria. Our weights match the published ones to 4 decimals (largest difference 4.6e-5) and the standard deviations match Table 2. A second check against the project\'s own Excel sheet agrees to 1e-12.',
-      tr: "Beş akıllı telefon ve beş kriter. Ağırlıklarımız yayımlanan değerlerle 4 basamakta örtüşüyor (en büyük fark 4,6e-5); standart sapmalar Tablo 2 ile aynı. Projenin kendi Excel dosyasıyla yapılan ikinci kontrol 1e-12 düzeyinde uyuşuyor.",
+      en: "Table 1 (input), Table 2 and Table 5 (output). Five smartphones and five criteria. Our weights match the published ones to 4 decimals (largest difference 4.6e-5) and the standard deviations match Table 2. A second check against the project's own Excel sheet agrees to 1e-12.",
+      tr: "Tablo 1 (girdi), Tablo 2 ve Tablo 5 (çıktı). Beş akıllı telefon ve beş kriter. Ağırlıklarımız yayımlanan değerlerle 4 basamakta örtüşüyor (en büyük fark 4,6e-5); standart sapmalar Tablo 2 ile aynı. Projenin kendi Excel dosyasıyla yapılan ikinci kontrol 1e-12 düzeyinde uyuşuyor.",
     },
   },
   sources: [
@@ -101,56 +100,50 @@ export const critic: MethodContent = {
   ],
   en: {
     summary:
-      'CRITIC gives more weight to a criterion when its values vary a lot across alternatives (contrast) and when it disagrees with the other criteria (conflict). Two criteria that tell the same story share weight instead of being counted twice. Use it when you have a filled decision matrix and no expert opinion about importance.',
+      'CRITIC gives more weight to criteria whose values vary a lot (contrast) and disagree with the other criteria (conflict). Use it when you have a filled decision matrix and no expert view on importance.',
     whenToUse: [
       'Weights must come from the data, not from people.',
-      'Criteria may be correlated (financial ratios, technical specifications) and you want redundancy to cost weight.',
-      'You want a method whose steps (standard deviation, correlation, information) are easy to show.',
+      'Correlated criteria (financial ratios, specifications) should share weight, not count twice.',
+      'You want steps that are easy to show: deviation, correlation, information.',
     ],
     whenNot: [
-      'There are very few alternatives: with 3 or fewer, correlations are +1, -1 or unstable.',
-      'The decision maker has clear views on importance. Use AHP, BWM or SWARA, or combine the two.',
-      'You expect to add or remove alternatives later: the weights change with the set.',
+      'With 3 or fewer alternatives, correlations are +1, -1 or unstable.',
+      'Clear expert views on importance: use AHP, BWM or SWARA, or combine.',
+      'You will add or remove alternatives: the weights change with the set.',
     ],
     inputs: [
-      'Decision matrix with m alternatives and n criteria, real numbers. At least 4 alternatives recommended, 2 is the technical minimum.',
+      'Decision matrix with m alternatives and n criteria, real numbers; negatives are fine, min-max handles them. At least 4 alternatives recommended, 2 is the technical minimum.',
       'Criterion type per column (benefit or cost). It is used only in the normalization.',
       'No parameters.',
     ],
     pitfalls: [
-      'A constant column cannot be normalized. We set its values to 0, which gives it weight 0, and show a warning.',
-      'If every column is constant there is no information at all; we fall back to equal weights and warn.',
+      'A constant column gets weight 0 with a warning; if every column is constant, the weights fall back to 1/n.',
       'With fewer than 4 alternatives the correlations jump around; we warn below 4.',
-      'Negative correlation raises weight: 1 - rho can reach 2, so strongly opposed criteria get large weights. This is by design in the origin method; Mukhametzyanov (2021) argues it is a flaw and proposes using |rho|.',
-      'Adding or removing an alternative changes min, max, spread and correlations, so the weights and their order can change.',
-      'Negative raw values are fine, min-max handles them.',
+      'Negative correlation raises weight (1 - rho can reach 2); Mukhametzyanov (2021) calls this a flaw and proposes |rho|.',
     ],
   },
   tr: {
     summary:
-      'CRITIC, bir kriterin değerleri alternatifler arasında çok değişiyorsa (kontrast) ve diğer kriterlerle çelişiyorsa (çatışma) o kritere daha çok ağırlık verir. Aynı şeyi söyleyen iki kriter ağırlığı paylaşır, iki kez sayılmaz. Dolu bir karar matrisin varsa ve önem konusunda uzman görüşü yoksa kullan.',
+      'CRITIC, değerleri çok değişen (kontrast) ve diğer kriterlerle çelişen (çatışma) kriterlere daha çok ağırlık verir. Dolu bir karar matrisiniz varsa ve önem konusunda uzman görüşü yoksa kullanın.',
     whenToUse: [
-      'Ağırlıklar kişilerden değil veriden gelmeli.',
-      'Kriterler birbiriyle ilişkili olabilir (finansal oranlar, teknik özellikler) ve tekrarlanan bilginin ağırlık kaybettirmesini istiyorsun.',
-      'Adımları (standart sapma, korelasyon, bilgi miktarı) adım adım gösterilebilen bir yöntem arıyorsun.',
+      'Ağırlıklar kişilerden değil, veriden gelmeli.',
+      'İlişkili kriterler (finansal oranlar, teknik özellikler) ağırlığı paylaşmalı, iki kez sayılmamalı.',
+      'Adımları kolay gösterilen bir yöntem istiyorsunuz: sapma, korelasyon, bilgi.',
     ],
     whenNot: [
-      'Alternatif sayısı çok az: 3 veya daha az alternatifte korelasyonlar +1, -1 çıkar ya da oynaktır.',
-      'Karar vericinin önem konusunda net görüşü var. AHP, BWM veya SWARA kullan ya da ikisini birleştir.',
-      'İleride alternatif ekleyip çıkarmayı bekliyorsun: ağırlıklar kümeyle birlikte değişir.',
+      'En fazla 3 alternatif: korelasyonlar +1, -1 çıkar ya da oynar.',
+      'Net uzman görüşü varsa AHP, BWM ya da SWARA; ikisini birleştirebilirsiniz.',
+      'Alternatif ekleyip çıkaracaksınız: ağırlıklar kümeyle birlikte değişir.',
     ],
     inputs: [
-      'm alternatif ve n kriterden oluşan karar matrisi, gerçek sayılar. En az 4 alternatif önerilir, teknik alt sınır 2.',
+      'm alternatif ve n kriterden oluşan karar matrisi, gerçek sayılar; negatif değerler sorun değil, min-maks bunları karşılar. En az 4 alternatif önerilir, teknik alt sınır 2.',
       'Her sütun için kriter türü (fayda ya da maliyet). Yalnız normalizasyonda kullanılır.',
       'Parametre yok.',
     ],
     pitfalls: [
-      'Sabit bir sütun normalize edilemez. Değerlerini 0 yaparız, bu da ağırlığını 0 yapar, ve uyarı gösteririz.',
-      'Bütün sütunlar sabitse hiç bilgi yoktur; eşit ağırlığa döner ve uyarırız.',
-      '4\'ten az alternatifte korelasyonlar sıçrar; 4\'ün altında uyarırız.',
-      'Negatif korelasyon ağırlığı artırır: 1 - rho 2\'ye kadar çıkabilir, bu yüzden birbirine çok zıt kriterler büyük ağırlık alır. Özgün yöntemde bu bilinçli bir tasarımdır; Mukhametzyanov (2021) bunu kusur sayar ve |rho| kullanmayı önerir.',
-      'Alternatif eklemek ya da çıkarmak min, maks, yayılım ve korelasyonları değiştirir; ağırlıklar ve sıraları değişebilir.',
-      'Negatif ham değerler sorun değildir, min-maks normalizasyonu bunları karşılar.',
+      'Sabit sütunun ağırlığı 0 alınır ve uyarı gösterilir; bütün sütunlar sabitse ağırlıklar 1/n olur.',
+      "4'ten az alternatifte korelasyonlar sıçrar; 4'ün altında uyarı gösterilir.",
+      "Negatif korelasyon ağırlığı artırır (1 - rho 2'ye kadar çıkar); Mukhametzyanov (2021) bunu kusur sayar ve |rho| önerir.",
     ],
   },
 }

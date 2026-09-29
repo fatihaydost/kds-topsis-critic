@@ -18,8 +18,8 @@ export const mabac: MethodContent = {
     venue: 'Expert Systems with Applications 42(6), 3016-3028',
     doi: '10.1016/j.eswa.2014.11.057',
     note: {
-      en: 'Paywalled, only the abstract was read. The steps follow Biswas & Das (2018).',
-      tr: 'Ücretli erişimde; yalnız özet okundu. Adımlar Biswas ve Das (2018) anlatımını izler.',
+      en: 'The steps follow Biswas & Das (2018); the origin is cited from its abstract.',
+      tr: 'Adımlar Biswas ve Das (2018) anlatımını izler; özgün makaleye özeti üzerinden atıf yapılır.',
     },
   },
   steps: [
@@ -71,18 +71,17 @@ export const mabac: MethodContent = {
       methodId: 'saw',
       text: {
         en: 'The origin compares MABAC with SAW, COPRAS, TOPSIS, MOORA and VIKOR (abstract).',
-        tr: 'Özgün makale MABAC\'ı SAW, COPRAS, TOPSIS, MOORA ve VIKOR ile karşılaştırır (özet).',
+        tr: "Özgün makale MABAC'ı SAW, COPRAS, TOPSIS, MOORA ve VIKOR ile karşılaştırır (özet).",
       },
     },
   ],
   reference: {
     source: 'Biswas, T.K.; Das, M.C. (2018). Selection of hybrid vehicle for green environment using multi-attributive border approximation area comparison method. Management Science Letters 8, 121-130',
     doi: '10.5267/j.msl.2017.11.004',
-    table: 'Tables 2-7',
     match: 'match',
     note: {
-      en: 'Nine hybrid vehicles, five criteria. G, Q and S match the paper\'s 9 printed digits (difference below 1e-6). Three of the five weights are read from Table 4, because the paper shows them only in a pie chart. pyDecision ignores the weights and does not match.',
-      tr: "Dokuz hibrit araç, beş kriter. G, Q ve S makalenin basılı 9 basamağıyla örtüşüyor (fark 1e-6'nın altında). Beş ağırlığın üçü Tablo 4'ten okundu, çünkü makale bunları yalnız pasta grafikte veriyor. pyDecision ağırlıkları yok sayar ve örtüşmez.",
+      en: "Published example (Tables 2-7); this method is not computed here yet, only recomputed during research. Nine hybrid vehicles, five criteria. G, Q and S match the paper's 9 printed digits (difference below 1e-6). Three of the five weights are read from Table 4, because the paper shows them only in a pie chart. pyDecision ignores the weights and does not match.",
+      tr: "Yayımlanmış örnek (Tablo 2-7); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. Dokuz hibrit araç, beş kriter. G, Q ve S makalenin basılı 9 basamağıyla örtüşüyor (fark 1e-6'nın altında). Beş ağırlığın üçü Tablo 4'ten okundu, çünkü makale bunları yalnız pasta grafikte veriyor. pyDecision ağırlıkları yok sayar ve örtüşmez.",
     },
   },
   sources: [
@@ -93,40 +92,44 @@ export const mabac: MethodContent = {
   ],
   en: {
     summary:
-      'MABAC builds a "border" value for each criterion (the geometric mean over all alternatives) and measures how far above or below that border each alternative lies. Alternatives with most criteria in the upper area score highest. The score is positive above the border and negative below it.',
+      'MABAC sets a border per criterion (the geometric mean of all alternatives) and measures how far above or below it each alternative lies. The score is positive above the border, negative below.',
     whenToUse: [
-      'You want a signed score: above or below a border derived from the data.',
-      'Measurement units may change: min-max normalization is not affected by a change of unit or zero point.',
+      'You want a signed score: above or below a data-derived border.',
+      'Units may change: min-max ignores changes of unit or zero point.',
     ],
     whenNot: [
       'A criterion is constant: min-max is undefined for it.',
       'The alternative set will change: the border depends on all alternatives.',
     ],
-    inputs: ['Decision matrix, criterion type per column, weights summing to 1.', 'No parameters.'],
+    inputs: [
+      'Decision matrix, criterion type per column, weights summing to 1.',
+      'No parameters.',
+    ],
     pitfalls: [
-      'A constant column divides by zero; set t = 0 (then q = 0 for that criterion).',
-      'v is at least w, so the geometric mean is always defined; a zero weight simply removes the column.',
+      'A constant column divides by zero; set t = 0, so q = 0 for that criterion.',
+      'v is at least w, so the geometric mean is always defined; a zero weight removes the column.',
       'Rank reversal when the alternative set changes.',
-      'pyDecision\'s mabac_method has no weights argument and uses 1/m instead.',
     ],
   },
   tr: {
     summary:
-      'MABAC her kriter için bir "sınır" değeri kurar (tüm alternatiflerin geometrik ortalaması) ve her alternatifin bu sınırın ne kadar üstünde ya da altında kaldığını ölçer. Kriterlerinin çoğu üst bölgede olan alternatif en yüksek skoru alır. Skor sınırın üstünde pozitif, altında negatiftir.',
+      'MABAC her kriter için bir sınır kurar (tüm alternatiflerin geometrik ortalaması) ve her alternatifin bu sınırın ne kadar üstünde ya da altında kaldığını ölçer. Skor sınırın üstünde pozitif, altında negatiftir.',
     whenToUse: [
-      'Veriden türetilen bir sınırın üstünde ya da altında olmayı gösteren işaretli bir skor istiyorsun.',
-      'Ölçü birimleri değişebilir: min-maks normalizasyonu birim ya da sıfır noktası değişikliğinden etkilenmez.',
+      'Veriden türetilen bir sınırın üstünü ya da altını gösteren işaretli skor.',
+      'Birimler değişebilir: min-maks, birim ve sıfır noktası değişikliğinden etkilenmez.',
     ],
     whenNot: [
       'Bir kriter sabit: min-maks o kriter için tanımsızdır.',
       'Alternatif kümesi değişecek: sınır tüm alternatiflere bağlıdır.',
     ],
-    inputs: ['Karar matrisi, her sütun için kriter türü, toplamı 1 olan ağırlıklar.', 'Parametre yok.'],
+    inputs: [
+      'Karar matrisi, her sütun için kriter türü, toplamı 1 olan ağırlıklar.',
+      'Parametre yok.',
+    ],
     pitfalls: [
-      'Sabit bir sütun sıfıra böler; t = 0 al (o kriter için q = 0 olur).',
+      'Sabit sütun sıfıra böler; t = 0 alınır, o kriter için q = 0 olur.',
       'v en az w kadardır, bu yüzden geometrik ortalama her zaman tanımlıdır; sıfır ağırlık sütunu devreden çıkarır.',
       'Alternatif kümesi değişince sıralama tersine dönebilir.',
-      "pyDecision'daki mabac_method ağırlık almaz, onun yerine 1/m kullanır.",
     ],
   },
 }

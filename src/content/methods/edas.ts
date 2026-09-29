@@ -24,8 +24,8 @@ export const edas: MethodContent = {
       title: { en: 'Positive and negative distance from average', tr: 'Ortalamadan pozitif ve negatif uzaklık' },
       tex: String.raw`PDA_{ij} = \frac{\max\left(0,\ x_{ij} - AV_j\right)}{AV_j}, \qquad NDA_{ij} = \frac{\max\left(0,\ AV_j - x_{ij}\right)}{AV_j}`,
       note: {
-        en: 'For benefit criteria. For cost criteria the two numerators swap.',
-        tr: 'Fayda kriterleri için. Maliyet kriterlerinde iki pay yer değiştirir.',
+        en: 'For benefit criteria; for cost criteria the two numerators swap.',
+        tr: 'Fayda kriterleri için; maliyet kriterlerinde iki pay yer değiştirir.',
       },
     },
     {
@@ -78,11 +78,10 @@ export const edas: MethodContent = {
   reference: {
     source: 'Keshavarz Ghorabaee, M.; Zavadskas, E.K.; Olfat, L.; Turskis, Z. (2015). Multi-Criteria Inventory Classification Using a New Method of Evaluation Based on Distance from Average Solution (EDAS). Informatica 26(3), 435-451',
     doi: '10.15388/Informatica.2015.57',
-    table: 'Tables 1-2 (47 items), Tables 5-7 (10 x 7, seven weight sets)',
     match: 'match',
     note: {
-      en: 'Inventory classification with 47 items and 3 criteria. AS matches the printed 2 decimals (largest gap 0.0052, at the edge of rounding; the paper rounded intermediate values). In the 10 x 7 example our ranks equal the published EDAS ranks in 7 of 7 weight sets.',
-      tr: "47 kalem ve 3 kriterle stok sınıflandırması. AS basılı 2 basamakta örtüşüyor (en büyük fark 0,0052, yuvarlama sınırında; makale ara değerleri yuvarlamış). 10 x 7 örnekte sıralarımız yayımlanan EDAS sıralarıyla 7 ağırlık setinin 7'sinde aynı.",
+      en: 'Published example (Tables 1-2 (47 items), Tables 5-7 (10 x 7, seven weight sets)); this method is not computed here yet, only recomputed during research. Inventory classification with 47 items and 3 criteria. AS matches the printed 2 decimals (largest gap 0.0052, at the edge of rounding; the paper rounded intermediate values). In the 10 x 7 example the ranks equal the published EDAS ranks in 7 of 7 weight sets.',
+      tr: "Yayımlanmış örnek (Tablo 1-2 (47 kalem), Tablo 5-7 (10 x 7, yedi ağırlık seti)); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. 47 kalem ve 3 kriterle stok sınıflandırması. AS basılı 2 basamakta örtüşüyor (en büyük fark 0,0052, yuvarlama sınırında; makale ara değerleri yuvarlamış). 10 x 7 örnekte sıralar yayımlanan EDAS sıralarıyla 7 ağırlık setinin 7'sinde aynı.",
     },
   },
   sources: [
@@ -94,14 +93,14 @@ export const edas: MethodContent = {
   ],
   en: {
     summary:
-      'EDAS compares every alternative with the average of all alternatives: how much better than average it is (positive distance) and how much worse (negative distance), weighted by criterion importance. It suits cases where an "average performer" is a meaningful benchmark and no natural ideal point exists.',
+      'EDAS scores each alternative by its weighted distance above and below the average alternative. It suits cases where the average is a meaningful benchmark and no natural ideal exists.',
     whenToUse: [
       'Many alternatives, for example inventory (ABC) classification.',
       'No natural ideal point.',
-      'You want less sensitivity to one extreme alternative than ideal-point methods give.',
+      'Less sensitivity to one extreme alternative than ideal-point methods.',
     ],
     whenNot: [
-      'A criterion has an average of 0 or below: the distances divide by the average.',
+      'A criterion average is 0 or below: distances divide by it.',
       'The average itself has no meaning (ordinal codes).',
       'The alternative set will change: the average moves with it.',
     ],
@@ -111,24 +110,23 @@ export const edas: MethodContent = {
       'No parameters.',
     ],
     pitfalls: [
-      'AV = 0 divides by zero; a negative AV flips the meaning. Require positive data or shift columns and say so.',
-      'If no alternative is above average anywhere (max SP = 0) or none is below (max SN = 0), NSP or NSN is undefined; we set NSP = 0 or NSN = 1 and flag it.',
-      'A constant column contributes nothing, which is fine.',
+      'AV = 0 divides by zero and a negative AV flips the meaning; use positive data or a declared shift.',
+      'If no alternative is above (max SP = 0) or below (max SN = 0) average, NSP or NSN is undefined.',
       'Rank reversal when alternatives are added or removed.',
     ],
   },
   tr: {
     summary:
-      'EDAS her alternatifi tüm alternatiflerin ortalamasıyla karşılaştırır: ortalamadan ne kadar iyi (pozitif uzaklık) ve ne kadar kötü (negatif uzaklık) olduğunu kriter ağırlıklarıyla toplar. "Ortalama performans" anlamlı bir referanssa ve doğal bir ideal nokta yoksa uygundur.',
+      'EDAS her alternatifi ortalama alternatifin üstündeki ve altındaki ağırlıklı uzaklığıyla puanlar. Ortalama anlamlı bir referanssa ve doğal bir ideal nokta yoksa uygundur.',
     whenToUse: [
-      'Alternatif sayısı fazla, örneğin stok (ABC) sınıflandırması.',
+      'Alternatif çok, örneğin stok (ABC) sınıflandırması.',
       'Doğal bir ideal nokta yok.',
-      'Tek bir uç alternatife ideal nokta yöntemlerinden daha az duyarlı bir sonuç istiyorsun.',
+      'Tek bir uç alternatife ideal nokta yöntemlerinden daha az duyarlılık istiyorsunuz.',
     ],
     whenNot: [
-      "Bir kriterin ortalaması 0 ya da altında: uzaklıklar ortalamaya bölünür.",
+      'Bir kriterin ortalaması 0 ya da altında: uzaklıklar ortalamaya bölünür.',
       'Ortalamanın kendisi anlamsız (sıralı kodlar).',
-      'Alternatif kümesi değişecek: ortalama da onunla birlikte kayar.',
+      'Alternatif kümesi değişecek: ortalama da onunla kayar.',
     ],
     inputs: [
       'Karar matrisi, pozitif değerler önerilir.',
@@ -136,9 +134,8 @@ export const edas: MethodContent = {
       'Parametre yok.',
     ],
     pitfalls: [
-      'AV = 0 sıfıra bölme demektir; negatif AV anlamı tersine çevirir. Pozitif veri iste ya da sütunları kaydırıp bunu belirt.',
-      'Hiçbir alternatif hiçbir yerde ortalamanın üstünde değilse (maks SP = 0) ya da altında değilse (maks SN = 0) NSP veya NSN tanımsızdır; NSP = 0 ya da NSN = 1 alır ve işaretleriz.',
-      'Sabit bir sütun hiçbir katkı yapmaz, bu sorun değildir.',
+      'AV = 0 sıfıra bölme demektir, negatif AV anlamı tersine çevirir; pozitif veri ya da açıkça belirtilen bir kaydırma kullanın.',
+      'Hiçbir alternatif ortalamanın üstünde (maks SP = 0) ya da altında (maks SN = 0) değilse NSP veya NSN tanımsızdır.',
       'Alternatif eklenip çıkarılınca sıralama tersine dönebilir.',
     ],
   },

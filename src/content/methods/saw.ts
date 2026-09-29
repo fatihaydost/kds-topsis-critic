@@ -14,8 +14,8 @@ export const saw: MethodContent = {
     title: 'An approximate measure of value',
     venue: 'Operations Research 2, 172-180',
     note: {
-      en: 'A classical method with no single origin paper. Usually traced to Churchman & Ackoff (1954) and MacCrimmon (1968); textbook statement in Hwang & Yoon (1981). None was opened and no DOI was checked. The formulas and the example follow Podvezko (2011).',
-      tr: 'Tek bir özgün makalesi olmayan klasik bir yöntem. Genelde Churchman ve Ackoff (1954) ile MacCrimmon (1968) kaynaklarına dayandırılır; ders kitabı anlatımı Hwang ve Yoon (1981). Hiçbiri açılmadı, DOI doğrulanmadı. Formüller ve örnek Podvezko (2011) anlatımını izler.',
+      en: 'A classical method with no single origin paper, usually traced to Churchman & Ackoff (1954) and MacCrimmon (1968), with the textbook statement in Hwang & Yoon (1981). The formulas and the example follow Podvezko (2011).',
+      tr: 'Tek bir özgün makalesi olmayan klasik bir yöntem; genelde Churchman ve Ackoff (1954) ile MacCrimmon (1968) kaynaklarına dayandırılır, ders kitabı anlatımı Hwang ve Yoon (1981). Formüller ve örnek Podvezko (2011) anlatımını izler.',
     },
   },
   steps: [
@@ -23,8 +23,8 @@ export const saw: MethodContent = {
       title: { en: 'Linear max normalization', tr: 'Doğrusal maks normalizasyonu' },
       tex: String.raw`r_{ij} = \begin{cases} \dfrac{x_{ij}}{\max_i x_{ij}} & j \in J^{+} \\[2ex] \dfrac{\min_i x_{ij}}{x_{ij}} & j \in J^{-} \end{cases}`,
       note: {
-        en: 'Default. Sum and min-max normalization are options; they give different scores and sometimes different ranks.',
-        tr: 'Varsayılan. Toplam ve min-maks normalizasyonu seçenektir; farklı skorlar, bazen farklı sıralamalar verirler.',
+        en: 'Default; sum and min-max normalization are options that give different scores and sometimes different ranks.',
+        tr: 'Varsayılan; toplam ve min-maks normalizasyonu farklı skorlar, bazen farklı sıralamalar veren seçeneklerdir.',
       },
     },
     {
@@ -49,7 +49,7 @@ export const saw: MethodContent = {
       methodId: 'waspas',
       text: {
         en: 'SAW is WASPAS with lambda = 1, and COPRAS with only benefit criteria is SAW with sum normalization.',
-        tr: 'SAW, lambda = 1 olan WASPAS\'tır; yalnız fayda kriterli COPRAS da toplam normalizasyonlu SAW\'dır.',
+        tr: "SAW, lambda = 1 olan WASPAS'tır; yalnız fayda kriterli COPRAS da toplam normalizasyonlu SAW'dır.",
       },
     },
     {
@@ -70,11 +70,10 @@ export const saw: MethodContent = {
   reference: {
     source: 'Podvezko, V. (2011). The Comparative Analysis of MCDA Methods SAW and COPRAS. Inžinerinė ekonomika - Engineering Economics 22(2), 134-146',
     doi: '10.5755/j01.ee.22.2.310',
-    table: 'Tables 1-3 and 5-6',
     match: 'partial',
     note: {
-      en: 'Four countries, five criteria. Table 2 prints Lithuania\'s salary ratio as 0.599 instead of 306/501 = 0.611, and Table 3 uses the typo, so S(Lithuania) differs by 0.0024; the ranking is the same. The sum-normalized variant (Table 6) matches. Ranks also match Keshavarz Ghorabaee et al. (2015) in 7 of 7 weight sets.',
-      tr: "Dört ülke, beş kriter. Tablo 2, Litvanya'nın maaş oranını 306/501 = 0,611 yerine 0,599 basmış ve Tablo 3 bu hatalı değeri kullanmış; bu yüzden S(Litvanya) 0,0024 farklı, sıralama aynı. Toplam normalizasyonlu varyant (Tablo 6) örtüşüyor. Sıralamalar Keshavarz Ghorabaee vd. (2015) ile 7 ağırlık setinin 7'sinde aynı.",
+      en: "Published example (Tables 1-3 and 5-6); this method is not computed here yet, only recomputed during research. Four countries, five criteria. Table 2 prints Lithuania's salary ratio as 0.599 instead of 306/501 = 0.611, and Table 3 uses the typo, so S(Lithuania) differs by 0.0024; the ranking is the same. The sum-normalized variant (Table 6) matches. Ranks also match Keshavarz Ghorabaee et al. (2015) in 7 of 7 weight sets.",
+      tr: "Yayımlanmış örnek (Tablo 1-3 ve 5-6); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. Dört ülke, beş kriter. Tablo 2, Litvanya'nın maaş oranını 306/501 = 0,611 yerine 0,599 basmış ve Tablo 3 bu hatalı değeri kullanmış; bu yüzden S(Litvanya) 0,0024 farklı, sıralama aynı. Toplam normalizasyonlu varyant (Tablo 6) örtüşüyor. Sıralamalar Keshavarz Ghorabaee vd. (2015) ile 7 ağırlık setinin 7'sinde aynı.",
     },
   },
   sources: [
@@ -86,11 +85,15 @@ export const saw: MethodContent = {
   ],
   en: {
     summary:
-      'SAW turns every criterion into a 0-1 "higher is better" score, multiplies it by the criterion weight and adds everything up. It is the most transparent method: every point of the final score can be traced to one criterion. Choose it when trade-offs between criteria are genuinely linear.',
-    whenToUse: ['As a baseline, for explanations and sanity checks.', 'Data on ratio scales.'],
+      'SAW turns every criterion into a 0-1 score, multiplies it by the weight and adds everything up. It is the most transparent method: every point traces back to one criterion.',
+    whenToUse: [
+      'Trade-offs between criteria are genuinely linear.',
+      'As a baseline, for explanations and sanity checks.',
+      'Data on ratio scales.',
+    ],
     whenNot: [
       'A terrible value must not be offset: SAW compensates fully.',
-      'You cannot fix the normalization: max, sum and min-max give different scores and sometimes different ranks.',
+      'The normalization is open: max, sum and min-max can rank differently.',
     ],
     inputs: [
       'Decision matrix with positive values.',
@@ -105,11 +108,15 @@ export const saw: MethodContent = {
   },
   tr: {
     summary:
-      'SAW her kriteri 0-1 arası "ne kadar yüksekse o kadar iyi" bir skora çevirir, kriter ağırlığıyla çarpar ve hepsini toplar. En şeffaf yöntemdir: nihai skordaki her puan tek bir kritere kadar izlenebilir. Kriterler arası ödünleşimler gerçekten doğrusal ise tercih et.',
-    whenToUse: ['Karşılaştırma tabanı, açıklama ve sağlama kontrolü için.', 'Oran ölçekli veri.'],
+      'SAW her kriteri 0-1 arası bir skora çevirir, ağırlıkla çarpar ve hepsini toplar. En şeffaf yöntemdir: her puan tek bir kritere kadar izlenebilir.',
+    whenToUse: [
+      'Kriterler arası ödünleşimler gerçekten doğrusal.',
+      'Karşılaştırma tabanı, açıklama ve sağlama kontrolü için.',
+      'Oran ölçekli veri.',
+    ],
     whenNot: [
       'Çok kötü bir değer telafi edilmemeli: SAW tam telafi eder.',
-      'Normalizasyonu sabitleyemiyorsun: maks, toplam ve min-maks farklı skorlar, bazen farklı sıralamalar verir.',
+      'Normalizasyon belli değil: maks, toplam ve min-maks farklı sıralayabilir.',
     ],
     inputs: [
       'Pozitif değerli karar matrisi.',

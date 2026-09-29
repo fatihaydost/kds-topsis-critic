@@ -40,6 +40,34 @@ function allTex(): { path: string; tex: string }[] {
   return out
 }
 
+/** Whitespace-separated tokens that contain a letter or a digit. */
+const wordCount = (s: string): number => s.split(/\s+/).filter((t) => /[\p{L}\p{N}]/u.test(t)).length
+
+/** Sentence split used by every length rule: a stop followed by a capital or a quote. */
+const sentencesOf = (s: string): string[] => s.split(/(?<=[.?!])\s+(?=[A-ZÇĞİÖŞÜ"])/u).filter(Boolean)
+
+/**
+ * Heuristic for the informal "sen" address in Turkish copy (owner decision 29.09: address the reader as "siz").
+ * Flags "sen/senin/sana...", 2nd person singular endings (-yorsun, aorist -irsin/-arsın, -malısın, conditional
+ * -san/-sen) and bare imperatives that the old copy used. Real words that only look like these go in SEN_EXCEPTIONS.
+ */
+const SEN_PRONOUNS = new Set(['sen', 'senin', 'sana', 'seni', 'sende', 'senden', 'seninle', 'kendin', 'kendine'])
+const SEN_IMPERATIVES = new Set([
+  'kullan', 'kullanma', 'göster', 'raporla', 'seç', 'bak', 'oku', 'hesapla', 'belirle', 'sırala', 'değiştir',
+  'ölçekle', 'karşılaştır', 'iste', 'uyar', 'al', 'ekle', 'çalıştır', 'dene', 'gir', 'bas', 'düşün', 'çevir', 'belirt',
+])
+const SEN_EXCEPTIONS = new Set(['kesin', 'insan', 'nisan'])
+function senForms(text: string): string[] {
+  const words = (text.toLocaleLowerCase('tr').match(/\p{L}+/gu) ?? []).filter((w) => !SEN_EXCEPTIONS.has(w))
+  return words.filter(
+    (w) =>
+      SEN_PRONOUNS.has(w) ||
+      SEN_IMPERATIVES.has(w) ||
+      // -yorsun, aorist -irsin/-arsın, -malısın, conditional -san/-sen. Plain -sin also ends genitives (matrisin), so it is not flagged alone.
+      /(yors[ıiuü]n|[ıiuüae]rs[ıiuü]n|m[ae]l[ıi]s[ıi]n|y?s[ae]n)$/u.test(w),
+  )
+}
+
 const EM_DASH = '—'
 const EN_DASH = '–'
 const EMOJI = /\p{Extended_Pictographic}/u
@@ -95,9 +123,7 @@ describe('method content', () => {
     it.each(['en', 'tr'] as const)('is filled in %s', (lang) => {
       const t: LocalizedText = m[lang]
       expect(t.summary.trim().length).toBeGreaterThan(40)
-      const sentences = t.summary.split(/(?<=[.?!])\s+(?=[A-ZÇĞİÖŞÜ"])/u).filter(Boolean)
-      expect(sentences.length, `summary sentences: ${t.summary}`).toBeGreaterThanOrEqual(2)
-      expect(sentences.length, `summary sentences: ${t.summary}`).toBeLessThanOrEqual(4)
+      expect(sentencesOf(t.summary).length, `summary sentences: ${t.summary}`).toBeLessThanOrEqual(2)
       for (const key of ['whenToUse', 'whenNot', 'inputs', 'pitfalls'] as const) {
         expect(t[key].length, key).toBeGreaterThan(0)
         for (const s of t[key]) expect(s.trim(), key).not.toBe('')
@@ -127,6 +153,34 @@ describe('method content', () => {
       for (const c of m.combinedWith) if (c.methodId) expect(isMethodId(c.methodId), c.methodId).toBe(true)
     })
 
+    it.each(['en', 'tr'] as const)('keeps the %s copy short (DESIGN.md Copy)', (lang) => {
+      const t: LocalizedText = m[lang]
+      expect(wordCount(t.summary), `summary: ${t.summary}`).toBeLessThanOrEqual(35)
+      for (const key of ['whenToUse', 'whenNot'] as const) {
+        expect(t[key].length, key).toBeLessThanOrEqual(3)
+        for (const s of t[key]) expect(wordCount(s), `${key}: ${s}`).toBeLessThanOrEqual(12)
+      }
+      expect(t.pitfalls.length, 'pitfalls').toBeLessThanOrEqual(3)
+      for (const s of m.steps) if (s.note) expect(sentencesOf(s.note[lang]), `step note: ${s.note[lang]}`).toHaveLength(1)
+    })
+
+    it('keeps the same number of items in both languages', () => {
+      for (const key of ['whenToUse', 'whenNot', 'inputs', 'pitfalls'] as const) expect(m.tr[key].length, key).toBe(m.en[key].length)
+    })
+
+    it('says in the reference note whether this site computes the method', () => {
+      const pending = { en: /not computed here yet/i, tr: /henüz hesaplanmıyor/i }
+      for (const lang of ['en', 'tr'] as const) {
+        const note = m.reference.note[lang]
+        if (m.status === 'research') expect(note, `${lang}: ${note}`).toMatch(pending[lang])
+        else expect(note, `${lang}: ${note}`).not.toMatch(pending[lang])
+      }
+    })
+
+    it('keeps table names in the localized note, not in the language-neutral table field', () => {
+      expect(m.reference.table).toBeUndefined()
+    })
+
     it('flattens to one language', () => {
       const v = localizeMethod(m, 'tr')
       expect(v.summary).toBe(m.tr.summary)
@@ -150,6 +204,16 @@ describe('step content', () => {
       expect(stepContent[k].tr.trim(), k).not.toBe('')
     }
   })
+
+  it('explains every step in one short line', () => {
+    for (const k of STEP_KEYS) {
+      const c = stepContent[k]
+      for (const text of [c.en, c.tr, ...(c.edgeCase ? [c.edgeCase.en, c.edgeCase.tr] : [])]) {
+        expect(wordCount(text), `${k}: ${text}`).toBeLessThanOrEqual(14)
+        expect(sentencesOf(text), `${k}: ${text}`).toHaveLength(1)
+      }
+    }
+  })
 })
 
 describe('guide', () => {
@@ -166,6 +230,17 @@ describe('guide', () => {
       ...decisionTree.nodes.flatMap((n) => n.options.flatMap((o) => o.recommend?.methodIds ?? [])),
     ]
     for (const id of ids) expect(isMethodId(id), id).toBe(true)
+  })
+
+  it('asks short questions and gives one-sentence reasons', () => {
+    for (const n of decisionTree.nodes) {
+      for (const lang of ['en', 'tr'] as const) {
+        expect(wordCount(n.question[lang]), `${n.id}: ${n.question[lang]}`).toBeLessThanOrEqual(12)
+        for (const o of n.options) {
+          if (o.recommend) expect(sentencesOf(o.recommend.reason[lang]), `${n.id}.${o.id}`).toHaveLength(1)
+        }
+      }
+    }
   })
 
   it('has a consistent co-mention table', () => {
@@ -232,6 +307,19 @@ describe('copy rules', () => {
       expect(text.includes(EN_DASH), `en dash in ${path}`).toBe(false)
     }
     for (const { path, tex } of allTex()) expect(/--/.test(tex), `TeX dash in ${path}`).toBe(false)
+  })
+
+  it('addresses the reader as "siz" in Turkish', () => {
+    const turkish = visible.filter((s) => /(^|\.)tr(\.|\[|$)/.test(s.path))
+    expect(turkish.length).toBeGreaterThan(500)
+    for (const { path, text } of turkish) expect(senForms(text), `${path}: ${text}`).toEqual([])
+  })
+
+  it('flags the informal forms it is meant to catch', () => {
+    expect(senForms('Kriter önemini uzmanlar belirliyorsa AHP\'yi seçin.')).toEqual([])
+    expect(senForms('Veriniz varsa kesin bir sıralama kullanın; matrisin tersini alın.')).toEqual([])
+    for (const bad of ['AHP kullan.', 'Bunu istiyorsun.', 'Verin varsa sana uyar.', 'Çalıştırdıysan göster.', 'Bunu yapabilirsin.', 'Seçmelisin.'])
+      expect(senForms(bad), bad).not.toEqual([])
   })
 
   it('has no emoji', () => {

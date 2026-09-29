@@ -17,19 +17,19 @@ export const swara: MethodContent = {
   },
   steps: [
     {
-      title: { en: 'Sort and state the steps', tr: 'Sırala ve adımları belirt' },
+      title: { en: 'Sort and state the steps', tr: 'Sıralama ve adımlar' },
       tex: String.raw`k_1 = 1, \qquad k_j = s_j + 1 \quad (j \ge 2)`,
       note: {
-        en: 'Criteria sorted from most to least important. s_j says how much more important criterion j-1 is than criterion j, as a ratio (0.15 = 15%).',
-        tr: 'Kriterler en önemliden en önemsize sıralıdır. s_j, j-1. kriterin j. kriterden ne kadar önemli olduğunu oran olarak söyler (0,15 = %15).',
+        en: 'Criteria sorted from most to least important, and s_j says how much more important criterion j-1 is than criterion j, as a ratio (0.15 = 15%).',
+        tr: 'Kriterler en önemliden en önemsize sıralıdır; s_j, j-1. kriterin j. kriterden ne kadar önemli olduğunu oran olarak söyler (0,15 = %15).',
       },
     },
     {
       title: { en: 'Recalculated weights', tr: 'Yeniden hesaplanan ağırlıklar' },
       tex: String.raw`q_1 = 1, \qquad q_j = \frac{q_{j-1}}{k_j} \quad (j \ge 2)`,
       note: {
-        en: 'The origin paper calls this w and the final weight q; we swap the letters to match the other methods.',
-        tr: 'Özgün makale buna w, nihai ağırlığa q der; diğer yöntemlerle uyum için harfleri değiştirdik.',
+        en: 'The origin paper calls this w and the final weight q; the letters are swapped here to match the other methods.',
+        tr: 'Özgün makale buna w, nihai ağırlığa q der; diğer yöntemlerle uyum için harfler burada yer değiştirdi.',
       },
     },
     {
@@ -67,11 +67,10 @@ export const swara: MethodContent = {
   reference: {
     source: 'Keršulienė, V.; Zavadskas, E.K.; Turskis, Z. (2010). Selection of rational dispute resolution method by applying new step-wise weight assessment ratio analysis (SWARA). Journal of Business Economics and Management 11(2), 243-258',
     doi: '10.3846/jbem.2010.12',
-    table: 'Table 1',
     match: 'match',
     note: {
-      en: 'Six criteria for choosing a dispute resolution method. k, q and w match the printed 2 decimals (largest gap 0.0028 on w).',
-      tr: 'Uyuşmazlık çözüm yöntemi seçimi için altı kriter. k, q ve w basılı 2 basamakta örtüşüyor (w üzerinde en büyük fark 0,0028).',
+      en: 'Published example (Table 1); this method is not computed here yet, only recomputed during research. Six criteria for choosing a dispute resolution method. k, q and w match the printed 2 decimals (largest gap 0.0028 on w).',
+      tr: 'Yayımlanmış örnek (Tablo 1); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. Uyuşmazlık çözüm yöntemi seçimi için altı kriter. k, q ve w basılı 2 basamakta örtüşüyor (w üzerinde en büyük fark 0,0028).',
     },
   },
   sources: [
@@ -80,11 +79,11 @@ export const swara: MethodContent = {
   ],
   en: {
     summary:
-      'In SWARA you first sort the criteria from most to least important. Then, going down the list, you say how much less important each criterion is than the one just above it (for example 0.15 = 15% less important). The method chains these steps into weights. Pick it when experts find ranking plus "a bit less or much less important" easier than full pairwise comparisons.',
+      'SWARA sorts the criteria by importance, then asks how much less important each one is than the one above (0.15 = 15% less). It chains these steps into weights with only n - 1 judgements.',
     whenToUse: [
-      'Experts can agree on a ranking and on the step sizes.',
-      'You want only n - 1 judgements.',
-      'No consistency check is needed: SWARA is consistent by construction.',
+      'Experts agree on a ranking and on the step sizes.',
+      'Ranking plus "a bit or much less" is easier than pairwise.',
+      'No consistency check needed: SWARA is consistent by construction.',
     ],
     whenNot: [
       'The ranking itself is disputed: SWARA takes it as given.',
@@ -95,33 +94,31 @@ export const swara: MethodContent = {
       'For each criterion after the first, a comparative importance s of 0 or more (0.15 = 15%). With several experts, average s first.',
     ],
     pitfalls: [
-      'Order matters: the same s values in another order give other weights. Sort first.',
-      's = 0 means "as important as the one above", which gives the same weight; allowed.',
-      'A negative s would make a lower-ranked criterion more important and contradicts the ranking; rejected.',
+      'Order matters: the same s values in another order give other weights, so sort first.',
+      'A negative s would make a lower-ranked criterion more important and contradicts the ranking; it is rejected (s = 0 is allowed).',
       'Large steps compound quickly (s = 1 means "twice as important"); show q.',
     ],
   },
   tr: {
     summary:
-      "SWARA'da önce kriterleri en önemliden en önemsize sıralarsın. Sonra listede aşağı inerken her kriterin hemen üstündekinden ne kadar daha az önemli olduğunu söylersin (örneğin 0,15 = %15 daha az önemli). Yöntem bu adımları zincirleyerek ağırlıklara çevirir. Uzmanlar tam ikili karşılaştırma yerine sıralama ve \"biraz ya da çok daha az önemli\" demeyi daha kolay buluyorsa seç.",
+      'SWARA kriterleri önem sırasına dizer, sonra her kriterin üstündekinden ne kadar daha az önemli olduğunu sorar (0,15 = %15 daha az). Bu adımları zincirleyerek yalnız n - 1 yargıyla ağırlık üretir.',
     whenToUse: [
-      'Uzmanlar bir sıralamada ve adım büyüklüklerinde uzlaşabiliyor.',
-      'Yalnız n - 1 yargı istiyorsun.',
+      'Uzmanlar sıralamada ve adım büyüklüklerinde uzlaşabiliyor.',
+      'Sıralama ve "biraz ya da çok daha az" demek ikili karşılaştırmadan kolay.',
       'Tutarlılık denetimi gerekmiyor: SWARA yapısı gereği tutarlıdır.',
     ],
     whenNot: [
       'Sıralamanın kendisi tartışmalı: SWARA onu veri kabul eder.',
-      'Tutarlılık göstergesi gerekiyor: AHP ya da BWM kullan.',
+      'Tutarlılık göstergesi gerekiyor: AHP ya da BWM kullanın.',
     ],
     inputs: [
       'Önem sırasına göre azalan biçimde dizilmiş kriterler.',
       'İlkinden sonraki her kriter için 0 ya da daha büyük bir karşılaştırmalı önem s (0,15 = %15). Birden çok uzman varsa önce s değerlerinin ortalaması alınır.',
     ],
     pitfalls: [
-      'Sıra önemlidir: aynı s değerleri başka bir sırada başka ağırlıklar verir. Önce sırala.',
-      's = 0 "üstündeki kadar önemli" demektir ve aynı ağırlığı verir; izin verilir.',
-      'Negatif s, alt sıradaki kriteri daha önemli yapar ve sıralamayla çelişir; reddedilir.',
-      'Büyük adımlar hızla katlanır (s = 1 "iki kat önemli" demektir); q değerlerini göster.',
+      'Sıra önemlidir: aynı s değerleri başka bir sırada başka ağırlıklar verir, önce sıralayın.',
+      'Negatif s alt sıradaki kriteri daha önemli yapar ve sıralamayla çelişir; reddedilir (s = 0 serbesttir).',
+      'Büyük adımlar hızla katlanır (s = 1 "iki kat önemli" demektir); q değerlerini gösterin.',
     ],
   },
 }

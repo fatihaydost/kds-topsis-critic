@@ -19,7 +19,7 @@ export const prometheeII: MethodContent = {
     doi: '10.1016/0377-2217(86)90044-5',
     note: {
       en: 'First presented by Brans in 1982 (Université Laval). Companion paper: Brans & Vincke (1985), Management Science 31(6), 647-656.',
-      tr: 'İlk kez Brans tarafından 1982\'de sunuldu (Université Laval). Eşlik eden makale: Brans ve Vincke (1985), Management Science 31(6), 647-656.',
+      tr: "İlk kez Brans tarafından 1982'de sunuldu (Université Laval). Eşlik eden makale: Brans ve Vincke (1985), Management Science 31(6), 647-656.",
     },
   },
   steps: [
@@ -55,16 +55,16 @@ export const prometheeII: MethodContent = {
       title: { en: 'Leaving and entering flows', tr: 'Çıkan ve giren akışlar' },
       tex: String.raw`\phi^{+}(a) = \frac{1}{m-1}\sum_{b \ne a} \pi(a,b), \qquad \phi^{-}(a) = \frac{1}{m-1}\sum_{b \ne a} \pi(b,a)`,
       note: {
-        en: 'm is the number of alternatives. The 1986 paper reports plain sums without 1/(m-1); the ranking is the same.',
-        tr: "m alternatif sayısıdır. 1986 makalesi 1/(m-1) olmadan düz toplamlar verir; sıralama aynıdır.",
+        en: 'm is the number of alternatives; the 1986 paper reports plain sums without 1/(m-1), which gives the same ranking.',
+        tr: 'm alternatif sayısıdır; 1986 makalesi 1/(m-1) olmadan düz toplamlar verir, sıralama aynıdır.',
       },
     },
     {
       title: { en: 'Net flow', tr: 'Net akış' },
       tex: String.raw`\phi(a) = \phi^{+}(a) - \phi^{-}(a) \in [-1, 1], \qquad \sum_a \phi(a) = 0`,
       note: {
-        en: 'PROMETHEE II ranks by decreasing net flow. PROMETHEE I uses the two flows separately and shows pairs where they disagree as incomparable.',
-        tr: 'PROMETHEE II net akışa göre büyükten küçüğe sıralar. PROMETHEE I iki akışı ayrı kullanır ve uyuşmadıkları çiftleri kıyaslanamaz gösterir.',
+        en: 'PROMETHEE II ranks by decreasing net flow, while PROMETHEE I uses the two flows separately and shows pairs where they disagree as incomparable.',
+        tr: 'PROMETHEE II net akışa göre büyükten küçüğe sıralar; PROMETHEE I iki akışı ayrı kullanır ve uyuşmadıkları çiftleri kıyaslanamaz gösterir.',
       },
     },
   ],
@@ -100,11 +100,10 @@ export const prometheeII: MethodContent = {
   reference: {
     source: 'Brans, J.-P.; Vincke, Ph.; Mareschal, B. (1986). How to select and how to rank projects: The PROMETHEE method. European Journal of Operational Research 24(2), 228-238',
     doi: '10.1016/0377-2217(86)90044-5',
-    table: 'Hydroelectric power station example (input from Mareschal 2019, Table 1)',
     match: 'match',
     note: {
-      en: 'Six projects, six criteria, one preference type per criterion. The ranking a5 > a2 > a4 > a6 > a3 > a1 matches; pi differs by at most 0.001 and the summed net flow by 0.002, because the source rounds pi before summing. PROMETHEE I also shows a1 and a2 as incomparable, as the source says. pyDecision agrees to 1e-16.',
-      tr: "Altı proje, altı kriter, her kriter için bir tercih türü. a5 > a2 > a4 > a6 > a3 > a1 sıralaması örtüşüyor; kaynak pi değerlerini toplamadan önce yuvarladığı için pi en fazla 0,001, toplam net akış 0,002 farklı. PROMETHEE I de kaynağın dediği gibi a1 ile a2'yi kıyaslanamaz gösteriyor. pyDecision 1e-16 düzeyinde uyuşuyor.",
+      en: 'Published example (hydroelectric power station, input from Mareschal 2019, Table 1); this method is not computed here yet, only recomputed during research. Six projects, six criteria, one preference type per criterion. The ranking a5 > a2 > a4 > a6 > a3 > a1 matches; pi differs by at most 0.001 and the summed net flow by 0.002, because the source rounds pi before summing. PROMETHEE I also shows a1 and a2 as incomparable, as the source says. pyDecision agrees to 1e-16.',
+      tr: "Yayımlanmış örnek (hidroelektrik santral, girdi Mareschal 2019, Tablo 1); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. Altı proje, altı kriter, her kriter için bir tercih türü. a5 > a2 > a4 > a6 > a3 > a1 sıralaması örtüşüyor; kaynak pi değerlerini toplamadan önce yuvarladığı için pi en fazla 0,001, toplam net akış 0,002 farklı. PROMETHEE I de kaynağın dediği gibi a1 ile a2'yi kıyaslanamaz gösteriyor. pyDecision 1e-16 düzeyinde uyuşuyor.",
     },
   },
   sources: [
@@ -120,17 +119,15 @@ export const prometheeII: MethodContent = {
   ],
   en: {
     summary:
-      'PROMETHEE compares every pair of alternatives criterion by criterion and asks how strongly A is preferred to B there, using a preference function you choose per criterion (for example "any difference counts" or "differences under q are ignored, above p they count fully"). It then subtracts how much each alternative is beaten (negative flow) from how much it beats the others (positive flow). Pick it when small differences should not count, when criteria are on very different scales, or when you want to see which alternatives are incomparable (PROMETHEE I).',
+      'PROMETHEE compares alternatives pair by pair on each criterion with a chosen preference function and ranks them by net flow. Use it when small differences should not count or scales differ widely.',
     whenToUse: [
-      'The decision maker can say what size of difference is negligible (q) and what size is decisive (p).',
-      'Criteria are on very different scales and you do not want a normalization step to decide their spread.',
-      'Partial compensation is acceptable: bounded preference functions cap how much one large advantage can buy.',
-      'You want PROMETHEE I\'s partial order to expose incomparable pairs.',
+      'You can name negligible (q) and decisive (p) differences.',
+      'Very different scales, and no normalization should decide their spread.',
+      'You want PROMETHEE I to expose incomparable pairs.',
     ],
     whenNot: [
-      'Very many alternatives: the pairwise cost grows with the square of their number (fine up to about 300 in the browser).',
-      'The thresholds would be picked at random: the result is then harder to defend than a plain weighted sum.',
-      'Ranks must not depend on other alternatives: rank reversal is possible.',
+      'Very many alternatives: pairwise cost grows quadratically (fine up to about 300).',
+      'Thresholds would be arbitrary: then a weighted sum is easier to defend.',
       'A veto is needed: PROMETHEE has none; use ELECTRE III.',
     ],
     inputs: [
@@ -140,40 +137,34 @@ export const prometheeII: MethodContent = {
       'Per criterion a preference function and its parameters (q, p or s) in the units of that criterion. Suggested start: type V with q = 0 and p = the column range.',
     ],
     pitfalls: [
-      'Rank reversal: adding or removing an alternative can swap two others. Removing one cannot swap a and b when their net flows differ by more than 2/(m-1); flag closer pairs.',
+      'Rank reversal: removing an alternative cannot swap a and b whose net flows differ by more than 2/(m-1); closer pairs can swap.',
       'Thresholds are in raw units: rescaling a column (EUR to thousand EUR) means rescaling its thresholds.',
-      'Results can change with q and p; include them in the sensitivity panel.',
-      'A constant column makes every P = 0, so the criterion is silently inactive; warn.',
-      'With V-shape functions and p at least the column range, the net flow is a weighted sum in disguise; with all usual functions it is a weighted Borda count. PROMETHEE adds value only when thresholds are chosen on purpose.',
+      'With V-shape functions and p at least the column range, the net flow is a weighted sum in disguise; choose thresholds on purpose.',
     ],
   },
   tr: {
     summary:
-      "PROMETHEE alternatifleri ikişer ikişer, her kriterde ayrı ayrı karşılaştırır ve orada A'nın B'ye ne kadar tercih edildiğini sorar; bunu her kriter için seçtiğin bir tercih fonksiyonuyla yapar (örneğin \"her fark sayılır\" ya da \"q'nun altındaki farklar yok sayılır, p'nin üstü tam sayılır\"). Sonra her alternatifin diğerlerini ne kadar geçtiğinden (pozitif akış) ne kadar geçildiğini (negatif akış) çıkarır. Küçük farklar sayılmamalıysa, kriterler çok farklı ölçeklerdeyse ya da kıyaslanamayan alternatifleri görmek istiyorsan (PROMETHEE I) seç.",
+      'PROMETHEE alternatifleri her kriterde, seçilen bir tercih fonksiyonuyla ikişer ikişer karşılaştırır ve net akışa göre sıralar. Küçük farklar sayılmamalıysa ya da ölçekler çok farklıysa kullanın.',
     whenToUse: [
-      'Karar verici hangi büyüklükte farkın önemsiz (q), hangisinin belirleyici (p) olduğunu söyleyebiliyor.',
-      'Kriterler çok farklı ölçeklerde ve yayılımlarına bir normalizasyon adımının karar vermesini istemiyorsun.',
-      'Kısmi telafi kabul edilebilir: sınırlı tercih fonksiyonları tek bir büyük üstünlüğün ne kadar şey satın alabileceğini sınırlar.',
-      'PROMETHEE I\'in kısmi sıralamasıyla kıyaslanamaz çiftleri görmek istiyorsun.',
+      'İhmal edilebilir (q) ve belirleyici (p) farkı söyleyebiliyorsunuz.',
+      'Ölçekler çok farklı ve yayılımı bir normalizasyon belirlememeli.',
+      'PROMETHEE I ile kıyaslanamaz çiftleri görmek istiyorsunuz.',
     ],
     whenNot: [
-      'Alternatif sayısı çok fazla: ikili karşılaştırma maliyeti sayının karesiyle büyür (tarayıcıda 300 civarına kadar sorun yok).',
-      'Eşikler rastgele seçilecek: sonuç bu durumda düz bir ağırlıklı toplamdan daha zor savunulur.',
-      'Sıralar diğer alternatiflere bağlı olmamalı: sıralamanın tersine dönmesi mümkündür.',
-      'Veto gerekiyor: PROMETHEE\'de veto yoktur; ELECTRE III kullan.',
+      'Alternatif çok: maliyet sayının karesiyle büyür (300 civarına kadar sorun yok).',
+      'Eşikler rastgele seçilecek: düz ağırlıklı toplamı savunmak daha kolay olur.',
+      "Veto gerekiyor: PROMETHEE'de veto yok; ELECTRE III kullanın.",
     ],
     inputs: [
       'Karar matrisi, en az 2 alternatif, herhangi gerçek değerler.',
       'Her sütun için kriter türü: fayda ya da maliyet.',
-      'Negatif olmayan, toplamı 1\'e normalize edilen ağırlıklar.',
+      "Negatif olmayan, toplamı 1'e normalize edilen ağırlıklar.",
       'Her kriter için bir tercih fonksiyonu ve o kriterin biriminde parametreleri (q, p ya da s). Önerilen başlangıç: q = 0 ve p = sütun aralığı olan V türü.',
     ],
     pitfalls: [
-      "Sıralamanın tersine dönmesi: bir alternatif eklemek ya da çıkarmak başka iki alternatifin yerini değiştirebilir. Net akışları 2/(m-1)'den fazla farklı olan a ile b, bir alternatif çıkarılınca yer değiştiremez; daha yakın çiftleri işaretle.",
-      'Eşikler ham birimdedir: bir sütunu yeniden ölçeklemek (avrodan bin avroya) eşiklerini de ölçeklemeyi gerektirir.',
-      'Sonuçlar q ve p ile değişebilir; bunları duyarlılık paneline ekle.',
-      'Sabit bir sütunda her P = 0 olur, kriter sessizce devre dışı kalır; uyar.',
-      "V biçimli fonksiyonlarda p sütun aralığına eşit ya da büyükse net akış kılık değiştirmiş bir ağırlıklı toplamdır; tüm fonksiyonlar olağan türdeyse ağırlıklı Borda sayımıdır. PROMETHEE ancak eşikler bilinçli seçildiğinde bir şey katar.",
+      "Sıralama tersine dönebilir: net akışları 2/(m-1)'den fazla farklı a ile b, bir alternatif çıkarılınca yer değiştiremez; daha yakın çiftler değiştirebilir.",
+      'Eşikler ham birimdedir: bir sütunu yeniden ölçeklerseniz (avrodan bin avroya) eşiklerini de ölçekleyin.',
+      'V biçimli fonksiyonda p sütun aralığına eşit ya da büyükse net akış kılık değiştirmiş ağırlıklı toplamdır; eşikleri bilinçli seçin.',
     ],
   },
 }

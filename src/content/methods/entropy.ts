@@ -15,8 +15,8 @@ export const entropy: MethodContent = {
     venue: 'Springer, Lecture Notes in Economics and Mathematical Systems 186',
     doi: '10.1007/978-3-642-48318-9',
     note: {
-      en: 'The information measure is Shannon (1948). Its use as a weighting method is usually credited to Zeleny (1982) and Hwang & Yoon (1981). Neither book was read; the algorithm follows open-access restatements.',
-      tr: 'Bilgi ölçüsü Shannon (1948) kaynaklıdır. Ağırlıklandırma yöntemi olarak kullanımı genellikle Zeleny (1982) ile Hwang ve Yoon (1981) kaynaklarına bağlanır. İki kitap da okunmadı; algoritma açık erişimli anlatımları izler.',
+      en: 'The information measure is Shannon (1948); its use as a weighting method is usually credited to Zeleny (1982) and Hwang & Yoon (1981), and the algorithm follows open-access restatements.',
+      tr: 'Bilgi ölçüsü Shannon (1948) kaynaklıdır; ağırlıklandırmada kullanımı genellikle Zeleny (1982) ile Hwang ve Yoon (1981) kaynaklarına bağlanır, algoritma açık erişimli anlatımları izler.',
     },
   },
   steps: [
@@ -24,8 +24,8 @@ export const entropy: MethodContent = {
       title: { en: 'Proportions', tr: 'Paylar' },
       tex: String.raw`p_{ij} = \frac{x_{ij}}{\sum_{i=1}^{m} x_{ij}}`,
       note: {
-        en: 'Default variant: raw data, criterion type ignored. The min-max option first normalizes with cost inversion, then takes shares.',
-        tr: 'Varsayılan varyant: ham veri, kriter türü dikkate alınmaz. Min-maks seçeneği önce maliyet ters çevrilerek normalize eder, sonra payları alır.',
+        en: 'Default variant: raw data, criterion type ignored; the min-max option first normalizes with cost inversion, then takes shares.',
+        tr: 'Varsayılan varyant: ham veri, kriter türü dikkate alınmaz; min-maks seçeneği önce maliyeti ters çevirerek normalize eder, sonra payları alır.',
       },
     },
     {
@@ -74,11 +74,10 @@ export const entropy: MethodContent = {
   reference: {
     source: 'Zavadskas, E.K.; Cavallaro, F.; Podvezko, V.; Ubarte, I.; Kaklauskas, A. (2017). MCDM Assessment of a Healthy and Safe Built Environment According to Sustainable Development Principles: A Practical Neighborhood Approach in Vilnius. Sustainability 9(5), 702',
     doi: '10.3390/su9050702',
-    table: 'Table 4 (input, economic block), Table 8 (Entropy)',
     match: 'partial',
     note: {
-      en: 'Twenty-one Vilnius neighbourhoods, five economic criteria. All five published weights are reproduced to 4 decimals, but the paper assigns them to the wrong criteria (a fixed permutation of the rows). Matched after undoing it. The min-max option matches Krishnan et al. (2021), Table 5, with consistent labels.',
-      tr: 'Yirmi bir Vilnius mahallesi, beş ekonomik kriter. Yayımlanan beş ağırlığın hepsi 4 basamakta elde ediliyor, ama makale bunları yanlış kriterlere atamış (satırların sabit bir permütasyonu). Permütasyon geri alınınca örtüşüyor. Min-maks seçeneği, etiketleri tutarlı olan Krishnan vd. (2021) Tablo 5 ile örtüşüyor.',
+      en: 'Published example (Table 4 (input, economic block), Table 8 (Entropy)); this method is not computed here yet, only recomputed during research. Twenty-one Vilnius neighbourhoods, five economic criteria. All five published weights are reproduced to 4 decimals, but the paper assigns them to the wrong criteria (a fixed permutation of the rows). Matched after undoing it. The min-max option matches Krishnan et al. (2021), Table 5, with consistent labels.',
+      tr: 'Yayımlanmış örnek (Tablo 4 (girdi, ekonomik blok), Tablo 8 (Entropi)); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. Yirmi bir Vilnius mahallesi, beş ekonomik kriter. Yayımlanan beş ağırlığın hepsi 4 basamakta elde ediliyor, ama makale bunları yanlış kriterlere atamış (satırların sabit bir permütasyonu). Permütasyon geri alınınca örtüşüyor. Min-maks seçeneği, etiketleri tutarlı olan Krishnan vd. (2021) Tablo 5 ile örtüşüyor.',
     },
   },
   sources: [
@@ -92,15 +91,15 @@ export const entropy: MethodContent = {
   ],
   en: {
     summary:
-      'Entropy weighting treats each criterion as a source of information: if all alternatives score almost the same on a criterion, it cannot tell them apart and gets little weight; if scores are spread unevenly, it gets more. It looks only at the data, not at what the criterion means. Pick it for a quick, fully objective weighting of a filled decision matrix.',
+      'Entropy gives little weight to criteria on which all alternatives score almost the same, and more to criteria with uneven scores. Use it for quick, fully objective weights from a filled matrix.',
     whenToUse: [
-      'Positive, ratio-scale data (counts, prices, rates) and you want dispersion-based weights.',
+      'Positive ratio-scale data (counts, prices, rates), dispersion-based weights wanted.',
       'As a baseline next to CRITIC, SD and MEREC.',
     ],
     whenNot: [
-      'The data contain negatives or zeros you cannot shift sensibly.',
-      'The matrix is very homogeneous: all entropies are close to 1, so tiny differences decide the weights.',
-      'The importance of the criteria is known from the decision context.',
+      'Negatives or zeros you cannot shift sensibly.',
+      'Very homogeneous data: entropies near 1, tiny differences decide.',
+      'Importance is known from the decision context.',
     ],
     inputs: [
       'Decision matrix. The default variant needs values of 0 or more and each column sum above 0.',
@@ -108,38 +107,32 @@ export const entropy: MethodContent = {
       'Option: normalization sum (default) or min-max.',
     ],
     pitfalls: [
-      'A column of all zeros has sum 0 and is rejected.',
-      'Negative values are invalid in the default variant. Reject, switch to min-max, or shift the data; shifting changes the weights, and the page says so.',
-      'A constant column gets entropy 1 and weight 0, as expected. If every column is constant, we fall back to equal weights and warn.',
-      'Homogeneous data amplify noise: entropies of 0.991-0.999 gave weights of 0.024-0.378 in one published study. Show d next to w.',
-      'The normalization variant changes the result a lot (up to 0.2 per weight on the Vilnius data). pyDecision uses yet another variant.',
-      'Multiplying a column by a constant does not change the weights, adding a constant does (degrees C and K give different weights).',
+      'Negative values are invalid in the default variant; switch to min-max or shift the data, which changes the weights.',
+      'Homogeneous data amplify noise: entropies of 0.991-0.999 gave weights of 0.024-0.378 in one published study.',
+      'The normalization variant (up to 0.2 per weight on the Vilnius data) and adding a constant (C vs K) both change the weights; multiplying does not.',
     ],
   },
   tr: {
     summary:
-      'Entropi ağırlıklandırması her kriteri bir bilgi kaynağı gibi görür: tüm alternatifler bir kriterde hemen hemen aynı puanı alıyorsa o kriter onları ayırt edemez ve az ağırlık alır; puanlar dengesiz dağılıyorsa daha çok ağırlık alır. Yalnız veriye bakar, kriterin anlamına bakmaz. Dolu bir karar matrisi için hızlı ve tamamen nesnel bir ağırlık istediğinde seç.',
+      'Entropi, tüm alternatiflerin hemen hemen aynı puanı aldığı kriterlere az, puanları dengesiz dağılan kriterlere daha çok ağırlık verir. Dolu bir matristen hızlı ve tamamen nesnel ağırlık için kullanın.',
     whenToUse: [
-      'Pozitif, oran ölçekli veri (adet, fiyat, oran) ve yayılıma dayalı ağırlık istiyorsun.',
+      'Pozitif, oran ölçekli veri (adet, fiyat, oran); yayılıma dayalı ağırlık isteniyor.',
       'CRITIC, SD ve MEREC yanında bir karşılaştırma tabanı olarak.',
     ],
     whenNot: [
-      'Veride makul biçimde kaydırılamayan negatif değerler ya da sıfırlar var.',
-      "Matris çok homojen: tüm entropiler 1'e yakın olur ve ağırlıkları çok küçük farklar belirler.",
-      'Kriterlerin önemi karar bağlamından biliniyor.',
+      'Makul biçimde kaydırılamayan negatif değerler ya da sıfırlar var.',
+      "Veri çok homojen: entropiler 1'e yakın, küçük farklar belirleyici olur.",
+      'Önem karar bağlamından biliniyor.',
     ],
     inputs: [
-      'Karar matrisi. Varsayılan varyant 0 ya da daha büyük değerler ve toplamı 0\'dan büyük sütunlar ister.',
+      "Karar matrisi. Varsayılan varyant 0 ya da daha büyük değerler ve toplamı 0'dan büyük sütunlar ister.",
       'Varsayılan varyant kriter türlerini kullanmaz; min-maks seçeneği kullanır.',
       'Seçenek: toplam (varsayılan) ya da min-maks normalizasyonu.',
     ],
     pitfalls: [
-      "Tamamı sıfır olan sütunun toplamı 0'dır ve reddedilir.",
-      'Varsayılan varyantta negatif değer geçersizdir. Reddet, min-maks seçeneğine geç ya da veriyi kaydır; kaydırma ağırlıkları değiştirir ve sayfa bunu belirtir.',
-      "Sabit bir sütun entropi 1 ve ağırlık 0 alır, beklendiği gibi. Bütün sütunlar sabitse eşit ağırlığa döner ve uyarırız.",
-      "Homojen veri gürültüyü büyütür: yayımlanmış bir çalışmada 0,991-0,999 arası entropiler 0,024-0,378 arası ağırlıklar verdi. w'nin yanında d'yi de göster.",
-      'Normalizasyon varyantı sonucu çok değiştirir (Vilnius verisinde ağırlık başına 0,2\'ye kadar). pyDecision ise başka bir varyant kullanır.',
-      'Bir sütunu sabitle çarpmak ağırlıkları değiştirmez, sabit eklemek değiştirir (santigrat ve kelvin farklı ağırlık verir).',
+      'Varsayılan varyantta negatif değer geçersizdir; min-maks seçeneğine geçin ya da veriyi kaydırın, ama kaydırma ağırlıkları değiştirir.',
+      'Homojen veri gürültüyü büyütür: yayımlanmış bir çalışmada 0,991-0,999 arası entropiler 0,024-0,378 arası ağırlıklar verdi.',
+      "Normalizasyon varyantı (Vilnius verisinde ağırlık başına 0,2'ye kadar) ve sabit eklemek (santigrat ve kelvin) ağırlıkları değiştirir; sabitle çarpmak değiştirmez.",
     ],
   },
 }

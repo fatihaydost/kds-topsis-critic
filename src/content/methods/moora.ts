@@ -18,8 +18,8 @@ export const moora: MethodContent = {
     venue: 'Control and Cybernetics 35(2), 445-469',
     url: 'https://eudml.org/doc/209425',
     note: {
-      en: 'No DOI, not opened. The ratio system first appeared in Brauers (2004, book). The reference example is from the method authors\' open-access paper Brauers & Zavadskas (2010).',
-      tr: 'DOI yok, açılmadı. Oran sistemi ilk kez Brauers (2004, kitap) içinde yer aldı. Referans örnek, yöntemin yazarlarının açık erişimli Brauers ve Zavadskas (2010) makalesinden alındı.',
+      en: "No DOI. The ratio system first appeared in Brauers (2004, book); the reference example is from the method authors' open-access paper Brauers & Zavadskas (2010).",
+      tr: 'DOI yok. Oran sistemi ilk kez Brauers (2004, kitap) içinde yer aldı; referans örnek, yazarların açık erişimli Brauers ve Zavadskas (2010) makalesinden alındı.',
     },
   },
   steps: [
@@ -31,8 +31,8 @@ export const moora: MethodContent = {
       title: { en: 'Ratio system', tr: 'Oran sistemi' },
       tex: String.raw`y^{*}_i = \sum_{j \in J^{+}} w_j\, x^{*}_{ij} - \sum_{j \in J^{-}} w_j\, x^{*}_{ij}`,
       note: {
-        en: 'The origin uses no weights (w = 1). Rank by decreasing y*.',
-        tr: 'Özgün yöntem ağırlık kullanmaz (w = 1). y* değerine göre büyükten küçüğe sıralanır.',
+        en: 'The origin uses no weights (w = 1); rank by decreasing y*.',
+        tr: 'Özgün yöntem ağırlık kullanmaz (w = 1); y* değerine göre büyükten küçüğe sıralanır.',
       },
     },
     {
@@ -76,11 +76,10 @@ export const moora: MethodContent = {
   reference: {
     source: 'Brauers, W.K.M.; Zavadskas, E.K. (2010). Project management by MULTIMOORA as an instrument for transition economies. Technological and Economic Development of Economy 16(1), 5-24',
     doi: '10.3846/tede.2010.01',
-    table: 'Appendix C, Table 2; Appendix D, Table 3; Table 1',
     match: 'match',
     note: {
-      en: 'Three projects, nine objectives. Ratio sums, reference-point deviations and the full multiplicative form all match (largest gap 0.00015, the paper prints B and C to 3 decimals). An earlier contractor example (Brauers et al. 2008) was rejected because the paper is internally inconsistent.',
-      tr: 'Üç proje, dokuz amaç. Oran toplamları, referans nokta sapmaları ve tam çarpımsal biçim örtüşüyor (en büyük fark 0,00015; makale B ve C için 3 basamak basıyor). Daha önceki müteahhit örneği (Brauers vd. 2008) makale kendi içinde tutarsız olduğu için kullanılmadı.',
+      en: 'Published example (Appendix C, Table 2; Appendix D, Table 3; Table 1); this method is not computed here yet, only recomputed during research. Three projects, nine objectives. Ratio sums, reference-point deviations and the full multiplicative form all match (largest gap 0.00015, the paper prints B and C to 3 decimals). An earlier contractor example (Brauers et al. 2008) was rejected because the paper is internally inconsistent.',
+      tr: 'Yayımlanmış örnek (Ek C, Tablo 2; Ek D, Tablo 3; Tablo 1); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. Üç proje, dokuz amaç. Oran toplamları, referans nokta sapmaları ve tam çarpımsal biçim örtüşüyor (en büyük fark 0,00015; makale B ve C için 3 basamak basıyor). Daha önceki müteahhit örneği (Brauers vd. 2008) makale kendi içinde tutarsız olduğu için kullanılmadı.',
     },
   },
   sources: [
@@ -91,14 +90,14 @@ export const moora: MethodContent = {
   ],
   en: {
     summary:
-      'MOORA divides each value by the length of its criterion column, then adds the benefit ratios and subtracts the cost ratios. The alternative with the highest net ratio wins. It is quick, needs no reference point, and weights (importance coefficients) are optional.',
+      'MOORA divides each value by its column length, adds the benefit ratios and subtracts the cost ratios. It is quick, needs no reference point, and weights are optional.',
     whenToUse: [
       'Many objectives, quick screening.',
-      'You want the same normalization as TOPSIS but an additive score.',
+      'TOPSIS normalization with an additive score.',
     ],
     whenNot: [
-      'Users will be confused by a negative net score (costs dominate): the score can be negative.',
-      'Criterion scales may be shifted: vector normalization is not invariant to such changes, as with TOPSIS.',
+      'Users would be confused by a negative net score.',
+      'Scales may shift: vector normalization is unit-dependent, as in TOPSIS.',
     ],
     inputs: [
       'Decision matrix, criterion type per column.',
@@ -106,22 +105,21 @@ export const moora: MethodContent = {
       'No parameters.',
     ],
     pitfalls: [
-      'Negative net scores are fine for ranking. The 2008 paper adds a constant to make the smallest sum 1; we do not do that silently.',
-      'An all-zero column has norm 0; keep its ratios at 0.',
-      'Unit dependence of vector normalization, as with TOPSIS.',
-      'MULTIMOORA adds a multiplicative form and merges three rankings by dominance; that is out of scope for now.',
+      'Negative net scores are fine for ranking; the 2008 paper adds a constant to make the smallest sum 1.',
+      'An all-zero column has norm 0; its ratios stay 0.',
+      'MULTIMOORA adds a multiplicative form and merges three rankings by dominance; it is not covered here.',
     ],
   },
   tr: {
     summary:
-      'MOORA her değeri kendi kriter sütununun uzunluğuna böler, sonra fayda oranlarını toplayıp maliyet oranlarını çıkarır. Net oranı en yüksek olan alternatif kazanır. Hızlıdır, referans nokta gerektirmez; ağırlıklar (önem katsayıları) isteğe bağlıdır.',
+      'MOORA her değeri sütun uzunluğuna böler, fayda oranlarını toplayıp maliyet oranlarını çıkarır. Hızlıdır, referans nokta gerektirmez, ağırlıklar isteğe bağlıdır.',
     whenToUse: [
       'Çok sayıda amaç, hızlı ön eleme.',
-      "TOPSIS ile aynı normalizasyonu ama toplamsal bir skor istiyorsun.",
+      'TOPSIS normalizasyonu, ama toplamsal bir skor istiyorsunuz.',
     ],
     whenNot: [
-      'Kullanıcılar negatif net skordan (maliyetler baskın) şaşıracak: skor negatif olabilir.',
-      "Kriter ölçekleri kaydırılabilir: TOPSIS'te olduğu gibi vektör normalizasyonu bu değişikliklere duyarlıdır.",
+      'Negatif net skor kullanıcıların kafasını karıştırır.',
+      "Ölçekler kayabilir: TOPSIS'teki gibi vektör normalizasyonu birime bağlıdır.",
     ],
     inputs: [
       'Karar matrisi, her sütun için kriter türü.',
@@ -129,10 +127,9 @@ export const moora: MethodContent = {
       'Parametre yok.',
     ],
     pitfalls: [
-      "Negatif net skor sıralama için sorun değildir. 2008 makalesi en küçük toplamı 1 yapmak için sabit ekler; biz bunu sessizce yapmayız.",
-      "Tamamı sıfır olan sütunun normu 0'dır; oranlarını 0 bırak.",
-      "TOPSIS'te olduğu gibi vektör normalizasyonu birime bağlıdır.",
-      'MULTIMOORA çarpımsal bir biçim ekler ve üç sıralamayı baskınlıkla birleştirir; bu şimdilik kapsam dışıdır.',
+      'Negatif net skor sıralama için sorun değildir; 2008 makalesi en küçük toplamı 1 yapmak için sabit ekler.',
+      "Tamamı sıfır olan sütunun normu 0'dır; oranları 0 kalır.",
+      'MULTIMOORA çarpımsal bir biçim ekler ve üç sıralamayı baskınlıkla birleştirir; burada ele alınmıyor.',
     ],
   },
 }

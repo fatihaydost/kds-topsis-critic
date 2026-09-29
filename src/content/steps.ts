@@ -30,8 +30,8 @@ export type StepKey =
 
 export const stepContent: Readonly<Record<StepKey, StepContent>> = {
   'critic.normalized': {
-    en: 'Min-max normalized matrix: each column scaled to 0-1, with 1 the best value (cost columns reversed).',
-    tr: 'Min-maks normalize matris: her sütun 0-1 aralığına ölçeklenir, 1 en iyi değerdir (maliyet sütunları ters çevrilir).',
+    en: 'Min-max normalized matrix: each column scaled to 0-1, 1 is best (cost reversed).',
+    tr: 'Min-maks normalize matris: her sütun 0-1 aralığına iner, 1 en iyidir (maliyet ters).',
     tex: String.raw`r_{ij} = \begin{cases} \dfrac{x_{ij} - \min_i x_{ij}}{\max_i x_{ij} - \min_i x_{ij}} & j \in J^{+} \\[2ex] \dfrac{\max_i x_{ij} - x_{ij}}{\max_i x_{ij} - \min_i x_{ij}} & j \in J^{-} \end{cases}`,
     edgeCase: {
       en: 'A constant column (max = min) is set to 0 in every row.',
@@ -59,12 +59,12 @@ export const stepContent: Readonly<Record<StepKey, StepContent>> = {
   },
   'critic.information': {
     en: 'Information content: contrast times conflict.',
-    tr: 'Bilgi miktarı: kontrast çarpı çatışma.',
+    tr: 'Bilgi miktarı: kontrast ile çatışmanın çarpımı.',
     tex: String.raw`C_j = \sigma_j \sum_{k=1}^{n} \left(1 - \rho_{jk}\right)`,
   },
   'critic.informationTotal': {
     en: 'Total information over all criteria, the denominator of the weights.',
-    tr: 'Tüm kriterlerin toplam bilgi miktarı; ağırlıkların paydası.',
+    tr: 'Tüm kriterlerin toplam bilgi miktarı: ağırlıkların paydası.',
     tex: String.raw`\sum_{k=1}^{n} C_k`,
   },
   'critic.weights': {
@@ -91,8 +91,8 @@ export const stepContent: Readonly<Record<StepKey, StepContent>> = {
     tex: String.raw`v_{ij} = w_j\, r_{ij}`,
   },
   'topsis.idealBest': {
-    en: 'Ideal solution: the best weighted value of each criterion (largest for benefit, smallest for cost).',
-    tr: 'İdeal çözüm: her kriterin en iyi ağırlıklı değeri (faydada en büyük, maliyette en küçük).',
+    en: 'Ideal solution: the best weighted value per criterion (benefit max, cost min).',
+    tr: 'İdeal çözüm: her kriterin en iyi ağırlıklı değeri (faydada maks, maliyette min).',
     tex: String.raw`A_j^{+} = \begin{cases} \max_i v_{ij} & j \in J^{+} \\ \min_i v_{ij} & j \in J^{-} \end{cases}`,
   },
   'topsis.idealWorst': {
@@ -115,8 +115,8 @@ export const stepContent: Readonly<Record<StepKey, StepContent>> = {
     tr: 'İdeal çözüme göreli yakınlık, 0 ile 1 arasında; yüksek olan önde sıralanır.',
     tex: String.raw`C_i = \frac{D_i^{-}}{D_i^{+} + D_i^{-}}`,
     edgeCase: {
-      en: 'If both distances are 0 the alternative equals both ideals and gets 0.5, a tie rather than last place.',
-      tr: 'İki uzaklık da 0 ise alternatif iki ideale de eşittir ve 0,5 alır; bu sonuncu değil, eşitlik demektir.',
+      en: 'If both distances are 0, the alternative gets 0.5: a tie, not last.',
+      tr: 'İki uzaklık da 0 ise alternatif 0,5 alır: sonuncu değil, eşitlik.',
     },
   },
 }

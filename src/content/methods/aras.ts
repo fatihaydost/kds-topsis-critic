@@ -17,15 +17,15 @@ export const aras: MethodContent = {
   },
   steps: [
     {
-      title: { en: 'Add the optimal alternative', tr: 'Optimal alternatifi ekle' },
+      title: { en: 'Add the optimal alternative', tr: 'Optimal alternatifin eklenmesi' },
       tex: String.raw`x_{0j} = \begin{cases} \max_i x_{ij} & j \in J^{+} \\ \min_i x_{ij} & j \in J^{-} \end{cases}`,
       note: {
-        en: 'Row 0 of the extended matrix. Default is the column best; the user can instead give a target (norm) per criterion, as the origin example does.',
-        tr: 'Genişletilmiş matrisin 0. satırı. Varsayılan sütunun en iyi değeridir; kullanıcı bunun yerine her kriter için bir hedef (norm) verebilir, özgün örnekte olduğu gibi.',
+        en: 'Row 0 of the extended matrix: the column best by default, or a target (norm) per criterion, as in the origin example.',
+        tr: 'Genişletilmiş matrisin 0. satırı: varsayılan olarak sütunun en iyi değeri ya da özgün örnekteki gibi kriter başına bir hedef (norm).',
       },
     },
     {
-      title: { en: 'Invert cost criteria', tr: 'Maliyet kriterlerini ters çevir' },
+      title: { en: 'Invert cost criteria', tr: 'Maliyet kriterlerinin ters çevrilmesi' },
       tex: String.raw`x_{ij} \leftarrow \frac{1}{x_{ij}}, \qquad j \in J^{-},\ i = 0, \dots, m`,
     },
     {
@@ -40,8 +40,8 @@ export const aras: MethodContent = {
       title: { en: 'Utility degree', tr: 'Fayda derecesi' },
       tex: String.raw`K_i = \frac{S_i}{S_0}`,
       note: {
-        en: 'Share of the optimum, shown as a percentage. Rank by decreasing K.',
-        tr: 'Optimumun payıdır, yüzde olarak gösterilir. K değerine göre büyükten küçüğe sıralanır.',
+        en: 'Share of the optimum, shown as a percentage; rank by decreasing K.',
+        tr: 'Optimumun payıdır, yüzde olarak gösterilir; K değerine göre büyükten küçüğe sıralanır.',
       },
     },
   ],
@@ -70,11 +70,10 @@ export const aras: MethodContent = {
   reference: {
     source: 'Zavadskas, E.K.; Turskis, Z. (2010). A new additive ratio assessment (ARAS) method in multicriteria decision-making. Technological and Economic Development of Economy 16(2), 159-172',
     doi: '10.3846/tede.2010.10',
-    table: 'Tables 1-3',
     match: 'partial',
     note: {
-      en: 'Fourteen office rooms, six criteria. S matches everywhere; K differs only for room 8. Table 2 prints room 8\'s illumination value as 0.0825 (the value of room 1) instead of 0.0846. With the correct value room 8 ranks first (K = 0.7762) ahead of room 9, which the paper ranks first. CODAS (2016) on the same data also puts room 8 first.',
-      tr: "On dört ofis odası, altı kriter. S her yerde örtüşüyor; K yalnız 8. odada farklı. Tablo 2, 8. odanın aydınlatma değerini 0,0846 yerine 0,0825 (1. odanın değeri) basmış. Doğru değerle 8. oda birinci çıkıyor (K = 0,7762) ve makalenin birinci saydığı 9. odanın önüne geçiyor. Aynı veride CODAS (2016) da 8. odayı birinci buluyor.",
+      en: "Published example (Tables 1-3); this method is not computed here yet, only recomputed during research. Fourteen office rooms, six criteria. S matches everywhere; K differs only for room 8. Table 2 prints room 8's illumination value as 0.0825 (the value of room 1) instead of 0.0846. With the correct value room 8 ranks first (K = 0.7762) ahead of room 9, which the paper ranks first. CODAS (2016) on the same data also puts room 8 first.",
+      tr: 'Yayımlanmış örnek (Tablo 1-3); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. On dört ofis odası, altı kriter. S her yerde örtüşüyor; K yalnız 8. odada farklı. Tablo 2, 8. odanın aydınlatma değerini 0,0846 yerine 0,0825 (1. odanın değeri) basmış. Doğru değerle 8. oda birinci çıkıyor (K = 0,7762) ve makalenin birinci saydığı 9. odanın önüne geçiyor. Aynı veride CODAS (2016) da 8. odayı birinci buluyor.',
     },
   },
   sources: [
@@ -84,15 +83,15 @@ export const aras: MethodContent = {
   ],
   en: {
     summary:
-      'ARAS adds an "optimal" alternative (the best value on each criterion, or a target you define), scores every alternative with a weighted sum of sum-normalized values, and reports each one as a percentage of the optimum (utility degree K). Choose it when the question is "how close to the target are we, in percent?".',
+      'ARAS adds an optimal alternative (column best or your target) and scores each alternative as a percentage of it (utility degree K). Use it for "how close to the target are we, in percent?"',
     whenToUse: [
-      'A meaningful target or optimal value exists for each criterion (norms, specifications).',
-      'A percentage of the optimum is useful to the audience.',
+      'Each criterion has a meaningful target or optimum (norms, specifications).',
+      'A percentage of the optimum means something to the audience.',
     ],
     whenNot: [
       'Cost criteria contain zeros: they are inverted with 1/x.',
-      'You need a linear treatment of cost criteria: 1/x is non-linear.',
-      'Nobody can agree on the optimal row: the results depend on it.',
+      'Cost criteria need linear treatment: 1/x is non-linear.',
+      'Nobody agrees on the optimal row: the results depend on it.',
     ],
     inputs: [
       'Decision matrix, strictly positive in cost criteria.',
@@ -101,35 +100,33 @@ export const aras: MethodContent = {
       'Optional optimal value per criterion. Default is the column best.',
     ],
     pitfalls: [
-      'A cost value of 0 gives 1/0; negative values have no meaning here.',
       'If the optimal row is worse than an alternative on some criterion, K can exceed 1.',
       'Rank reversal when alternatives are added, because of the sum normalization.',
-      'Column best and given norms give very different K values (room 9: 0.9455 vs 0.7734 in the origin data), even when the ranking stays the same.',
+      'Column best and given norms give very different K (room 9: 0.9455 vs 0.7734), even with the same ranking.',
     ],
   },
   tr: {
     summary:
-      'ARAS tabloya "optimal" bir alternatif ekler (her kriterdeki en iyi değer ya da senin belirlediğin hedef), her alternatifi toplam normalizasyonlu değerlerin ağırlıklı toplamıyla puanlar ve sonucu optimumun yüzdesi olarak verir (fayda derecesi K). Soru "hedefe yüzde kaç yakınız?" ise uygundur.',
+      'ARAS tabloya optimal bir alternatif ekler (sütunun en iyisi ya da sizin hedefiniz) ve her alternatifi onun yüzdesi olarak puanlar (fayda derecesi K). Soru "hedefe yüzde kaç yakınız?" ise uygundur.',
     whenToUse: [
-      'Her kriter için anlamlı bir hedef ya da optimal değer var (norm, şartname).',
-      'Optimumun yüzdesi olarak bir sonuç okuyucuya bir şey söylüyor.',
+      'Her kriter için anlamlı bir hedef ya da optimum var (norm, şartname).',
+      'Optimumun yüzdesi okuyucuya bir şey söylüyor.',
     ],
     whenNot: [
-      'Maliyet kriterlerinde sıfır var: bu kriterler 1/x ile ters çevrilir.',
-      'Maliyet kriterlerinin doğrusal ele alınması gerekiyor: 1/x doğrusal değildir.',
-      'Optimal satır üzerinde uzlaşılamıyor: sonuçlar ona bağlıdır.',
+      'Maliyet kriterlerinde sıfır var: bunlar 1/x ile ters çevrilir.',
+      'Maliyet kriterleri doğrusal ele alınmalı: 1/x doğrusal değildir.',
+      'Optimal satırda uzlaşı yok: sonuçlar ona bağlıdır.',
     ],
     inputs: [
       'Karar matrisi; maliyet kriterlerinde kesinlikle pozitif.',
       'Her sütun için kriter türü: fayda ya da maliyet.',
-      "Toplamı 1 olan ağırlıklar.",
+      'Toplamı 1 olan ağırlıklar.',
       'İsteğe bağlı olarak her kriter için optimal değer. Varsayılan sütunun en iyi değeridir.',
     ],
     pitfalls: [
-      'Maliyet kriterinde 0 değeri 1/0 demektir; negatif değerlerin burada anlamı yoktur.',
       "Optimal satır bir kriterde bir alternatiften kötüyse K 1'i geçebilir.",
       'Toplam normalizasyonu yüzünden alternatif eklenince sıralama tersine dönebilir.',
-      "Sütunun en iyisi ile verilen normlar çok farklı K değerleri üretir (özgün veride 9. oda: 0,9455 ve 0,7734), sıralama aynı kalsa bile.",
+      'Sütunun en iyisi ile verilen normlar çok farklı K üretir (9. oda: 0,9455 ve 0,7734), sıralama aynı kalsa bile.',
     ],
   },
 }

@@ -12,7 +12,7 @@ export const electreIII: MethodContent = {
     authors: 'Roy, B.',
     year: 1978,
     title: 'ELECTRE III : un algorithme de classements fondé sur une représentation floue des préférences en présence de critères multiples',
-    venue: 'Cahiers du Centre d\'Études de Recherche Opérationnelle 20(1), 3-24',
+    venue: "Cahiers du Centre d'Études de Recherche Opérationnelle 20(1), 3-24",
     note: {
       en: 'No DOI. The standard modern description is Figueira, Mousseau & Roy (2005).',
       tr: 'DOI yok. Güncel standart anlatım Figueira, Mousseau ve Roy (2005).',
@@ -36,23 +36,23 @@ export const electreIII: MethodContent = {
       tex: String.raw`d_j(a,b) = \begin{cases} 0 & \Delta_j \le p_j \\ \dfrac{\Delta_j - p_j}{v_j - p_j} & p_j < \Delta_j < v_j \\ 1 & \Delta_j \ge v_j \end{cases}`,
       note: {
         en: 'Without a veto threshold, d is always 0.',
-        tr: 'Veto eşiği yoksa d her zaman 0\'dır.',
+        tr: "Veto eşiği yoksa d her zaman 0'dır.",
       },
     },
     {
       title: { en: 'Credibility', tr: 'Güvenilirlik' },
       tex: String.raw`\sigma(a,b) = C(a,b) \prod_{j:\ d_j(a,b) > C(a,b)} \frac{1 - d_j(a,b)}{1 - C(a,b)}`,
       note: {
-        en: 'If no d exceeds C, the product is empty and sigma = C. Any d = 1 gives sigma = 0.',
-        tr: "Hiçbir d, C'yi aşmıyorsa çarpım boştur ve sigma = C olur. Herhangi bir d = 1 ise sigma = 0.",
+        en: 'If no d exceeds C the product is empty and sigma = C, while any d = 1 gives sigma = 0.',
+        tr: "Hiçbir d, C'yi aşmıyorsa çarpım boştur ve sigma = C olur; herhangi bir d = 1 ise sigma = 0.",
       },
     },
     {
       title: { en: 'Distillation', tr: 'Damıtma' },
       tex: String.raw`s(\lambda) = 0.30 - 0.15\,\lambda, \qquad a \mathrel{S^{\lambda}} b \iff \sigma(a,b) > \lambda \ \wedge\ \sigma(a,b) - \sigma(b,a) > s\big(\sigma(a,b)\big)`,
       note: {
-        en: 'Qualification Q(a) = number of alternatives a outranks minus number that outrank a. The descending distillation keeps the best Q at shrinking cut levels, the ascending one the worst; the final result is the intersection of the two pre-orders, where disagreement means incomparable.',
-        tr: "Nitelik puanı Q(a) = a'nın üstün geldiği alternatif sayısı eksi a'ya üstün gelen sayısı. Azalan damıtma küçülen kesim düzeylerinde en iyi Q'yu, artan damıtma en kötüyü tutar; nihai sonuç iki ön sıralamanın kesişimidir, uyuşmazlık kıyaslanamazlık demektir.",
+        en: 'Qualification Q(a) is the number of alternatives a outranks minus the number that outrank a; descending distillation keeps the best Q at shrinking cut levels, ascending the worst, and the result is their intersection, where disagreement means incomparable.',
+        tr: "Nitelik puanı Q(a), a'nın üstün geldiği alternatif sayısı eksi a'ya üstün gelenlerin sayısıdır; azalan damıtma küçülen kesim düzeylerinde en iyi Q'yu, artan damıtma en kötüyü tutar, sonuç ikisinin kesişimidir ve uyuşmazlık kıyaslanamazlık demektir.",
       },
     },
   ],
@@ -74,18 +74,17 @@ export const electreIII: MethodContent = {
       methodId: 'promethee-ii',
       text: {
         en: 'As a non-compensatory cross-check next to PROMETHEE II or TOPSIS in the same study; Brans et al. (1986) already compare PROMETHEE with ELECTRE III.',
-        tr: 'Aynı çalışmada PROMETHEE II ya da TOPSIS yanında telafi etmeyen bir çapraz kontrol olarak; Brans vd. (1986) PROMETHEE\'yi ELECTRE III ile zaten karşılaştırır.',
+        tr: "Aynı çalışmada PROMETHEE II ya da TOPSIS yanında telafi etmeyen bir çapraz kontrol olarak; Brans vd. (1986) PROMETHEE'yi ELECTRE III ile zaten karşılaştırır.",
       },
     },
   ],
   reference: {
     source: 'Wang, X.; Triantaphyllou, E. (2008). Ranking irregularities when evaluating alternatives by using some ELECTRE methods. Omega 36(1), 45-63',
     doi: '10.1016/j.omega.2005.12.003',
-    table: 'Section 3.2, pp. 51-53',
     match: 'match',
     note: {
-      en: 'Waste incineration strategy, 11 alternatives, 11 criteria, direct relative thresholds, no veto. All 110 credibility cells match at 2 decimals, and both distillation pre-orders and the final result (A7 and A9 on top, incomparable) match. In the modified case the top alternative matches; one lower class is a tie where the paper prints a strict order.',
-      tr: 'Atık yakma stratejisi, 11 alternatif, 11 kriter, doğrudan göreli eşikler, veto yok. Güvenilirlik matrisinin 110 hücresi 2 basamakta örtüşüyor; iki damıtma ön sıralaması ve nihai sonuç (A7 ve A9 en üstte, kıyaslanamaz) aynı. Değiştirilmiş durumda en üstteki alternatif örtüşüyor; alttaki bir sınıfta makale kesin sıra basmışken biz eşitlik buluyoruz.',
+      en: 'Published example (Section 3.2, pp. 51-53); this method is not computed here yet, only recomputed during research. Waste incineration strategy, 11 alternatives, 11 criteria, direct relative thresholds, no veto. All 110 credibility cells match at 2 decimals, and both distillation pre-orders and the final result (A7 and A9 on top, incomparable) match. In the modified case the top alternative matches; one lower class is a tie where the paper prints a strict order.',
+      tr: 'Yayımlanmış örnek (Bölüm 3.2, s. 51-53); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. Atık yakma stratejisi, 11 alternatif, 11 kriter, doğrudan göreli eşikler, veto yok. Güvenilirlik matrisinin 110 hücresi 2 basamakta örtüşüyor; iki damıtma ön sıralaması ve nihai sonuç (A7 ve A9 en üstte, kıyaslanamaz) aynı. Değiştirilmiş durumda en üstteki alternatif örtüşüyor; alttaki bir sınıfta makale kesin sıra basmışken yeniden hesaplama eşitlik buluyor.',
     },
   },
   sources: [
@@ -98,17 +97,16 @@ export const electreIII: MethodContent = {
   ],
   en: {
     summary:
-      'ELECTRE III asks, for every pair, whether there is enough evidence that A is at least as good as B, and whether any criterion strongly objects. Small differences are ignored (indifference threshold q), large ones count fully (preference threshold p), and a very bad score on one criterion can block A from outranking B however good it is elsewhere (veto threshold v). Choose it when a weakness must not be compensated and you accept that some alternatives come out incomparable.',
+      'ELECTRE III checks for every pair whether A outranks B, using indifference (q), preference (p) and veto (v) thresholds. Use it when weaknesses must not be compensated and incomparable pairs are acceptable.',
     whenToUse: [
       'Non-compensation matters: environmental, safety or regulatory limits.',
-      'Data are imprecise and the decision maker can state q and p, and optionally v, per criterion.',
+      'Imprecise data, and q, p (optionally v) can be stated per criterion.',
       'The audience accepts a partial order with incomparable pairs.',
     ],
     whenNot: [
-      'A single score or a strict complete ranking is needed for reporting. Use PROMETHEE II or a compensatory method.',
+      'A single score or strict full ranking is needed: use PROMETHEE II.',
       'The thresholds cannot be justified.',
       'Many alternatives: repeated distillation can be slow in the browser.',
-      'The audience cannot be taught what "incomparable" means.',
     ],
     inputs: [
       'Decision matrix, any real values (only differences are used), criterion directions.',
@@ -117,39 +115,34 @@ export const electreIII: MethodContent = {
       'Distillation coefficients, defaults 0.30 and -0.15.',
     ],
     pitfalls: [
-      'Distillation is fragile: rounding sigma to 2 decimals before distilling changed the order in the reference case. Compute at full precision, round only for display.',
-      'Replacing a non-optimal alternative by a worse one can change the best one (Wang & Triantaphyllou 2008).',
+      'Distillation is fragile: rounding sigma to 2 decimals changed the order in the reference case; round only for display.',
       'Thresholds are in raw units: rescaling a column means rescaling its thresholds.',
       'A "rank" from ELECTRE III is a class in a pre-order, not a score; show incomparable pairs explicitly.',
-      'Ranking by net credibility is a popular shortcut but is not Roy\'s method; offer it only with a clear label.',
     ],
   },
   tr: {
     summary:
-      "ELECTRE III her çift için A'nın en az B kadar iyi olduğuna dair yeterli kanıt olup olmadığını ve bir kriterin buna ciddi biçimde itiraz edip etmediğini sorar. Küçük farklar yok sayılır (farksızlık eşiği q), büyük farklar tam sayılır (tercih eşiği p); bir kriterde çok kötü bir değer, A başka yerlerde ne kadar iyi olursa olsun A'nın B'ye üstün gelmesini engelleyebilir (veto eşiği v). Bir zayıflık telafi edilmemeliyse ve bazı alternatiflerin kıyaslanamaz çıkmasını kabul ediyorsan seç.",
+      "ELECTRE III her çift için A'nın B'ye üstün gelip gelmediğini farksızlık (q), tercih (p) ve veto (v) eşikleriyle sınar. Zayıflık telafi edilmemeliyse ve kıyaslanamaz çiftler kabul edilebilirse kullanın.",
     whenToUse: [
       'Telafi olmamalı: çevre, güvenlik ya da mevzuat sınırları.',
-      'Veri kesin değil ve karar verici her kriter için q ile p, isterse v eşiğini söyleyebiliyor.',
-      'Okuyucu kıyaslanamaz çiftler içeren kısmi bir sıralamayı kabul ediyor.',
+      'Veri kesin değil; kriter başına q, p ve isterseniz v verilebiliyor.',
+      'Okuyucu kıyaslanamaz çiftler içeren kısmi sıralamayı kabul ediyor.',
     ],
     whenNot: [
-      'Raporlama için tek bir skor ya da kesin tam sıralama gerekiyor. PROMETHEE II ya da telafi edici bir yöntem kullan.',
+      'Tek skor ya da kesin tam sıralama gerekiyor: PROMETHEE II kullanın.',
       'Eşikler gerekçelendirilemiyor.',
-      'Alternatif sayısı çok: tekrarlanan damıtma tarayıcıda yavaşlayabilir.',
-      'Okuyucuya "kıyaslanamaz" kavramı anlatılamıyor.',
+      'Alternatif çok: tekrarlanan damıtma tarayıcıda yavaşlayabilir.',
     ],
     inputs: [
       'Karar matrisi, herhangi gerçek değerler (yalnız farklar kullanılır), kriter yönleri.',
-      'Ağırlıklar: ELECTRE\'de ödünleşim katsayısı değil, oy gücüdür.',
+      "Ağırlıklar: ELECTRE'de ödünleşim katsayısı değil, oy gücüdür.",
       'Her kriter için kriter biriminde eşikler, 0 <= q <= p <= v; v isteğe bağlı. Her biri sabit ya da değerin bir payı olabilir.',
       'Damıtma katsayıları, varsayılan 0,30 ve -0,15.',
     ],
     pitfalls: [
-      "Damıtma kırılgandır: referans örnekte sigmayı damıtmadan önce 2 basamağa yuvarlamak sırayı değiştirdi. Tam hassasiyetle hesapla, yalnız gösterirken yuvarla.",
-      'En iyi olmayan bir alternatifi daha kötüsüyle değiştirmek en iyiyi değiştirebilir (Wang ve Triantaphyllou 2008).',
-      'Eşikler ham birimdedir: bir sütunu yeniden ölçeklemek eşiklerini de ölçeklemeyi gerektirir.',
-      "ELECTRE III'ün verdiği \"sıra\" bir skor değil, ön sıralamadaki bir sınıftır; kıyaslanamaz çiftleri açıkça göster.",
-      "Net güvenilirliğe göre sıralamak yaygın bir kestirmedir ama Roy'un yöntemi değildir; yalnız açık bir etiketle sun.",
+      'Damıtma kırılgandır: referans örnekte sigmayı 2 basamağa yuvarlamak sırayı değiştirdi; yalnız gösterirken yuvarlayın.',
+      'Eşikler ham birimdedir: bir sütunu yeniden ölçeklerseniz eşiklerini de ölçekleyin.',
+      'ELECTRE III\'ün verdiği "sıra" skor değil, ön sıralamadaki bir sınıftır; kıyaslanamaz çiftleri açıkça gösterin.',
     ],
   },
 }

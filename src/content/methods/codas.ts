@@ -36,8 +36,8 @@ export const codas: MethodContent = {
       title: { en: 'Relative assessment matrix', tr: 'Göreli değerlendirme matrisi' },
       tex: String.raw`h_{ik} = (E_i - E_k) + \psi(E_i - E_k)\,(T_i - T_k), \qquad \psi(x) = \begin{cases} 1 & |x| \ge \tau \\ 0 & |x| < \tau \end{cases}`,
       note: {
-        en: 'psi as printed in Eq. (10) of the origin, which reproduces every published number. The paper\'s text says the opposite (use Taxicab when the Euclidean gap is below tau).',
-        tr: "psi, özgün makaledeki Denklem (10)'da basıldığı gibi; yayımlanan tüm sayıları bu verir. Makalenin metni ise tersini söyler (Öklid farkı tau'nun altındaysa Taxicab kullanılsın).",
+        en: "psi as printed in Eq. (10) of the origin, which reproduces every published number, although the paper's text says the opposite (use Taxicab when the Euclidean gap is below tau).",
+        tr: "psi, özgün makaledeki Denklem (10)'da basıldığı gibidir ve yayımlanan tüm sayıları verir; makalenin metni ise tersini söyler (Öklid farkı tau'nun altındaysa Taxicab kullanılır).",
       },
     },
     {
@@ -73,11 +73,10 @@ export const codas: MethodContent = {
   ],
   reference: {
     source: 'Keshavarz Ghorabaee, M.; Zavadskas, E.K.; Turskis, Z.; Antucheviciene, J. (2016). A new combinative distance-based assessment (CODAS) method for multi-criteria decision-making. Economic Computation and Economic Cybernetics Studies and Research 50(3), 25-44',
-    table: 'Example 1: Tables 1-4; Example 2: Tables 5-8',
     match: 'match',
     note: {
-      en: 'Industrial-robot selection (7 x 5) and office microclimate (14 x 6). E, T and H match both examples and the rankings are identical. The headers of Tables 1 and 2 swap two columns (tip speed and repeatability); Table 3 confirms which is which. pyDecision uses a different h formula and does not match.',
-      tr: 'Endüstriyel robot seçimi (7 x 5) ve ofis mikrokliması (14 x 6). E, T ve H iki örnekte de örtüşüyor, sıralamalar aynı. Tablo 1 ve 2 başlıklarında iki sütun (uç hızı ve tekrarlanabilirlik) yer değiştirmiş; hangisinin hangisi olduğunu Tablo 3 doğruluyor. pyDecision farklı bir h formülü kullanır ve örtüşmez.',
+      en: 'Published example (Example 1: Tables 1-4; Example 2: Tables 5-8); this method is not computed here yet, only recomputed during research. Industrial-robot selection (7 x 5) and office microclimate (14 x 6). E, T and H match both examples and the rankings are identical. The headers of Tables 1 and 2 swap two columns (tip speed and repeatability); Table 3 confirms which is which. pyDecision uses a different h formula and does not match.',
+      tr: 'Yayımlanmış örnek (Örnek 1: Tablo 1-4; Örnek 2: Tablo 5-8); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. Endüstriyel robot seçimi (7 x 5) ve ofis mikrokliması (14 x 6). E, T ve H iki örnekte de örtüşüyor, sıralamalar aynı. Tablo 1 ve 2 başlıklarında iki sütun (uç hızı ve tekrarlanabilirlik) yer değiştirmiş; hangisinin hangisi olduğunu Tablo 3 doğruluyor. pyDecision farklı bir h formülü kullanır ve örtüşmez.',
     },
   },
   sources: [
@@ -86,13 +85,13 @@ export const codas: MethodContent = {
   ],
   en: {
     summary:
-      'CODAS measures how far each alternative is from the worst point, mainly by straight-line (Euclidean) distance, with city-block (Taxicab) distance as a second measure. Every alternative is compared with every other one; the one that beats the others by the largest total margin wins.',
+      'CODAS scores each alternative by its distance from the worst point, Euclidean first and Taxicab second. Comparing every pair, the alternative with the largest total margin wins.',
     whenToUse: [
       'Benefit and cost data.',
-      'You want a pairwise-comparison style aggregation that uses two notions of distance.',
+      'You want pairwise aggregation using two notions of distance.',
     ],
     whenNot: [
-      'You cannot defend a value for the threshold tau: the ranking can change with it.',
+      'You cannot defend a value for tau: the ranking can change.',
       'Cost criteria contain zeros (min/x normalization).',
     ],
     inputs: [
@@ -101,22 +100,20 @@ export const codas: MethodContent = {
       'Threshold tau, default 0.02, suggested range 0.01-0.05.',
     ],
     pitfalls: [
-      'The meaning of psi is contradictory in the origin paper; we follow Eq. (10) because it reproduces the published numbers, and say so on the page.',
-      'tau is in units of weighted normalized distance, so its effect depends on the weights and the number of alternatives.',
-      'A cost value of 0 divides by zero; an all-zero benefit column has max 0.',
+      'The origin paper contradicts itself on psi; Eq. (10) is the version that reproduces the published numbers.',
+      'tau is in weighted normalized distance units, so its effect depends on the weights and the number of alternatives.',
       'H sums to zero over all alternatives and is not bounded; do not compare it across problems.',
-      'Near ties in E (gap below tau) are decided by E alone.',
     ],
   },
   tr: {
     summary:
-      'CODAS her alternatifin en kötü noktadan ne kadar uzak olduğunu ölçer; ana ölçü düz (Öklid) uzaklık, ikinci ölçü şehir bloğu (Taxicab) uzaklığıdır. Her alternatif diğerleriyle tek tek karşılaştırılır; toplamda diğerlerini en büyük farkla geçen kazanır.',
+      'CODAS her alternatifi en kötü noktaya uzaklığıyla puanlar: önce Öklid, ikinci ölçü olarak Taxicab uzaklığı. Tüm çiftler karşılaştırılır; toplamda en büyük farkla önde olan kazanır.',
     whenToUse: [
       'Fayda ve maliyet kriterli veri.',
-      'İki uzaklık kavramını birlikte kullanan, ikili karşılaştırma tarzı bir birleştirme istiyorsun.',
+      'İki uzaklık kavramını kullanan ikili karşılaştırmalı bir birleştirme istiyorsunuz.',
     ],
     whenNot: [
-      'tau eşiği için savunulabilir bir değer veremiyorsun: sıralama buna göre değişebilir.',
+      'tau için savunulabilir bir değeriniz yok: sıralama buna göre değişebilir.',
       'Maliyet kriterlerinde sıfır var (min/x normalizasyonu).',
     ],
     inputs: [
@@ -125,11 +122,9 @@ export const codas: MethodContent = {
       'Eşik tau, varsayılan 0,02, önerilen aralık 0,01-0,05.',
     ],
     pitfalls: [
-      "psi'nin anlamı özgün makalede çelişkilidir; yayımlanan sayıları verdiği için Denklem (10)'u izleriz ve bunu sayfada belirtiriz.",
+      "Özgün makale psi konusunda kendisiyle çelişir; yayımlanan sayıları veren Denklem (10)'dur.",
       'tau ağırlıklı normalize uzaklık birimindedir; etkisi ağırlıklara ve alternatif sayısına bağlıdır.',
-      "Maliyet kriterinde 0 değeri sıfıra bölme demektir; tamamı sıfır olan fayda sütununun maksimumu 0'dır.",
-      'H tüm alternatifler üzerinde sıfıra toplanır ve sınırlı değildir; problemler arasında karşılaştırma.',
-      "E'de neredeyse eşitlik (fark tau'nun altında) yalnız E'ye göre çözülür.",
+      'H tüm alternatifler üzerinde sıfıra toplanır ve sınırlı değildir; problemler arasında karşılaştırmayın.',
     ],
   },
 }

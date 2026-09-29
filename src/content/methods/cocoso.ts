@@ -53,7 +53,7 @@ export const cocoso: MethodContent = {
       methodId: 'waspas',
       text: {
         en: 'The origin compares CoCoSo with WASPAS, VIKOR, TOPSIS, CODAS, MOORA, COPRAS and EDAS by Spearman correlation.',
-        tr: 'Özgün makale CoCoSo\'yu WASPAS, VIKOR, TOPSIS, CODAS, MOORA, COPRAS ve EDAS ile Spearman korelasyonu üzerinden karşılaştırır.',
+        tr: "Özgün makale CoCoSo'yu WASPAS, VIKOR, TOPSIS, CODAS, MOORA, COPRAS ve EDAS ile Spearman korelasyonu üzerinden karşılaştırır.",
       },
     },
     {
@@ -67,11 +67,10 @@ export const cocoso: MethodContent = {
   reference: {
     source: 'Yazdani, M.; Zaraté, P.; Zavadskas, E.K.; Turskis, Z. (2019). A combined compromise solution (CoCoSo) method for multi-criteria decision-making problems. Management Decision 57(9), 2501-2519',
     doi: '10.1108/MD-05-2017-0458',
-    table: 'Tables I, III-VI',
     match: 'partial',
     note: {
-      en: 'Seven alternatives, five criteria. S, P, ka, kb and kc match to the printed 3 decimals. The final k is off by up to 0.0013 (1.2987 vs the printed "1.3"), more than 3-decimal rounding allows; the paper rounded at some other stage. The ranking is identical and pyDecision agrees with us to 1e-15.',
-      tr: 'Yedi alternatif, beş kriter. S, P, ka, kb ve kc basılı 3 basamakta örtüşüyor. Nihai k değerinde 0,0013\'e varan fark var (basılı "1.3" yerine 1,2987); bu 3 basamaklı yuvarlamanın açıklayacağından fazla, makale başka bir aşamada yuvarlamış. Sıralama aynı; pyDecision bizimle 1e-15 düzeyinde uyuşuyor.',
+      en: 'Published example (Tables I, III-VI); this method is not computed here yet, only recomputed during research. Seven alternatives, five criteria. S, P, ka, kb and kc match to the printed 3 decimals. The final k is off by up to 0.0013 (1.2987 vs the printed "1.3"), more than 3-decimal rounding allows; the paper rounded at some other stage. The ranking is identical and pyDecision agrees with the recomputation to 1e-15.',
+      tr: 'Yayımlanmış örnek (Tablo I, III-VI); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. Yedi alternatif, beş kriter. S, P, ka, kb ve kc basılı 3 basamakta örtüşüyor. Nihai k değerinde 0,0013\'e varan fark var (basılı "1.3" yerine 1,2987); bu 3 basamaklı yuvarlamanın açıklayacağından fazla, makale başka bir aşamada yuvarlamış. Sıralama aynı; pyDecision yeniden hesaplamayla 1e-15 düzeyinde uyuşuyor.',
     },
   },
   sources: [
@@ -82,43 +81,43 @@ export const cocoso: MethodContent = {
   ],
   en: {
     summary:
-      'CoCoSo computes two scores per alternative, a weighted sum and a power-weighted sum, and merges them with three different aggregation strategies into one final score. It is useful when you want a single result that balances additive and multiplicative views of performance.',
+      'CoCoSo merges a weighted sum and a power-weighted sum per alternative, using three aggregation strategies, into one final score. Use it for one result that balances additive and multiplicative views.',
     whenToUse: [
-      'Both an additive and a multiplicative view of performance should count.',
+      'Both additive and multiplicative views of performance should count.',
       'Each criterion has a clear best and worst value.',
     ],
     whenNot: [
-      'You need a bounded score you can read as a percentage: k is neither.',
-      'An alternative is worst on every criterion: S = P = 0 for it and k_b divides by zero.',
+      'You need a bounded, percentage-like score: k is neither.',
+      'An alternative worst on every criterion makes k_b divide by zero.',
     ],
     inputs: [
       'Decision matrix, criterion type per column, weights summing to 1.',
       'Parameter lambda between 0 and 1, default 0.5.',
     ],
     pitfalls: [
-      'min S = 0 or min P = 0 breaks k_b. pyDecision silently adds 1 to all S or P, which also changes k_a and k_c; we prefer an explicit error.',
-      'A constant column cannot be min-max normalized; set it to 0 and warn.',
+      'min S = 0 or min P = 0 breaks k_b; pyDecision silently adds 1 to all S or P, which also changes k_a and k_c.',
+      'A constant column cannot be min-max normalized; it is set to 0 with a warning.',
       'Rank reversal when alternatives are added: the min-max bounds and the min and max in k_b and k_c move.',
     ],
   },
   tr: {
     summary:
-      'CoCoSo her alternatif için iki skor hesaplar, ağırlıklı toplam ve üs ağırlıklı toplam, ve bunları üç farklı birleştirme stratejisiyle tek bir nihai skora dönüştürür. Toplamsal ve çarpımsal bakışı dengeleyen tek bir sonuç istediğinde işe yarar.',
+      'CoCoSo her alternatifin ağırlıklı toplamını ve üs ağırlıklı toplamını üç birleştirme stratejisiyle tek bir nihai skora dönüştürür. Toplamsal ve çarpımsal bakışı dengeleyen tek bir sonuç istediğinizde kullanın.',
     whenToUse: [
       'Performansa hem toplamsal hem çarpımsal bakış önemli.',
       'Her kriterin belirgin bir en iyi ve en kötü değeri var.',
     ],
     whenNot: [
-      'Sınırlı ve yüzde gibi okunabilen bir skor gerekiyor: k ikisi de değildir.',
-      'Bir alternatif her kriterde en kötü: onun için S = P = 0 olur ve k_b sıfıra bölünür.',
+      'Sınırlı, yüzde gibi okunan bir skor gerekiyor: k ikisi de değil.',
+      'Her kriterde en kötü bir alternatif varsa k_b sıfıra bölünür.',
     ],
     inputs: [
       'Karar matrisi, her sütun için kriter türü, toplamı 1 olan ağırlıklar.',
-      "0 ile 1 arasında lambda parametresi, varsayılan 0,5.",
+      '0 ile 1 arasında lambda parametresi, varsayılan 0,5.',
     ],
     pitfalls: [
-      "min S = 0 ya da min P = 0 olursa k_b bozulur. pyDecision sessizce tüm S ya da P değerlerine 1 ekler, bu da k_a ve k_c'yi değiştirir; biz açık bir hata vermeyi tercih ederiz.",
-      'Sabit bir sütun min-maks ile normalize edilemez; 0 al ve uyar.',
+      "min S = 0 ya da min P = 0 olursa k_b bozulur; pyDecision sessizce tüm S ya da P değerlerine 1 ekler, bu da k_a ve k_c'yi değiştirir.",
+      'Sabit sütun min-maks ile normalize edilemez; 0 alınır ve uyarı gösterilir.',
       'Alternatif eklenince sıralama tersine dönebilir: min-maks sınırları ve k_b, k_c içindeki min ve maks kayar.',
     ],
   },

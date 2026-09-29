@@ -92,7 +92,10 @@ export type Reference = {
   /** Citation of the paper the fixture comes from. */
   source: string
   doi?: string
-  /** Where inside the paper (tables, sections). */
+  /**
+   * Where inside the paper, language-neutral. Leave it unset: table and section names are prose, so they
+   * open the localized note instead ("Tables 1-3" / "Tablo 1-3").
+   */
   table?: string
   match: ReferenceMatch
   note: Bilingual
@@ -106,11 +109,14 @@ export type Source = {
 
 /** Prose that exists once per language. */
 export type LocalizedText = {
-  /** 2-3 sentences for the method page header and the method list. */
+  /** At most 2 short sentences (35 words) for the method page header and the method list. */
   summary: string
+  /** At most 3 items of up to 12 words each (DESIGN.md, Copy). */
   whenToUse: string[]
+  /** Same limits as whenToUse. */
   whenNot: string[]
   inputs: string[]
+  /** At most 3. */
   pitfalls: string[]
 }
 

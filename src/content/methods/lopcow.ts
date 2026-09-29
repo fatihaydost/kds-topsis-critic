@@ -18,8 +18,8 @@ export const lopcow: MethodContent = {
     venue: 'Omega 112, 102690',
     doi: '10.1016/j.omega.2022.102690',
     note: {
-      en: 'Full text not accessible. The formulas are taken from four open-access papers that quote the origin identically, and confirmed numerically on Keleş (2023).',
-      tr: 'Tam metne erişilemedi. Formüller, özgün makaleyi aynı biçimde aktaran dört açık erişimli makaleden alındı ve Keleş (2023) üzerinde sayısal olarak doğrulandı.',
+      en: 'The formulas are taken from four open-access papers that quote the origin identically, and confirmed numerically on Keleş (2023).',
+      tr: 'Formüller, özgün makaleyi aynı biçimde aktaran dört açık erişimli makaleden alındı ve Keleş (2023) üzerinde sayısal olarak doğrulandı.',
     },
   },
   steps: [
@@ -31,8 +31,8 @@ export const lopcow: MethodContent = {
       title: { en: 'Percentage value', tr: 'Yüzde değer' },
       tex: String.raw`PV_j = \left|\, 100 \cdot \ln\!\left(\frac{\sqrt{\frac{1}{m}\sum_{i=1}^{m} r_{ij}^2}}{\sigma_j}\right) \right|`,
       note: {
-        en: 'Root mean square over the sample standard deviation (divisor m - 1). The sample form is an assumption backed by one reproduction; the origin could not be read.',
-        tr: 'Karesel ortalamanın örneklem standart sapmasına (bölen m - 1) oranı. Örneklem biçimi tek bir yeniden üretimle desteklenen bir varsayımdır; özgün makale okunamadı.',
+        en: 'Root mean square over the sample standard deviation (divisor m - 1), a form backed by one reproduction rather than by the origin text.',
+        tr: 'Karesel ortalamanın örneklem standart sapmasına (bölen m - 1) oranı; bu biçim özgün metinle değil, bir yeniden üretimle desteklenir.',
       },
     },
     {
@@ -57,7 +57,7 @@ export const lopcow: MethodContent = {
       methodId: 'edas',
       text: {
         en: 'LOPCOW then EDAS, and LOPCOW with MEREC then CoCoSo or EDAS (insurance sector), as listed in Keleş (2023), Table 1.',
-        tr: 'LOPCOW ardından EDAS ve LOPCOW ile MEREC ardından CoCoSo ya da EDAS (sigorta sektörü), Keleş (2023) Tablo 1\'de listelendiği gibi.',
+        tr: "LOPCOW ardından EDAS ve LOPCOW ile MEREC ardından CoCoSo ya da EDAS (sigorta sektörü), Keleş (2023) Tablo 1'de listelendiği gibi.",
       },
     },
     {
@@ -69,13 +69,12 @@ export const lopcow: MethodContent = {
     },
   ],
   reference: {
-    source: 'Keleş, N. (2023). Lopcow ve Cradis yöntemleriyle G7 ülkelerinin ve Türkiye\'nin yaşanabilir güç merkezi şehirlerinin değerlendirilmesi. Ömer Halisdemir Üniversitesi İİBF Dergisi 16(3), 727-747',
+    source: "Keleş, N. (2023). Lopcow ve Cradis yöntemleriyle G7 ülkelerinin ve Türkiye'nin yaşanabilir güç merkezi şehirlerinin değerlendirilmesi. Ömer Halisdemir Üniversitesi İİBF Dergisi 16(3), 727-747",
     doi: '10.25287/ohuiibf.1239201',
-    table: 'Tables 6, 7 and 8',
     match: 'match',
     note: {
-      en: 'Fifteen cities, three criteria sets (6, 8 and 14 criteria). Weights match the printed 3 decimals in all three tables with the sample standard deviation; the population form misses by up to 0.0045. LOPCOW weights published by Trung et al. (2024) could not be reproduced with either form.',
-      tr: 'On beş şehir, üç kriter kümesi (6, 8 ve 14 kriter). Örneklem standart sapmasıyla ağırlıklar üç tabloda da basılı 3 basamakta örtüşüyor; anakütle biçimi 0,0045\'e kadar sapıyor. Trung vd. (2024) tarafından yayımlanan LOPCOW ağırlıkları iki biçimle de elde edilemedi.',
+      en: 'Published example (Tables 6, 7 and 8); this method is not computed here yet, only recomputed during research. Fifteen cities, three criteria sets (6, 8 and 14 criteria). Weights match the printed 3 decimals in all three tables with the sample standard deviation; the population form misses by up to 0.0045. LOPCOW weights published by Trung et al. (2024) could not be reproduced with either form.',
+      tr: "Yayımlanmış örnek (Tablo 6, 7 ve 8); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. On beş şehir, üç kriter kümesi (6, 8 ve 14 kriter). Örneklem standart sapmasıyla ağırlıklar üç tabloda da basılı 3 basamakta örtüşüyor; anakütle biçimi 0,0045'e kadar sapıyor. Trung vd. (2024) tarafından yayımlanan LOPCOW ağırlıkları iki biçimle de elde edilemedi.",
     },
   },
   sources: [
@@ -86,7 +85,7 @@ export const lopcow: MethodContent = {
   ],
   en: {
     summary:
-      'LOPCOW scales each criterion to 0-1 and compares its typical size (root mean square) with its spread (standard deviation) on a logarithmic scale. This dampens the large weight gaps that Entropy can produce and works with negative raw data. Pick it when you want objective weights that are more even than Entropy\'s.',
+      "LOPCOW compares each criterion's typical size (root mean square) with its spread on a log scale, after min-max scaling. It gives flatter objective weights than Entropy and accepts negative data.",
     whenToUse: [
       'Data include negative values (financial ratios, growth rates).',
       'You want flatter, less extreme objective weights.',
@@ -94,36 +93,40 @@ export const lopcow: MethodContent = {
     ],
     whenNot: [
       'A criterion is constant: its standard deviation is 0.',
-      'You need a well-studied method with known properties: LOPCOW is new and its behaviour is only described empirically.',
+      'You need a well-studied method: LOPCOW is new, described only empirically.',
     ],
-    inputs: ['Decision matrix, any real values, at least 2 alternatives.', 'Criterion type per column: benefit or cost.', 'No parameters.'],
+    inputs: [
+      'Decision matrix, any real values, at least 2 alternatives.',
+      'Criterion type per column: benefit or cost.',
+      'No parameters.',
+    ],
     pitfalls: [
-      'Constant column: PV is undefined. Our choice is weight 0 with a warning; no source covers this case.',
-      'A column whose RMS equals its standard deviation gets PV = 0 and weight 0 although it varies. This is an artefact of the absolute log form, and the weight rises again on either side of that point.',
-      'Sample and population standard deviation give weights that differ by 0.3-0.5 percentage points; the page states which one is used.',
-      'Min-max depends on the alternative set, so the weights change when alternatives are added or removed.',
-      'Some papers call a different normalization "LOPCOW"; do not use them as references.',
+      'A constant column has undefined PV; weight 0 with a warning is a choice no source covers.',
+      'A varying column whose RMS equals its standard deviation gets PV = 0 and weight 0, an artefact of the absolute log.',
+      'Sample and population standard deviation differ by 0.3-0.5 percentage points per weight; state which one is used.',
     ],
   },
   tr: {
     summary:
-      'LOPCOW her kriteri 0-1 aralığına ölçekler ve tipik büyüklüğünü (karesel ortalama) yayılımıyla (standart sapma) logaritmik ölçekte karşılaştırır. Entropinin üretebildiği büyük ağırlık farklarını yumuşatır ve negatif ham verilerle çalışır. Entropiden daha dengeli nesnel ağırlıklar istediğinde seç.',
+      'LOPCOW her kriteri min-maks ile ölçekledikten sonra tipik büyüklüğünü (karesel ortalama) yayılımıyla logaritmik ölçekte karşılaştırır. Entropiden daha dengeli nesnel ağırlık verir ve negatif veriyle çalışır.',
     whenToUse: [
       'Veride negatif değerler var (finansal oranlar, büyüme oranları).',
-      'Daha düz, daha az uç nesnel ağırlıklar istiyorsun.',
+      'Daha düz, daha az uç nesnel ağırlıklar istiyorsunuz.',
       'Yeni sıralama yöntemleriyle birlikte (EDAS, CRADIS, RAM, DOBI).',
     ],
     whenNot: [
       "Bir kriter sabit: standart sapması 0'dır.",
-      'Özellikleri iyi bilinen, çok çalışılmış bir yöntem gerekiyor: LOPCOW yenidir ve davranışı yalnız deneysel olarak anlatılmıştır.',
+      'Çok çalışılmış bir yöntem gerekiyor: LOPCOW yeni, yalnız deneysel olarak anlatılmış.',
     ],
-    inputs: ['Karar matrisi, herhangi gerçek değerler, en az 2 alternatif.', 'Her sütun için kriter türü: fayda ya da maliyet.', 'Parametre yok.'],
+    inputs: [
+      'Karar matrisi, herhangi gerçek değerler, en az 2 alternatif.',
+      'Her sütun için kriter türü: fayda ya da maliyet.',
+      'Parametre yok.',
+    ],
     pitfalls: [
-      'Sabit sütun: PV tanımsızdır. Tercihimiz uyarıyla ağırlık 0; bu durumu ele alan bir kaynak yok.',
-      'Karesel ortalaması standart sapmasına eşit olan bir sütun, değerleri değişse bile PV = 0 ve ağırlık 0 alır. Bu mutlak logaritma biçiminin bir yan etkisidir; ağırlık o noktanın iki yanında yeniden artar.',
-      'Örneklem ve anakütle standart sapması 0,3-0,5 yüzde puan farklı ağırlıklar verir; sayfa hangisinin kullanıldığını belirtir.',
-      'Min-maks alternatif kümesine bağlıdır; alternatif eklenip çıkarılınca ağırlıklar değişir.',
-      'Bazı makaleler farklı bir normalizasyona "LOPCOW" der; bunları referans olarak kullanma.',
+      'Sabit sütunda PV tanımsızdır; uyarıyla ağırlık 0 almak hiçbir kaynağın ele almadığı bir tercihtir.',
+      'Karesel ortalaması standart sapmasına eşit olan değişken bir sütun PV = 0 ve ağırlık 0 alır; bu mutlak logaritmanın yan etkisidir.',
+      'Örneklem ve anakütle standart sapması ağırlık başına 0,3-0,5 yüzde puan fark verir; hangisinin kullanıldığını belirtin.',
     ],
   },
 }

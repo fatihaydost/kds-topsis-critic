@@ -12,7 +12,7 @@ export type Basis = 'sourced' | 'analysis'
 
 export const BASIS_LABEL: Readonly<Record<Basis, Bilingual>> = {
   sourced: { en: 'From the literature', tr: 'Literatürden' },
-  analysis: { en: 'Our analysis', tr: 'Yorum/analiz' },
+  analysis: { en: 'Our analysis', tr: 'Bizim analizimiz' },
 }
 
 // ---------------------------------------------------------------------------
@@ -36,7 +36,7 @@ export const coMentionQuery = {
   source: 'OpenAlex title_and_abstract.search, all years, all document types',
   caveat: {
     en: 'A count is the number of works whose title or abstract mentions both methods. It includes comparisons and reviews, not only pipelines, so read it as a measure of how often the two appear together.',
-    tr: 'Sayı, başlığında ya da özetinde iki yöntemin birlikte geçtiği çalışma sayısıdır. Yalnız boru hatlarını değil karşılaştırma ve incelemeleri de içerir; iki yöntemin ne sıklıkla birlikte anıldığının ölçüsü olarak okunmalı.',
+    tr: 'Sayı, başlığında ya da özetinde iki yöntemin birlikte geçtiği çalışma sayısıdır. Yalnız boru hatlarını değil karşılaştırma ve incelemeleri de içerir; iki yöntemin ne sıklıkla birlikte anıldığının ölçüsü olarak okuyun.',
   },
 } as const
 
@@ -496,7 +496,7 @@ export const rankingRequirements: readonly RankingRequirement[] = [
 
 export const constantColumnRule: Bilingual = {
   en: 'Every method with min-max or linear (f* - f) / (f* - f-) normalization divides by the column range, so a constant column must be dropped or given zero contribution, with a warning.',
-  tr: 'Min-maks ya da doğrusal (f* - f) / (f* - f-) normalizasyonu kullanan her yöntem sütun aralığına böler; sabit bir sütun çıkarılmalı ya da katkısı sıfır alınmalı ve uyarı verilmeli.',
+  tr: 'Min-maks ya da doğrusal (f* - f) / (f* - f-) normalizasyonu kullanan her yöntem sütun aralığına böler; sabit bir sütunu çıkarın ya da katkısını sıfır alıp uyarı gösterin.',
 }
 
 export type WeightingRequirement = {
@@ -570,7 +570,7 @@ export const weightingRequirements: readonly WeightingRequirement[] = [
     methodId: 'ahp',
     data: { en: 'Pairwise judgements on the 1-9 scale', tr: '1-9 ölçeğinde ikili yargılar' },
     normalization: null,
-    degenerate: { en: 'CR of 0.10 or more: ask to revise', tr: 'CR 0,10 ya da üstü: gözden geçirilmesini iste' },
+    degenerate: { en: 'CR of 0.10 or more: ask to revise', tr: 'CR 0,10 ya da üstü: yargıların gözden geçirilmesini isteyin' },
     sources: [{ label: 'Saaty (2008), International Journal of Services Sciences 1(1), 83-98', doi: '10.1504/IJSSCI.2008.017590' }],
   },
   {
@@ -611,7 +611,7 @@ export const weightingRequirements: readonly WeightingRequirement[] = [
 
 export const reportNormalizationRule: Bilingual = {
   en: 'Whenever the weights depend on the normalization, report the normalization together with the weighting method (Mukhametzyanov 2021).',
-  tr: 'Ağırlıklar normalizasyona bağlıysa, normalizasyonu ağırlıklandırma yöntemiyle birlikte raporla (Mukhametzyanov 2021).',
+  tr: 'Ağırlıklar normalizasyona bağlıysa, normalizasyonu ağırlıklandırma yöntemiyle birlikte raporlayın (Mukhametzyanov 2021).',
 }
 
 export type RiskyCombination = {
@@ -646,7 +646,7 @@ export const riskyCombinations: readonly RiskyCombination[] = [
     },
     siteRule: {
       en: 'With objective weights, always show an equal-weights run and the Monte Carlo panel next to the main result, and warn when one criterion takes more than half of the weight.',
-      tr: 'Nesnel ağırlık kullanıldığında ana sonucun yanında her zaman eşit ağırlıklı bir çalıştırma ve Monte Carlo panelini göster; bir kriter ağırlığın yarısından fazlasını alırsa uyar.',
+      tr: 'Nesnel ağırlık kullanıldığında ana sonucun yanında her zaman eşit ağırlıklı bir çalıştırma ve Monte Carlo paneli gösterilir; bir kriter ağırlığın yarısından fazlasını alırsa uyarı çıkar.',
     },
     methodIds: ['entropy', 'sd', 'critic', 'topsis', 'vikor'],
     sources: [
@@ -660,7 +660,7 @@ export const riskyCombinations: readonly RiskyCombination[] = [
     title: { en: 'Min-max normalization before Entropy', tr: 'Entropi öncesinde min-maks normalizasyonu' },
     text: {
       en: 'Min-max creates zeros (the column minimum) and changes the Entropy weights; Chen (2019) advises against it. Use raw non-negative data or sum normalization for Entropy.',
-      tr: 'Min-maks sıfırlar üretir (sütun minimumu) ve Entropi ağırlıklarını değiştirir; Chen (2019) bunu önermez. Entropi için ham, negatif olmayan veri ya da toplam normalizasyonu kullan.',
+      tr: 'Min-maks sıfırlar üretir (sütun minimumu) ve Entropi ağırlıklarını değiştirir; Chen (2019) bunu önermez. Entropi için ham, negatif olmayan veri ya da toplam normalizasyonu kullanın.',
     },
     basis: 'sourced',
     methodIds: ['entropy'],
@@ -700,7 +700,7 @@ export const riskyCombinations: readonly RiskyCombination[] = [
     title: { en: 'Chaining ranking methods', tr: 'Sıralama yöntemlerini zincirlemek' },
     text: {
       en: 'Our analysis: using the scores of one ranking method as the decision matrix of another (TOPSIS closeness into VIKOR, SMART then ELECTRE then TOPSIS) has no decision-theoretic meaning beyond "a second aggregation". If the aim is robustness, use the sensitivity panel and rank aggregation instead.',
-      tr: 'Bizim yorumumuz: bir sıralama yönteminin skorlarını başka bir yöntemin karar matrisi olarak kullanmanın (TOPSIS yakınlığını VIKOR\'a vermek, SMART ardından ELECTRE ardından TOPSIS) "ikinci bir birleştirme" olmanın ötesinde karar kuramı açısından bir anlamı yoktur. Amaç sağlamlıksa bunun yerine duyarlılık panelini ve sıralama birleştirmeyi kullan.',
+      tr: 'Bizim yorumumuz: bir sıralama yönteminin skorlarını başka bir yöntemin karar matrisi olarak kullanmanın (TOPSIS yakınlığını VIKOR\'a vermek, SMART ardından ELECTRE ardından TOPSIS) "ikinci bir birleştirme" olmanın ötesinde karar kuramı açısından bir anlamı yoktur. Amaç sağlamlıksa bunun yerine duyarlılık panelini ve sıralama birleştirmeyi kullanın.',
     },
     basis: 'analysis',
     methodIds: ['topsis', 'vikor', 'electre-i'],
@@ -711,7 +711,7 @@ export const riskyCombinations: readonly RiskyCombination[] = [
     title: { en: 'Dispersion-based weights in outranking methods', tr: 'Üstünlük (outranking) yöntemlerinde yayılıma dayalı ağırlıklar' },
     text: {
       en: 'In ELECTRE, weights are voting powers that do not depend on the scales, not trade-off coefficients (Figueira, Mousseau & Roy 2005). Entropy or CRITIC weights computed on a normalized matrix, combined with thresholds in raw units, mix two meanings. Allowed, but label it.',
-      tr: "ELECTRE'de ağırlıklar ödünleşim katsayısı değil, ölçeklerden bağımsız oy gücüdür (Figueira, Mousseau ve Roy 2005). Normalize matris üzerinde hesaplanan Entropi ya da CRITIC ağırlıklarını ham birimdeki eşiklerle birlikte kullanmak iki farklı anlamı karıştırır. İzin verilir ama etiketlenmelidir.",
+      tr: "ELECTRE'de ağırlıklar ödünleşim katsayısı değil, ölçeklerden bağımsız oy gücüdür (Figueira, Mousseau ve Roy 2005). Normalize matris üzerinde hesaplanan Entropi ya da CRITIC ağırlıklarını ham birimdeki eşiklerle birlikte kullanmak iki farklı anlamı karıştırır. Kullanabilirsiniz, ama bunu belirtin.",
     },
     basis: 'sourced',
     methodIds: ['electre-i', 'electre-iii', 'promethee-ii', 'entropy', 'critic'],
@@ -733,7 +733,7 @@ export const riskyCombinations: readonly RiskyCombination[] = [
     title: { en: 'Reading agreement between methods as validation', tr: 'Yöntemler arası uyumu doğrulama sanmak' },
     text: {
       en: 'A high Spearman correlation between TOPSIS and MOORA (both vector-normalized and compensatory) says little: methods of the same family agree by construction, and similarity depends on the normalization and weighting choices (Sałabun, Wątróbski & Shekhovtsov 2020). Compare across families (compensatory and outranking) and report WS as well as rho.',
-      tr: "TOPSIS ile MOORA arasındaki yüksek Spearman korelasyonu (ikisi de vektör normalizasyonlu ve telafi edici) pek bir şey söylemez: aynı ailedeki yöntemler yapıları gereği uyuşur ve benzerlik normalizasyon ile ağırlıklandırma seçimlerine bağlıdır (Sałabun, Wątróbski ve Shekhovtsov 2020). Aileler arasında karşılaştır (telafi edici ve üstünlük) ve rho'nun yanında WS'yi de raporla.",
+      tr: "TOPSIS ile MOORA arasındaki yüksek Spearman korelasyonu (ikisi de vektör normalizasyonlu ve telafi edici) pek bir şey söylemez: aynı ailedeki yöntemler yapıları gereği uyuşur ve benzerlik normalizasyon ile ağırlıklandırma seçimlerine bağlıdır (Sałabun, Wątróbski ve Shekhovtsov 2020). Aileler arasında karşılaştırın (telafi edici ve üstünlük) ve rho'nun yanında WS'yi de raporlayın.",
     },
     basis: 'sourced',
     methodIds: ['topsis', 'moora'],
@@ -759,7 +759,7 @@ export const robustnessTechniques: readonly RobustnessTechnique[] = [
     title: { en: 'One-at-a-time weight change', tr: 'Tek seferde bir ağırlık değişimi' },
     summary: {
       en: 'Change one weight by a relative step (default -20%, -10%, -5%, +5%, +10%, +20%) and rescale the others so the sum stays 1. Sweeping the weight from 0 to 1 finds the interval over which the first place or the whole ranking stays the same (weight stability interval); the smallest change that swaps two alternatives is the criticality measure.',
-      tr: 'Bir ağırlığı göreli bir adımla değiştir (varsayılan %-20, %-10, %-5, %+5, %+10, %+20) ve toplam 1 kalsın diye diğerlerini ölçekle. Ağırlığı 0\'dan 1\'e taramak, birincinin ya da tüm sıralamanın değişmediği aralığı bulur (ağırlık kararlılık aralığı); iki alternatifin yerini değiştiren en küçük değişim kritiklik ölçüsüdür.',
+      tr: 'Bir ağırlığı göreli bir adımla değiştirin (varsayılan %-20, %-10, %-5, %+5, %+10, %+20) ve toplam 1 kalsın diye diğerlerini ölçekleyin. Ağırlığı 0\'dan 1\'e taramak, birincinin ya da tüm sıralamanın değişmediği aralığı bulur (ağırlık kararlılık aralığı); iki alternatifin yerini değiştiren en küçük değişim kritiklik ölçüsüdür.',
     },
     tex: [String.raw`w_k' = \min\{1, \max\{0, w_k(1+\delta)\}\}, \qquad w_j' = w_j\,\frac{1 - w_k'}{1 - w_k} \quad (j \ne k)`],
     sources: [
@@ -772,7 +772,7 @@ export const robustnessTechniques: readonly RobustnessTechnique[] = [
     title: { en: 'Monte Carlo weight sampling', tr: 'Monte Carlo ağırlık örneklemesi' },
     summary: {
       en: 'Draw many weight vectors, either uniformly over all weightings (the SMAA setting) or around the user\'s weights with a concentration kappa, rerun the ranking each time and report how often each alternative takes each rank (rank acceptability), its mean rank and a 95% rank interval. With 10,000 runs every share has a standard error of at most 0.005.',
-      tr: 'Çok sayıda ağırlık vektörü çek: ya tüm ağırlıklandırmalar üzerinde düzgün dağılımla (SMAA ayarı) ya da kullanıcının ağırlıkları etrafında kappa yoğunluğuyla. Her seferinde sıralamayı yeniden hesapla; her alternatifin her sırayı ne sıklıkla aldığını (sıra kabul edilebilirliği), ortalama sırasını ve %95 sıra aralığını raporla. 10.000 çalıştırmada her oranın standart hatası en fazla 0,005 olur.',
+      tr: 'Çok sayıda ağırlık vektörü çekin: ya tüm ağırlıklandırmalar üzerinde düzgün dağılımla (SMAA ayarı) ya da kullanıcının ağırlıkları etrafında kappa yoğunluğuyla. Her seferinde sıralamayı yeniden hesaplayın; her alternatifin her sırayı ne sıklıkla aldığını (sıra kabul edilebilirliği), ortalama sırasını ve %95 sıra aralığını raporlayın. 10.000 çalıştırmada her oranın standart hatası en fazla 0,005 olur.',
     },
     tex: [
       String.raw`w \sim \operatorname{Dirichlet}(\kappa \bar w), \qquad \operatorname{Var}(w_j) = \frac{\bar w_j (1 - \bar w_j)}{\kappa + 1}`,
@@ -788,7 +788,7 @@ export const robustnessTechniques: readonly RobustnessTechnique[] = [
     title: { en: 'Leave one criterion out', tr: 'Bir kriteri dışarıda bırakma' },
     summary: {
       en: 'Drop each criterion in turn, renormalize the remaining weights or recompute objective weights on the reduced matrix, rerun, and report whether the top alternative changes, plus rho and WS against the base ranking. Removing a criterion that does not discriminate should not change the ranking.',
-      tr: 'Her kriteri sırayla çıkar; kalan ağırlıkları yeniden normalize et ya da nesnel ağırlıkları küçülen matris üzerinde yeniden hesapla, yeniden çalıştır ve birincinin değişip değişmediğini, temel sıralamaya göre rho ve WS değerlerini raporla. Ayırt edici olmayan bir kriteri çıkarmak sıralamayı değiştirmemelidir.',
+      tr: 'Her kriteri sırayla çıkarın; kalan ağırlıkları yeniden normalize edin ya da nesnel ağırlıkları küçülen matriste yeniden hesaplayın, yeniden çalıştırın ve birincinin değişip değişmediğini, temel sıralamaya göre rho ve WS değerlerini raporlayın. Ayırt edici olmayan bir kriteri çıkarmak sıralamayı değiştirmemelidir.',
     },
     tex: [String.raw`w_k' = \frac{w_k}{1 - w_j} \quad (k \ne j)`],
     sources: [
@@ -801,7 +801,7 @@ export const robustnessTechniques: readonly RobustnessTechnique[] = [
     title: { en: 'Rank-reversal tests', tr: 'Sıralamanın tersine dönmesi testleri' },
     summary: {
       en: 'Remove or add an alternative (leave one out, or add a dominated copy of the worst), replace a non-optimal alternative by a worse one (the best should not change), and rank every pair alone to check transitivity. In PROMETHEE II, removing one alternative cannot swap two whose net flows differ by more than 2/(m-1).',
-      tr: 'Bir alternatif çıkar ya da ekle (birini dışarıda bırakma ya da en kötünün baskın olunan bir kopyasını ekleme), en iyi olmayan bir alternatifi daha kötüsüyle değiştir (en iyi değişmemeli) ve geçişliliği denetlemek için her çifti tek başına sırala. PROMETHEE II\'de bir alternatif çıkarmak, net akışları 2/(m-1)\'den fazla farklı olan iki alternatifin yerini değiştiremez.',
+      tr: 'Bir alternatif çıkarın ya da ekleyin (birini dışarıda bırakma ya da en kötünün baskın olunan bir kopyasını ekleme), en iyi olmayan bir alternatifi daha kötüsüyle değiştirin (en iyi değişmemeli) ve geçişliliği denetlemek için her çifti tek başına sıralayın. PROMETHEE II\'de bir alternatif çıkarmak, net akışları 2/(m-1)\'den fazla farklı olan iki alternatifin yerini değiştiremez.',
     },
     tex: [],
     sources: [
@@ -824,7 +824,7 @@ export const robustnessTechniques: readonly RobustnessTechnique[] = [
     title: { en: 'Agreement between rankings', tr: 'Sıralamalar arası uyum' },
     summary: {
       en: 'Spearman and Kendall correlations, the top-weighted Spearman r_w, the WS coefficient (asymmetric, top positions dominate; low below 0.234, high above 0.808) and Kendall\'s W for several rankings. Always also show whether the first place is the same, because that is what users care about.',
-      tr: 'Spearman ve Kendall korelasyonları, üst sıralara ağırlık veren Spearman r_w, WS katsayısı (asimetrik, üst sıralar baskın; 0,234 altı düşük, 0,808 üstü yüksek) ve birden çok sıralama için Kendall W. Her zaman birincinin aynı olup olmadığını da göster, çünkü kullanıcıların baktığı budur.',
+      tr: 'Spearman ve Kendall korelasyonları, üst sıralara ağırlık veren Spearman r_w, WS katsayısı (asimetrik, üst sıralar baskın; 0,234 altı düşük, 0,808 üstü yüksek) ve birden çok sıralama için Kendall W. Birincinin aynı olup olmadığını da her zaman gösterin, çünkü kullanıcıların baktığı budur.',
     },
     tex: [
       String.raw`\rho = 1 - \frac{6\sum_i (x_i - y_i)^2}{n(n^2 - 1)}`,
@@ -843,7 +843,7 @@ export const robustnessTechniques: readonly RobustnessTechnique[] = [
     title: { en: 'Rank aggregation (Borda, Copeland)', tr: 'Sıralama birleştirme (Borda, Copeland)' },
     summary: {
       en: 'Use it when you deliberately ran 3 or more methods from different families and have no principled reason to prefer one. Show the combined ranking next to the individual ones with Kendall\'s W, never instead of them. Do not use it to hide disagreement, with several near-duplicate methods, or with a partial order mixed in. In 500,000 simulated aggregations a complete consensus was not reached in about 78% of cases.',
-      tr: 'Farklı ailelerden bilinçli olarak 3 ya da daha fazla yöntem çalıştırdıysan ve birini tercih etmek için ilkeli bir nedenin yoksa kullan. Birleşik sıralamayı tek tek sıralamaların yerine değil, yanlarında Kendall W ile göster. Uyuşmazlığı gizlemek için, birbirinin neredeyse kopyası birkaç yöntemle ya da araya karışmış kısmi bir sıralamayla kullanma. 500.000 benzetim birleştirmesinin yaklaşık %78\'inde tam bir uzlaşıya ulaşılamadı.',
+      tr: 'Farklı ailelerden bilinçli olarak 3 ya da daha fazla yöntem çalıştırdıysanız ve birini tercih etmek için ilkeli bir nedeniniz yoksa kullanın. Birleşik sıralamayı tek tek sıralamaların yerine değil, yanlarında Kendall W ile gösterin. Uyuşmazlığı gizlemek için, birbirinin neredeyse kopyası birkaç yöntemle ya da araya karışmış kısmi bir sıralamayla kullanmayın. 500.000 benzetim birleştirmesinin yaklaşık %78\'inde tam bir uzlaşıya ulaşılamadı.',
     },
     tex: [
       String.raw`B_i = \sum_{k} (n - r_{ik})`,
@@ -884,8 +884,8 @@ export type GuideNode = {
 }
 
 export const decisionTreeIntro: Bilingual = {
-  en: 'A few questions narrow the list to methods that fit your data and your question. The tree is a starting point built from the method cards and the compatibility table; read the method page before you rely on a result.',
-  tr: 'Birkaç soru, listeyi verine ve soruna uyan yöntemlere indirir. Ağaç yöntem kartlarından ve uyumluluk tablosundan kurulmuş bir başlangıç noktasıdır; bir sonuca güvenmeden önce yöntemin sayfasını oku.',
+  en: 'A few questions narrow the list to methods that fit your data and your question. The tree is a starting point; read the method page before you rely on a result.',
+  tr: 'Birkaç soru, listeyi verinize ve sorunuza uyan yöntemlere indirir. Ağaç bir başlangıç noktasıdır; bir sonuca güvenmeden önce yöntemin sayfasını okuyun.',
 }
 
 export const decisionTreeSources: readonly Source[] = [
@@ -915,8 +915,8 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           recommend: {
             methodIds: ['equal'],
             reason: {
-              en: 'With no information about importance, equal weights are the neutral start. Watch the number of criteria per theme: it weights themes quietly.',
-              tr: 'Önem hakkında bilgi yoksa eşit ağırlık tarafsız bir başlangıçtır. Tema başına kriter sayısına dikkat et: temaları sessizce ağırlıklandırır.',
+              en: 'With no information about importance, equal weights are the neutral start, but the number of criteria per theme quietly weights the themes.',
+              tr: 'Önem bilgisi yoksa eşit ağırlık tarafsız bir başlangıçtır, ama tema başına kriter sayısı temaları sessizce ağırlıklandırır.',
             },
           },
           next: RANKING_START,
@@ -928,7 +928,7 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
       stage: 'weighting',
       question: {
         en: 'What can the experts give you?',
-        tr: 'Uzmanlar sana ne verebilir?',
+        tr: 'Uzmanlar size ne verebilir?',
       },
       options: [
         {
@@ -995,7 +995,7 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
       stage: 'weighting',
       question: {
         en: 'Do some criteria measure nearly the same thing (strongly correlated)?',
-        tr: 'Bazı kriterler neredeyse aynı şeyi mi ölçüyor (aralarında yüksek korelasyon var mı)?',
+        tr: 'Bazı kriterler neredeyse aynı şeyi mi ölçüyor (yüksek korelasyon)?',
       },
       options: [
         {
@@ -1004,8 +1004,8 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           recommend: {
             methodIds: ['critic'],
             reason: {
-              en: 'CRITIC lowers the weight of criteria that tell the same story, so redundant criteria share weight instead of being counted twice. It needs at least 4 alternatives for stable correlations.',
-              tr: 'CRITIC aynı şeyi söyleyen kriterlerin ağırlığını düşürür; tekrarlanan kriterler iki kez sayılmak yerine ağırlığı paylaşır. Kararlı korelasyonlar için en az 4 alternatif ister.',
+              en: 'CRITIC lowers the weight of criteria that tell the same story, so redundant criteria share weight instead of counting twice (stable correlations need 4 or more alternatives).',
+              tr: 'CRITIC aynı bilgiyi taşıyan kriterlerin ağırlığını düşürür; bu kriterler iki kez sayılmak yerine ağırlığı paylaşır (kararlı korelasyon için en az 4 alternatif gerekir).',
             },
           },
           next: RANKING_START,
@@ -1027,8 +1027,8 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           recommend: {
             methodIds: ['lopcow', 'sd'],
             reason: {
-              en: 'Both start with min-max normalization, which accepts any sign. LOPCOW gives flatter weights than Entropy; SD is the simplest baseline.',
-              tr: 'İkisi de her işareti kabul eden min-maks normalizasyonuyla başlar. LOPCOW Entropiden daha düz ağırlıklar verir; SD en basit karşılaştırma tabanıdır.',
+              en: 'Both start with min-max normalization, which accepts any sign; LOPCOW gives flatter weights than Entropy, and SD is the simplest baseline.',
+              tr: 'İkisi de her işareti kabul eden min-maks normalizasyonuyla başlar; LOPCOW Entropiden daha düz ağırlık verir, SD ise en basit karşılaştırma tabanıdır.',
             },
           },
           next: RANKING_START,
@@ -1039,8 +1039,8 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           recommend: {
             methodIds: ['entropy', 'sd'],
             reason: {
-              en: 'Entropy accepts zeros (0 ln 0 = 0) as long as no column sums to 0. MEREC is excluded because it takes the logarithm of every value.',
-              tr: 'Entropi, hiçbir sütunun toplamı 0 olmadıkça sıfırı kabul eder (0 ln 0 = 0). MEREC her değerin logaritmasını aldığı için dışarıda kalır.',
+              en: 'Entropy accepts zeros (0 ln 0 = 0) as long as no column sums to 0, while MEREC is excluded because it takes the logarithm of every value.',
+              tr: 'Entropi, hiçbir sütunun toplamı 0 olmadıkça sıfırı kabul eder (0 ln 0 = 0); MEREC ise her değerin logaritmasını aldığı için dışarıda kalır.',
             },
           },
           next: RANKING_START,
@@ -1051,8 +1051,8 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           recommend: {
             methodIds: ['entropy', 'merec'],
             reason: {
-              en: 'Entropy weights by dispersion; MEREC by how much removing a criterion changes the scores. Entropy becomes erratic when the data are very homogeneous; MEREC is sensitive to single outliers.',
-              tr: 'Entropi yayılıma göre, MEREC bir kriteri çıkarmanın puanları ne kadar değiştirdiğine göre ağırlık verir. Veri çok homojense Entropi oynaklaşır; MEREC tek tek uç değerlere duyarlıdır.',
+              en: 'Entropy weights by dispersion and turns erratic on very homogeneous data; MEREC weights by how much removing a criterion changes the scores and is sensitive to single outliers.',
+              tr: 'Entropi yayılıma göre ağırlık verir ve çok homojen veride oynaklaşır; MEREC bir kriteri çıkarmanın puanları ne kadar değiştirdiğine bakar ve tek tek uç değerlere duyarlıdır.',
             },
           },
           next: RANKING_START,
@@ -1063,8 +1063,8 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
       id: 'result-type',
       stage: 'ranking',
       question: {
-        en: 'What kind of result do you need: a full ranking, a shortlist, or a partial order that may leave some pairs incomparable?',
-        tr: 'Nasıl bir sonuç gerekiyor: tam sıralama mı, kısa liste mi, bazı çiftleri kıyaslanamaz bırakabilen kısmi bir üstünlük ilişkisi mi?',
+        en: 'Which result do you need: full ranking, shortlist or partial order?',
+        tr: 'Nasıl bir sonuç gerekiyor: tam sıralama, kısa liste ya da kısmi sıralama?',
       },
       options: [
         { id: 'full', label: { en: 'A full ranking', tr: 'Tam sıralama' }, next: 'compensation' },
@@ -1079,15 +1079,15 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
             },
           },
         },
-        { id: 'partial', label: { en: 'A partial order is fine', tr: 'Kısmi bir sıralama yeterli' }, next: 'veto' },
+        { id: 'partial', label: { en: 'A partial order, some pairs left incomparable', tr: 'Kısmi sıralama, bazı çiftler kıyaslanamaz kalabilir' }, next: 'veto' },
       ],
     },
     {
       id: 'veto',
       stage: 'ranking',
       question: {
-        en: 'Should one very bad value block an alternative, however good it is elsewhere (veto)?',
-        tr: 'Tek bir çok kötü değer, alternatif başka yerlerde ne kadar iyi olursa olsun onu durdurmalı mı (veto)?',
+        en: 'Should one very bad value block an otherwise good alternative (veto)?',
+        tr: 'Çok kötü tek bir değer, iyi bir alternatifi elemeli mi (veto)?',
       },
       options: [
         {
@@ -1107,8 +1107,8 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           recommend: {
             methodIds: ['promethee-ii'],
             reason: {
-              en: 'PROMETHEE I shows the partial order (incomparable pairs) and PROMETHEE II adds a complete ranking from the same flows. It has no veto.',
-              tr: 'PROMETHEE I kısmi sıralamayı (kıyaslanamaz çiftleri) gösterir, PROMETHEE II aynı akışlardan tam bir sıralama ekler. Vetosu yoktur.',
+              en: 'PROMETHEE I shows the partial order (incomparable pairs) and PROMETHEE II adds a complete ranking from the same flows, without a veto.',
+              tr: 'PROMETHEE I kısmi sıralamayı (kıyaslanamaz çiftleri) gösterir, PROMETHEE II aynı akışlardan vetosuz tam bir sıralama ekler.',
             },
           },
         },
@@ -1118,7 +1118,7 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
       id: 'compensation',
       stage: 'ranking',
       question: {
-        en: 'Can a strength on one criterion make up for a weakness on another?',
+        en: 'Can strength on one criterion make up for weakness on another?',
         tr: 'Bir kriterdeki güç, başka bir kriterdeki zayıflığı telafi edebilir mi?',
       },
       options: [
@@ -1129,8 +1129,8 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           recommend: {
             methodIds: ['promethee-ii'],
             reason: {
-              en: 'Bounded preference functions cap how much one large advantage can buy, and the net flow still gives a complete ranking. If a weakness must never be compensated and a partial order is acceptable, look at ELECTRE III.',
-              tr: 'Sınırlı tercih fonksiyonları tek bir büyük üstünlüğün ne kadar şey satın alabileceğini sınırlar ve net akış yine tam bir sıralama verir. Bir zayıflık asla telafi edilmemeliyse ve kısmi sıralama kabul edilebilirse ELECTRE III\'e bak.',
+              en: 'Bounded preference functions cap what one large advantage can buy while the net flow still ranks fully; if a weakness must never be compensated and a partial order is fine, see ELECTRE III.',
+              tr: 'Sınırlı tercih fonksiyonları tek bir büyük üstünlüğün etkisini sınırlar, net akış yine tam sıralama verir; zayıflık hiç telafi edilmemeliyse ve kısmi sıralama yeterliyse ELECTRE III\'e bakın.',
             },
           },
         },
@@ -1140,8 +1140,8 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
       id: 'small-differences',
       stage: 'ranking',
       question: {
-        en: 'Are small differences between values meaningless, below some threshold you can name?',
-        tr: 'Adını koyabileceğin bir eşiğin altındaki küçük farklar anlamsız mı?',
+        en: 'Are differences below a threshold you can name meaningless?',
+        tr: 'Belirleyebileceğiniz bir eşiğin altındaki farklar anlamsız mı?',
       },
       options: [
         {
@@ -1151,7 +1151,7 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
             methodIds: ['promethee-ii'],
             reason: {
               en: 'PROMETHEE lets you set per criterion which difference is negligible (q) and which is decisive (p), in the units of the criterion.',
-              tr: 'PROMETHEE her kriter için hangi farkın önemsiz (q), hangisinin belirleyici (p) olduğunu kriterin kendi biriminde belirlemene izin verir.',
+              tr: 'PROMETHEE her kriter için hangi farkın önemsiz (q), hangisinin belirleyici (p) olduğunu kriterin kendi biriminde belirlemenize izin verir.',
             },
           },
         },
@@ -1172,8 +1172,8 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           recommend: {
             methodIds: ['vikor', 'mabac', 'cocoso'],
             reason: {
-              en: 'Their min-max or linear normalization accepts any sign. TOPSIS can compute with negatives, but its result then depends on where zero is.',
-              tr: 'Min-maks ya da doğrusal normalizasyonları her işareti kabul eder. TOPSIS negatif değerlerle de hesap yapar, ama sonucu sıfırın nerede olduğuna bağlı kalır.',
+              en: 'Their min-max or linear normalization accepts any sign; TOPSIS also computes with negatives, but its result then depends on where zero is.',
+              tr: 'Min-maks ya da doğrusal normalizasyonları her işareti kabul eder; TOPSIS negatif değerlerle de hesap yapar, ama sonucu sıfırın nerede olduğuna bağlı kalır.',
             },
           },
         },
@@ -1183,8 +1183,8 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           recommend: {
             methodIds: ['topsis', 'vikor', 'mabac'],
             reason: {
-              en: 'These accept zeros (TOPSIS as long as no column is all zero). Ratio-based methods (WASPAS, COPRAS, ARAS, MARCOS) are excluded.',
-              tr: 'Bunlar sıfırı kabul eder (TOPSIS, tamamı sıfır olan sütun olmadıkça). Orana dayalı yöntemler (WASPAS, COPRAS, ARAS, MARCOS) dışarıda kalır.',
+              en: 'These accept zeros (TOPSIS as long as no column is all zero), while ratio-based methods (WASPAS, COPRAS, ARAS, MARCOS) are excluded.',
+              tr: 'Bunlar sıfırı kabul eder (TOPSIS, tamamı sıfır olan sütun olmadıkça); orana dayalı yöntemler (WASPAS, COPRAS, ARAS, MARCOS) dışarıda kalır.',
             },
           },
         },
@@ -1196,7 +1196,7 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
       stage: 'ranking',
       question: {
         en: 'Which kind of score will your readers understand best?',
-        tr: 'Okuyucuların hangi tür skoru en iyi anlar?',
+        tr: 'Okuyucularınız hangi tür skoru en iyi anlar?',
       },
       options: [
         {
@@ -1227,8 +1227,8 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           recommend: {
             methodIds: ['saw', 'waspas'],
             reason: {
-              en: 'SAW is the most transparent method. WASPAS blends it with the weighted product, which punishes very weak values harder.',
-              tr: 'SAW en şeffaf yöntemdir. WASPAS onu çok zayıf değerleri daha sert cezalandıran ağırlıklı çarpımla harmanlar.',
+              en: 'SAW is the most transparent method, and WASPAS blends it with the weighted product, which punishes very weak values harder.',
+              tr: 'SAW en şeffaf yöntemdir; WASPAS onu çok zayıf değerleri daha sert cezalandıran ağırlıklı çarpımla harmanlar.',
             },
           },
         },
@@ -1250,7 +1250,7 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
             methodIds: ['aras', 'copras'],
             reason: {
               en: 'ARAS reports each alternative as a percentage of an optimal alternative you can define; COPRAS as a percentage of the best, with benefits and costs summed separately.',
-              tr: 'ARAS her alternatifi tanımlayabileceğin optimal bir alternatifin yüzdesi olarak verir; COPRAS ise fayda ve maliyetleri ayrı toplayarak en iyinin yüzdesi olarak.',
+              tr: 'ARAS her alternatifi tanımlayabileceğiniz optimal bir alternatifin yüzdesi olarak verir; COPRAS ise fayda ve maliyetleri ayrı toplayarak en iyinin yüzdesi olarak.',
             },
           },
         },

@@ -12,7 +12,7 @@ export const electreI: MethodContent = {
     authors: 'Roy, B.',
     year: 1968,
     title: 'Classement et choix en présence de points de vue multiples (la méthode ELECTRE)',
-    venue: 'Revue française d\'informatique et de recherche opérationnelle 2(8), 57-75',
+    venue: "Revue française d'informatique et de recherche opérationnelle 2(8), 57-75",
     doi: '10.1051/ro/196802V100571',
     note: {
       en: 'Earlier SEMA report: Benayoun, Roy & Sussmann (1966). The normalized textbook variant common in Turkish papers follows Hwang & Yoon (1981) and Yoon & Hwang (1995).',
@@ -21,23 +21,23 @@ export const electreI: MethodContent = {
   },
   steps: [
     {
-      title: { en: 'Orient all criteria', tr: 'Tüm kriterleri aynı yöne çevir' },
+      title: { en: 'Orient all criteria', tr: 'Tüm kriterlerin aynı yöne çevrilmesi' },
       tex: String.raw`g_j(a) = \begin{cases} x_{aj} & j \in J^{+} \\ -x_{aj} & j \in J^{-} \end{cases}`,
     },
     {
       title: { en: 'Concordance', tr: 'Uyum' },
       tex: String.raw`C(a,b) = \frac{\sum_{j:\, g_j(a) \ge g_j(b)} w_j}{\sum_{j} w_j}`,
       note: {
-        en: 'The weighted share of criteria on which a is at least as good as b. Ties count as concordant.',
-        tr: "a'nın en az b kadar iyi olduğu kriterlerin ağırlıklı payı. Eşitlikler uyumlu sayılır.",
+        en: 'The weighted share of criteria on which a is at least as good as b; ties count as concordant.',
+        tr: "a'nın en az b kadar iyi olduğu kriterlerin ağırlıklı payı; eşitlikler uyumlu sayılır.",
       },
     },
     {
       title: { en: 'Discordance', tr: 'Uyumsuzluk' },
       tex: String.raw`D(a,b) = \frac{\max\left(0,\ \max_j \left[g_j(b) - g_j(a)\right]\right)}{\delta}, \qquad \delta = \max_j \left(\max_i g_{ij} - \min_i g_{ij}\right)`,
       note: {
-        en: 'Roy variant: delta is the largest range on the common scale. Dividing each difference by its own criterion range is an option that removes the common-scale requirement.',
-        tr: 'Roy varyantı: delta ortak ölçekteki en geniş aralıktır. Her farkı kendi kriterinin aralığına bölmek, ortak ölçek şartını kaldıran bir seçenektir.',
+        en: 'Roy variant: delta is the largest range on the common scale; dividing each difference by its own criterion range is an option that removes the common-scale requirement.',
+        tr: 'Roy varyantı: delta ortak ölçekteki en geniş aralıktır; her farkı kendi kriterinin aralığına bölmek ortak ölçek şartını kaldıran bir seçenektir.',
       },
     },
     {
@@ -48,8 +48,8 @@ export const electreI: MethodContent = {
       title: { en: 'Kernel', tr: 'Çekirdek' },
       tex: String.raw`K \subseteq A: \quad \nexists\, a, b \in K:\ a \mathrel{S} b, \qquad \forall\, b \notin K\ \exists\, a \in K:\ a \mathrel{S} b`,
       note: {
-        en: 'First merge every cycle of S into one class, then repeatedly take the classes with no incoming arc and delete what they outrank. No member outranks another; every non-member is outranked by some member.',
-        tr: "Önce S içindeki her döngü tek bir sınıfa birleştirilir; sonra gelen oku olmayan sınıflar alınır ve üstün geldikleri silinir, bu tekrarlanır. Hiçbir üye diğerine üstün değildir; üye olmayan her alternatife bir üye üstün gelir.",
+        en: 'Merge every cycle of S into one class, then repeatedly take the classes with no incoming arc and delete what they outrank, so no member outranks another and every non-member is outranked by some member.',
+        tr: 'S içindeki her döngü tek sınıfa birleştirilir, sonra kendisine ok gelmeyen sınıflar alınıp üstün geldikleri silinir ve bu tekrarlanır; böylece hiçbir üye diğerine üstün gelmez, üye olmayan her alternatife bir üye üstün gelir.',
       },
     },
   ],
@@ -78,11 +78,10 @@ export const electreI: MethodContent = {
   reference: {
     source: 'Wang, X.; Triantaphyllou, E. (2008). Ranking irregularities when evaluating alternatives by using some ELECTRE methods. Omega 36(1), 45-63',
     doi: '10.1016/j.omega.2005.12.003',
-    table: 'Section 3.1, pp. 48-49 (concordance and discordance matrices)',
     match: 'match',
     note: {
-      en: 'Galway wastewater plant, 5 alternatives, 7 criteria. Concordance and discordance matrices match exactly. The paper goes on to ELECTRE II, so no kernel is published; ours is {A2 = A3 (a cycle), A5}. A second check on the Turkish Hwang-Yoon variant (Soner & Önüt 2006) matches only partly because of two apparent typos in its discordance table.',
-      tr: 'Galway atık su tesisi, 5 alternatif, 7 kriter. Uyum ve uyumsuzluk matrisleri birebir örtüşüyor. Makale ELECTRE II ile devam ettiği için çekirdek yayımlanmamış; bizim çekirdeğimiz {A2 = A3 (döngü), A5}. Türkçe Hwang-Yoon varyantı üzerindeki ikinci kontrol (Soner ve Önüt 2006) uyumsuzluk tablosundaki iki olası baskı hatası yüzünden kısmen örtüşüyor.',
+      en: 'Published example (Section 3.1, pp. 48-49, concordance and discordance matrices); this method is not computed here yet, only recomputed during research. Galway wastewater plant, 5 alternatives, 7 criteria. Concordance and discordance matrices match exactly. The paper goes on to ELECTRE II, so no kernel is published; the recomputed kernel is {A2 = A3 (a cycle), A5}. A second check on the Turkish Hwang-Yoon variant (Soner & Önüt 2006) matches only partly because of two apparent typos in its discordance table.',
+      tr: 'Yayımlanmış örnek (Bölüm 3.1, s. 48-49, uyum ve uyumsuzluk matrisleri); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. Galway atık su tesisi, 5 alternatif, 7 kriter. Uyum ve uyumsuzluk matrisleri birebir örtüşüyor. Makale ELECTRE II ile devam ettiği için çekirdek yayımlanmamış; yeniden hesaplanan çekirdek {A2 = A3 (döngü), A5}. Türkçe Hwang-Yoon varyantı üzerindeki ikinci kontrol (Soner ve Önüt 2006) uyumsuzluk tablosundaki iki olası baskı hatası yüzünden kısmen örtüşüyor.',
     },
   },
   sources: [
@@ -96,15 +95,15 @@ export const electreI: MethodContent = {
   ],
   en: {
     summary:
-      'ELECTRE I keeps an alternative in the running unless another one beats it on enough of the weighted criteria and is never much worse on any single criterion. The result is a short list (the kernel) of alternatives that nobody convincingly beats, not a full ranking. Use it to screen a long list down to a few candidates.',
+      'ELECTRE I drops an alternative only if another beats it on enough weighted criteria and is never much worse on any. The result is a shortlist (the kernel), not a full ranking.',
     whenToUse: [
       'The task is choice or screening, not ranking.',
       'You want a transparent majority rule with a veto.',
       'Teaching outranking before ELECTRE III or PROMETHEE.',
     ],
     whenNot: [
-      'A complete ranking is required. The Turkish "net concordance and net discordance" add-on gives one, but that is a different variant.',
-      'Criteria are on different scales and the Roy variant is used without a common scale: its discordance compares raw differences across criteria.',
+      'A complete ranking is required (the Turkish net add-on is another variant).',
+      'Roy variant on mixed scales: discordance compares raw differences across criteria.',
       'You cannot justify the thresholds c and d.',
     ],
     inputs: [
@@ -113,37 +112,33 @@ export const electreI: MethodContent = {
       'Hwang-Yoon variant: thresholds are the means of C and D; needs a normalization.',
     ],
     pitfalls: [
-      'With mixed units the criterion with the largest unit dominates D. Check the scale or use per-criterion ranges.',
-      'S can contain cycles; the kernel exists only after merging them. pyDecision returns a kernel that violates internal stability in one of our tests.',
+      'With mixed units the criterion with the largest unit dominates D; check the scale or use per-criterion ranges.',
+      'S can contain cycles, and the kernel exists only after merging them.',
       'The kernel changes with c and d; show it on a small grid of thresholds.',
-      'In the Hwang-Yoon variant the thresholds are averages over the current set, so adding or removing an alternative can change the dominance among the others.',
-      'A constant column is concordant for every pair and inflates C.',
     ],
   },
   tr: {
     summary:
-      'ELECTRE I bir alternatifi, ancak başka bir alternatif onu ağırlıklı kriterlerin yeterince çoğunda geçiyor ve hiçbir kriterde ondan çok kötü kalmıyorsa eler. Sonuç tam bir sıralama değil, kimsenin ikna edici biçimde geçemediği kısa bir listedir (çekirdek). Uzun bir listeyi birkaç adaya indirmek için kullan.',
+      'ELECTRE I bir alternatifi yalnız başka biri onu yeterince ağırlıklı kriterde geçiyor ve hiçbir kriterde çok geride kalmıyorsa eler. Sonuç tam sıralama değil, kısa bir listedir (çekirdek).',
     whenToUse: [
       'İş sıralama değil, seçim ya da eleme.',
-      'Veto hakkı olan şeffaf bir çoğunluk kuralı istiyorsun.',
+      'Veto hakkı olan şeffaf bir çoğunluk kuralı istiyorsunuz.',
       'ELECTRE III ya da PROMETHEE öncesinde üstünlük mantığını öğretmek.',
     ],
     whenNot: [
-      'Tam sıralama gerekiyor. Türkçe literatürdeki "net uyum ve net uyumsuzluk" eki bir sıralama verir, ama o ayrı bir varyanttır.',
-      'Kriterler farklı ölçeklerde ve Roy varyantı ortak ölçek olmadan kullanılıyor: uyumsuzluk kriterler arasında ham farkları karşılaştırır.',
-      'c ve d eşiklerini gerekçelendiremiyorsun.',
+      'Tam sıralama gerekiyor (Türkçe literatürdeki net uyum eki ayrı bir varyant).',
+      'Ortak ölçek olmadan Roy varyantı: uyumsuzluk ham farkları kriterler arasında karşılaştırır.',
+      'c ve d eşiklerini gerekçelendiremiyorsunuz.',
     ],
     inputs: [
       'Karar matrisi, kriter yönleri, pozitif ağırlıklar.',
-      "Roy varyantı: 0,5 ile 1 arasında uyum eşiği c (varsayılan 0,75) ve 0 ile 1 arasında uyumsuzluk eşiği d (varsayılan 0,50). Kriterler tek bir ölçeği paylaşmalı.",
+      'Roy varyantı: 0,5 ile 1 arasında uyum eşiği c (varsayılan 0,75) ve 0 ile 1 arasında uyumsuzluk eşiği d (varsayılan 0,50). Kriterler tek bir ölçeği paylaşmalı.',
       'Hwang-Yoon varyantı: eşikler C ve D ortalamalarıdır; normalizasyon gerekir.',
     ],
     pitfalls: [
-      "Karışık birimlerde en büyük birimli kriter D'ye hükmeder. Ölçeği denetle ya da kriter başına aralık kullan.",
-      "S döngü içerebilir; çekirdek ancak döngüler birleştirildikten sonra tanımlıdır. pyDecision testlerimizden birinde iç kararlılığı bozan bir çekirdek döndürüyor.",
-      'Çekirdek c ve d ile değişir; küçük bir eşik ızgarasında göster.',
-      'Hwang-Yoon varyantında eşikler mevcut kümenin ortalamasıdır; alternatif eklemek ya da çıkarmak diğerleri arasındaki baskınlığı değiştirebilir.',
-      "Sabit bir sütun her çift için uyumludur ve C'yi şişirir.",
+      "Karışık birimlerde en büyük birimli kriter D'ye hükmeder; ölçeği denetleyin ya da kriter başına aralık kullanın.",
+      'S döngü içerebilir; çekirdek ancak döngüler birleştirildikten sonra tanımlıdır.',
+      'Çekirdek c ve d ile değişir; küçük bir eşik ızgarasında gösterin.',
     ],
   },
 }
