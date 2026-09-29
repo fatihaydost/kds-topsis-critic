@@ -1,4 +1,9 @@
-<h1><img src="docs/brand/lockup-horizontal.svg" alt="MCDM Workbench" height="48"></h1>
+<h1>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/lockup-horizontal-dark.svg">
+    <img src="docs/brand/lockup-horizontal.svg" alt="MCDM Workbench" height="48">
+  </picture>
+</h1>
 
 A browser tool for multi-criteria decision analysis: weight criteria with CRITIC, rank alternatives with TOPSIS and read every intermediate step, in English or Turkish.
 
