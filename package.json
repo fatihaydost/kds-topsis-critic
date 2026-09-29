@@ -1,7 +1,13 @@
 {
-  "name": "kds-topsis-critic",
+  "name": "mcdm-workbench",
   "private": true,
   "version": "0.1.0",
+  "description": "Multi-criteria decision analysis in the browser: CRITIC weights, TOPSIS ranking and the full worked calculation, in English and Turkish.",
+  "homepage": "https://fatihaydost.github.io/kds-topsis-critic/",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",

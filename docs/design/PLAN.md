@@ -31,6 +31,13 @@ Status as of 2026-09-29 evening. Read DESIGN.md first, then FOUNDATION.md (writt
    and the method-choice guide, all from `src/content/`.
 3. **Review** (reviewer report in scratchpad `review/`, then fix round): screenshots in light/dark at 1440 and 390, keyboard pass, contrast, copy audit (no em dash),
    DESIGN.md banned-patterns pass; an independent reviewer agent; fix round.
-4. **Ship**: README (English, screenshots), GitHub Pages workflow. Push and deploy need Fatih's approval.
+4. **Ship**: prepared locally; push and enabling Pages need Fatih. `README.md` (English, screenshots in
+   `docs/screenshots/`), `.github/workflows/pages.yml` (install with the frozen lockfile, typecheck, test, build,
+   deploy `dist/` to Pages on every push to master), `.nvmrc` (Node 24), package metadata. The workflow steps pass
+   locally in a clean clone under Node 24; deep links and the 404 fallback work under `/kds-topsis-critic/`.
+   Fatih's steps, in order:
+   1. GitHub, repo `fatihaydost/kds-topsis-critic`: Settings → Pages → Build and deployment → Source: **GitHub Actions**.
+   2. Push master. The `Pages` workflow runs and publishes https://fatihaydost.github.io/kds-topsis-critic/
+      (check the run under Actions; it can be re-run by hand with "Run workflow").
 5. After v1: robustness panel (weight perturbation, Monte Carlo, rank agreement), then methods one at a
    time following the cards (review card, implement, reference test, method page).
