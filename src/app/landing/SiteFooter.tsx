@@ -4,9 +4,8 @@ import { REPO_URL } from '../shell/TopBar'
 import { textLink } from './usePageMeta'
 
 /**
- * Footer of the landing and method pages: source, author, licence and the privacy note. The source
+ * Footer of the landing and method pages: source, author and the privacy note. The source
  * link matters most on phones, where the top bar hides its GitHub icon.
- * The repo has no LICENSE file yet, so the licence is named without a link.
  */
 export function SiteFooter() {
   const { t } = useTranslation()
@@ -22,7 +21,6 @@ export function SiteFooter() {
             </a>
           </li>
           <li>{t('landing.footer.author')}</li>
-          <li>{t('landing.footer.license')}</li>
         </ul>
       </div>
     </footer>

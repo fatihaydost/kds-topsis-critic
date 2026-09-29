@@ -110,6 +110,11 @@ problem and takes focus. Messages are specific and fixable: "Weights sum to 0.95
 
 ## Copy
 
+**Less text, more seeing (owner review, 29.09).** Every section is a short headline, at most one
+sentence, then a visual or the real component. Details live behind a disclosure, never on the page by
+default. Method pages open with a picture of the method's idea before any formula. Test for every
+screen: can someone get the point in five seconds without reading a paragraph?
+
 Plain, specific, equal quality in Turkish and English. Buttons are verb plus object ("Calculate ranking",
 "Download .xlsx"). No buzzwords (unlock, seamless, powerful, elevate), no emoji, no em dash or en dash
 anywhere visible, no fake numbers. Every number on the site comes from a computation or a cited source.
