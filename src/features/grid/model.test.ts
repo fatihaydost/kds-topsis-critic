@@ -25,6 +25,7 @@ import {
   redo,
   sameProblem,
   toGrid,
+  setType,
   toggleType,
   undo,
   writeCell,
@@ -87,7 +88,14 @@ describe('keyboard commands', () => {
     expect(commandForKey({ key: 'x' }, 'corner')).toBeNull()
     expect(commandForKey({ key: 'Delete' }, 'value')).toEqual({ type: 'clear' })
     expect(commandForKey({ key: 'Backspace' }, 'value')).toEqual({ type: 'clear' })
-    expect(commandForKey({ key: ' ' }, 'criterion-type')).toEqual({ type: 'toggle-type' })
+    // A direction cell opens its menu; no single key flips it.
+    for (const k of [{ key: ' ' }, { key: 'Enter' }, { key: 'F2' }, { key: 'ArrowDown', alt: true }]) {
+      expect(commandForKey(k, 'criterion-type')).toEqual({ type: 'type-menu' })
+    }
+    expect(commandForKey({ key: 'Enter', shift: true }, 'criterion-type')).toEqual({ type: 'move', nav: 'shift-enter', extend: false })
+    expect(commandForKey({ key: 'ArrowDown' }, 'criterion-type')).toEqual({ type: 'move', nav: 'down', extend: false })
+    expect(commandForKey({ key: 'c' }, 'criterion-type')).toBeNull()
+    expect(commandForKey({ key: ' ' }, 'value')).toEqual({ type: 'edit', mode: 'replace', text: ' ' })
     expect(commandForKey({ key: 'z', ctrl: true }, 'value')).toEqual({ type: 'undo' })
     expect(commandForKey({ key: 'Z', ctrl: true, shift: true }, 'value')).toEqual({ type: 'redo' })
     expect(commandForKey({ key: 'y', ctrl: true }, 'value')).toEqual({ type: 'redo' })
@@ -136,6 +144,8 @@ describe('cells', () => {
     expect(cellText(p, toGrid(1, 1), fmt)).toBe('4')
     expect(cellText(p, { row: 1, col: 2 }, fmt)).toBe('cost')
     expect(toggleType(p, 1).criteria[1]!.type).toBe('benefit')
+    expect(setType(p, 1, 'benefit').criteria[1]!.type).toBe('benefit')
+    expect(setType(p, 1, p.criteria[1]!.type)).toBe(p)
   })
 
   it('clears a range but keeps types', () => {

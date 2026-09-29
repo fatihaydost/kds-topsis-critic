@@ -172,8 +172,12 @@
 }
 
 .typeButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  max-width: 100%;
   height: 24px;
-  padding: 0 4px;
+  padding: 0 2px 0 4px;
   border: 0;
   border-radius: var(--radius-control);
   background: transparent;
@@ -183,6 +187,11 @@
   cursor: pointer;
 }
 
+.typeLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .type[data-type='cost'] .typeButton {
   color: var(--text);
 }
@@ -190,6 +199,103 @@
 .typeButton:hover {
   background: var(--surface-2);
   color: var(--text);
+}
+
+/* The caret says "this opens a choice"; it is the one-click target for the menu. */
+.caret {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 20px;
+  border-radius: var(--radius-control);
+  color: var(--text-3);
+}
+
+.typeButton:hover .caret,
+.type[aria-expanded='true'] .caret {
+  color: var(--text);
+}
+
+/* A direction that just changed: the cell tints in the accent and fades back (1 s). */
+.changed {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--accent-bg);
+  box-shadow: inset 0 -2px 0 var(--accent);
+  pointer-events: none;
+  animation: type-changed 1s var(--ease) 0.2s forwards;
+}
+
+.type > .typeButton {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes type-changed {
+  to {
+    opacity: 0;
+  }
+}
+
+/* Without motion the tint stays until it is removed (1.2 s), with no fade. */
+@media (prefers-reduced-motion: reduce) {
+  .changed {
+    animation: none;
+  }
+}
+
+/* The benefit / cost menu (portalled next to the cell). */
+.typeMenu {
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  min-width: 136px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-float);
+  background: var(--surface);
+  box-shadow: var(--shadow-float);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.typeOption {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 10px 0 6px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.typeOption:hover,
+.typeOption:focus-visible {
+  background: var(--surface-2);
+}
+
+.typeOption:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.typeOption[aria-checked='true'] {
+  font-weight: 500;
+}
+
+.check {
+  width: 14px;
+  color: var(--accent);
+  text-align: center;
 }
 
 /* Row hover, selection, cursor, errors ------------------------------------------------------ */

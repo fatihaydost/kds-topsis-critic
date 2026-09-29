@@ -12,7 +12,8 @@ import {
   type MouseEvent,
   type ReactNode,
 } from 'react'
-import type { Criterion } from '../../core/types'
+import * as Popover from '@radix-ui/react-popover'
+import type { Criterion, CriterionType } from '../../core/types'
 import s from './DecisionGrid.module.css'
 import {
   applyPaste,
@@ -43,8 +44,8 @@ import {
   redo,
   sameProblem,
   samePos,
+  setType,
   toData,
-  toggleType,
   undo,
   writeCell,
   type EditMode,
@@ -73,7 +74,7 @@ export type GridLabels = {
   direction: string
   benefit: string
   cost: string
-  /** Hint read on a type cell, e.g. "Press Space to switch between benefit and cost." */
+  /** Hint read on a type cell, e.g. "Enter or Space opens the benefit / cost choice." */
   switchDirection: string
   addAlternative: string
   addCriterion: string
@@ -93,8 +94,8 @@ export type GridLabels = {
   newAlternative: (n: number) => string
   newCriterion: (n: number) => string
   /**
-   * Announced (and shown) after a direction flips, since one click on the direction cell flips it:
-   * e.g. "Pixel density is now Cost. Ctrl+Z undoes it."
+   * Announced (and shown) after a direction changes in its menu, e.g.
+   * "Pixel density is now Cost. Ctrl+Z undoes it."
    */
   typeChanged: (criterion: string, type: string) => string
 }
@@ -131,8 +132,8 @@ const key = (p: Pos): string => `${p.row}:${p.col}`
  *
  * Keys: arrows, Tab / Shift+Tab, Enter / Shift+Enter, Home / End, Ctrl+Home / Ctrl+End, PageUp /
  * PageDown move; Shift extends the selection. Typing replaces the cell, F2 or double click edits
- * it, Esc cancels. Delete / Backspace clear the selection. Space switches benefit / cost on the
- * type row. Ctrl+Z / Ctrl+Y (Ctrl+Shift+Z) undo and redo. Copy, cut and paste use TSV; a block
+ * it, Esc cancels. Delete / Backspace clear the selection. On the type row Enter or Space opens
+ * the benefit / cost menu (a click only selects). Ctrl+Z / Ctrl+Y (Ctrl+Shift+Z) undo and redo. Copy, cut and paste use TSV; a block
  * pasted from Excel or Sheets fills from the focused cell and grows the grid; pasted on the
  * top-left corner it replaces the whole table.
  */
@@ -158,6 +159,10 @@ export function DecisionGrid({
   const [anchorRaw, setAnchorRaw] = useState<Pos>({ row: HEADER_ROWS, col: HEADER_COLS })
   const [editing, setEditing] = useState<Editing | null>(null)
   const [notice, setNotice] = useState<Notice | null>(null)
+  /** Criterion whose direction menu is open. */
+  const [typeMenu, setTypeMenu] = useState<number | null>(null)
+  /** Direction cell that just changed: a short tint so the change is seen where it happened. */
+  const [changed, setChanged] = useState<{ j: number; n: number } | null>(null)
 
   const cursor = clampPos(cursorRaw, size)
   const anchor = clampPos(anchorRaw, size)
@@ -170,6 +175,8 @@ export function DecisionGrid({
   editRef.current = editing
   const dragging = useRef(false)
   const leaving = useRef(false)
+  /** Whether the pressed cell was already the active one: a click there opens the direction menu. */
+  const pressedActive = useRef(false)
 
   const names = useMemo<NameFactory>(
     () => ({ alternative: (i) => labels.newAlternative(i + 1), criterion: (j) => labels.newCriterion(j + 1) }),
@@ -186,6 +193,12 @@ export function DecisionGrid({
     wantFocus.current = false
     cells.current.get(key(cursor))?.focus()
   })
+
+  useEffect(() => {
+    if (!changed) return
+    const id = window.setTimeout(() => setChanged(null), 1200)
+    return () => window.clearTimeout(id)
+  }, [changed])
 
   useEffect(() => {
     const up = () => {
@@ -233,10 +246,14 @@ export function DecisionGrid({
     setNotice(null)
   }
 
-  /** Flips benefit / cost of criterion j and says so, with the undo shortcut. */
-  const flipType = (j: number) => {
-    emit(toggleType(problem, j))
+  /** Sets criterion j's direction from its menu and says so, with the undo shortcut. */
+  const chooseType = (j: number, type: CriterionType) => {
+    setTypeMenu(null)
+    const next = setType(problem, j, type)
+    if (next === problem) return
+    emit(next)
     setNotice({ kind: 'type-changed', j })
+    setChanged((c) => ({ j, n: (c?.n ?? 0) + 1 }))
   }
 
   const openEditor = (pos: Pos, mode: EditMode, draft?: string) => {
@@ -319,9 +336,9 @@ export function DecisionGrid({
         e.preventDefault()
         openEditor(cursor, cmd.mode, cmd.mode === 'replace' ? cmd.text : undefined)
         return
-      case 'toggle-type':
+      case 'type-menu':
         e.preventDefault()
-        flipType(toData(cursor).j)
+        setTypeMenu(toData(cursor).j)
         return
       case 'clear':
         e.preventDefault()
@@ -405,6 +422,7 @@ export function DecisionGrid({
   const onCellMouseDown = (pos: Pos, e: MouseEvent) => {
     leaving.current = false
     if (e.button !== 0) return
+    pressedActive.current = samePos(pos, cursor) && !e.shiftKey
     if (editing && samePos(editing.pos, pos)) return
     dragging.current = true
     select(pos, e.shiftKey)
@@ -616,22 +634,76 @@ export function DecisionGrid({
               </th>
               {criteria.map((c, j) => {
                 const pos = { row: 1, col: j + HEADER_COLS }
+                const open = typeMenu === j
                 return (
                   <td
                     key={j}
                     role="gridcell"
                     className={`${s.cell} ${s.type}`}
                     data-type={c.type}
+                    aria-haspopup="menu"
+                    aria-expanded={open}
                     {...cellAttrs(pos, `${c.name}: ${c.type === 'benefit' ? labels.benefit : labels.cost}`)}
                   >
-                    <button
-                      type="button"
-                      tabIndex={-1}
-                      className={s.typeButton}
-                      onClick={() => flipType(j)}
-                    >
-                      {typeLabel(c)}
-                    </button>
+                    {changed?.j === j && <span key={changed.n} className={s.changed} aria-hidden />}
+                    <Popover.Root open={open} onOpenChange={(o) => !o && setTypeMenu(null)}>
+                      <Popover.Anchor asChild>
+                        {/* One click selects the cell; a click on the selected cell or on the caret opens the menu. */}
+                        <button
+                          type="button"
+                          tabIndex={-1}
+                          aria-hidden
+                          className={s.typeButton}
+                          // Focus stays on the cell (the grid's roving focus), not on this inner button.
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={(e) => {
+                            const onCaret = (e.target as HTMLElement).closest('[data-caret]') !== null
+                            if (open) setTypeMenu(null)
+                            else if (onCaret || pressedActive.current) setTypeMenu(j)
+                          }}
+                        >
+                          <span className={s.typeLabel}>{typeLabel(c)}</span>
+                          <span className={s.caret} data-caret>
+                            <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden focusable="false">
+                              <path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" strokeWidth="1.4" />
+                            </svg>
+                          </span>
+                        </button>
+                      </Popover.Anchor>
+                      <Popover.Portal>
+                        <Popover.Content
+                          asChild
+                          align="end"
+                          side="bottom"
+                          sideOffset={4}
+                          collisionPadding={8}
+                          onOpenAutoFocus={(e) => {
+                            e.preventDefault()
+                            const menu = e.currentTarget as HTMLElement
+                            menu.querySelector<HTMLElement>('[aria-checked="true"]')?.focus()
+                          }}
+                          onCloseAutoFocus={(e) => {
+                            e.preventDefault()
+                            cells.current.get(key(pos))?.focus()
+                          }}
+                          // A press on its own cell is handled by the cell (it closes the menu there).
+                          onInteractOutside={(e) => {
+                            if (cells.current.get(key(pos))?.contains(e.target as Node)) e.preventDefault()
+                          }}
+                        >
+                          <TypeMenu
+                            label={`${c.name}: ${labels.direction}`}
+                            value={c.type}
+                            options={[
+                              { value: 'benefit', text: `↑ ${labels.benefit}` },
+                              { value: 'cost', text: `↓ ${labels.cost}` },
+                            ]}
+                            onChoose={(type) => chooseType(j, type)}
+                            onClose={() => setTypeMenu(null)}
+                          />
+                        </Popover.Content>
+                      </Popover.Portal>
+                    </Popover.Root>
                   </td>
                 )
               })}
@@ -679,6 +751,71 @@ export function DecisionGrid({
           )
         })}
       </div>
+    </div>
+  )
+}
+
+type TypeMenuProps = {
+  label: string
+  value: CriterionType
+  options: { value: CriterionType; text: string }[]
+  onChoose: (type: CriterionType) => void
+  onClose: () => void
+}
+
+/**
+ * Benefit / cost as a two-item menu (menuitemradio): arrows, Home / End move, Enter or Space picks,
+ * Esc closes without a change, Tab closes and returns to the grid. Radix Popover places it.
+ */
+const TypeMenu = ({ label, value, options, onChoose, onClose, ...rest }: TypeMenuProps & Record<string, unknown>) => {
+  const passed = rest as { onKeyDown?: (e: KeyboardEvent<HTMLDivElement>) => void }
+  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    // The menu is portalled but sits inside the grid in React's tree: keep its keys from the grid.
+    e.stopPropagation()
+    passed.onKeyDown?.(e)
+    if (e.defaultPrevented) return
+    const items = [...e.currentTarget.querySelectorAll<HTMLElement>('[role="menuitemradio"]')]
+    const at = items.indexOf(document.activeElement as HTMLElement)
+    let next = -1
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') next = (at + 1) % items.length
+    else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') next = (at - 1 + items.length) % items.length
+    else if (e.key === 'Home') next = 0
+    else if (e.key === 'End') next = items.length - 1
+    else if (e.key === 'Tab') {
+      e.preventDefault()
+      onClose()
+      return
+    } else return
+    e.preventDefault()
+    items[next]?.focus()
+  }
+  return (
+    // Popover.Content (asChild) passes its positioning props, ref and handlers through `rest`.
+    <div
+      {...rest}
+      role="menu"
+      aria-label={label}
+      className={s.typeMenu}
+      onKeyDown={onKeyDown}
+      onMouseDown={(e) => e.stopPropagation()}
+      onDoubleClick={(e) => e.stopPropagation()}
+    >
+      {options.map((o) => (
+        <button
+          key={o.value}
+          type="button"
+          role="menuitemradio"
+          aria-checked={o.value === value}
+          tabIndex={-1}
+          className={s.typeOption}
+          onClick={() => onChoose(o.value)}
+        >
+          <span className={s.check} aria-hidden>
+            {o.value === value ? '✓' : ''}
+          </span>
+          {o.text}
+        </button>
+      ))}
     </div>
   )
 }

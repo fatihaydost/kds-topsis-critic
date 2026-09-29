@@ -163,7 +163,7 @@ export type Command =
   | { type: 'move'; nav: NavKey; extend: boolean }
   | { type: 'edit'; mode: 'replace'; text: string }
   | { type: 'edit'; mode: 'edit' }
-  | { type: 'toggle-type' }
+  | { type: 'type-menu' }
   | { type: 'clear' }
   | { type: 'undo' }
   | { type: 'redo' }
@@ -177,6 +177,11 @@ export function commandForKey(k: KeyInput, kind: CellKind): Command | null {
   const shift = k.shift === true
   const ctrl = k.ctrl === true
   const alt = k.alt === true
+  // A direction cell is a menu button: Enter, Space, F2 or Alt+ArrowDown open the benefit / cost
+  // choice. Nothing flips on a single key or click, so the ranking never changes by accident.
+  if (kind === 'criterion-type' && !ctrl) {
+    if ((k.key === 'Enter' && !shift) || k.key === ' ' || k.key === 'F2' || (alt && k.key === 'ArrowDown')) return { type: 'type-menu' }
+  }
   const arrow = ARROWS[k.key]
   if (arrow) return { type: 'move', nav: arrow, extend: shift }
 
@@ -212,7 +217,6 @@ export function commandForKey(k: KeyInput, kind: CellKind): Command | null {
       return isEditable(kind) ? { type: 'edit', mode: 'edit' } : null
   }
 
-  if (k.key === ' ' && kind === 'criterion-type') return { type: 'toggle-type' }
   if (!alt && k.key.length === 1 && isEditable(kind)) return { type: 'edit', mode: 'replace', text: k.key }
   return null
 }
@@ -324,6 +328,15 @@ export function writeCell(p: GridProblem, pos: Pos, text: string, parse: Parse):
       return { problem: withMatrixCell(p, i, j, v), ok: true }
     }
   }
+}
+
+/** Sets criterion j to benefit or cost (the direction menu). Same object when nothing changes. */
+export function setType(p: GridProblem, j: number, type: CriterionType): GridProblem {
+  const c = p.criteria[j]
+  if (!c || c.type === type) return p
+  const criteria = p.criteria.slice()
+  criteria[j] = { ...c, type }
+  return { ...p, criteria }
 }
 
 export function toggleType(p: GridProblem, j: number): GridProblem {

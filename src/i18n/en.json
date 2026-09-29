@@ -177,7 +177,7 @@
       "direction": "Direction",
       "benefit": "Benefit",
       "cost": "Cost",
-      "switchHint": "Press Space to switch between benefit and cost.",
+      "switchHint": "Enter or Space opens the benefit or cost choice.",
       "addAlternative": "Add alternative",
       "addCriterion": "Add criterion",
       "deleteAlternative": "Delete alternative",

@@ -50,7 +50,7 @@ const labels: GridLabels = {
   direction: t('grid.direction'),          // label of the type row, "Direction"
   benefit: t('criterion.benefit'),         // shown as "↑ Benefit"
   cost: t('criterion.cost'),               // shown as "↓ Cost"
-  switchDirection: t('grid.switchHint'),   // "Press Space to switch between benefit and cost."
+  switchDirection: t('grid.switchHint'),   // "Enter or Space opens the benefit or cost choice."
   addAlternative: t('grid.addAlternative'),
   addCriterion: t('grid.addCriterion'),
   deleteAlternative: t('grid.deleteAlternative'),  // acts on the focused row
@@ -86,11 +86,15 @@ Before computing, turn nulls into NaN (`matrix.map((r) => r.map((v) => v ?? Numb
 
 ### Layout of the grid
 
-Row 1 holds the criterion names, row 2 the direction (`↑ Benefit` / `↓ Cost`, Space or click
-switches it), then one row per alternative with its name in a sticky first column. The grid
+Row 1 holds the criterion names, row 2 the direction (`↑ Benefit` / `↓ Cost` with a caret), then one row per alternative with its name in a sticky first column. The grid
 scrolls sideways inside its own container. Numbers use the UI font with `tabular-nums`, right
 aligned. An invalid cell gets a danger underline, `aria-invalid` and `aria-describedby` to its
 message; the message of the focused cell is also shown under the grid.
+
+A direction never changes on one click or one key. One click selects the cell; a click on the
+selected cell or on its caret, or Enter / Space / F2 / Alt+ArrowDown, opens a two-item menu
+(`menuitemradio`, Radix Popover): arrows move, Enter or Space picks, Esc closes without a change.
+A change tints the cell for a second and is announced with the undo shortcut (`typeChanged`).
 
 ### Keyboard and clipboard
 
@@ -111,7 +115,7 @@ message; the message of the focused cell is also shown under the grid.
 ### Pure model (`grid/model.ts`)
 
 Everything the component does is testable without a DOM (`grid/model.test.ts`):
-`move`, `commandForKey`, `editCommandForKey`, `writeCell`, `clearRange`, `toggleType`,
+`move`, `commandForKey`, `editCommandForKey`, `writeCell`, `clearRange`, `setType`, `toggleType`,
 `insertAlternative` / `deleteAlternative` / `insertCriterion` / `deleteCriterion`, `ensureSize`,
 `detectDelimiter`, `parseDelimited`, `parseClipboard`, `detectHeaders`, `applyPaste`,
 `rangeToTsv`, `sameProblem`, and `createHistory` / `pushHistory` / `undo` / `redo`.

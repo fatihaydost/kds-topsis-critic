@@ -144,12 +144,51 @@ test('grid: Escape then Tab leaves the grid instead of moving cell by cell', asy
   expect(await page.evaluate(() => Boolean(document.activeElement?.closest('[role="grid"]')))).toBe(false)
 })
 
-test('grid: flipping a direction is announced with the undo shortcut', async ({ page }) => {
+test('grid: one click on a direction selects it and changes nothing', async ({ page }) => {
   await page.goto('/app?example=krishnan-2021-smartphones&stage=data')
-  await page.locator('#wb-type-2 button').click()
+  const cell = page.locator('#wb-type-2')
+  await expect(cell).toContainText('Benefit')
+  await cell.locator('button').click()
+  await expect(cell).toBeFocused()
+  await expect(cell).toContainText('Benefit')
+  await expect(page.getByRole('menu')).toHaveCount(0)
+  // Clicking along the direction row (and a Shift+click range) changes nothing either.
+  const row = page.locator('[id^="wb-type-"]')
+  const before = await row.allInnerTexts()
+  for (const j of [0, 1, 3, 4]) await page.locator(`#wb-type-${j} button`).click()
+  await page.locator('#wb-type-0 button').click({ modifiers: ['Shift'] })
+  expect(await row.allInnerTexts()).toEqual(before)
+  await page.goto('/app?stage=ranking')
+  await expect(page.getByTestId('best-sentence')).toHaveText('E ranks first (C = 0.6033).')
+})
+
+test('grid: the direction menu changes it, says so and can be undone', async ({ page }) => {
+  await page.goto('/app?example=krishnan-2021-smartphones&stage=data')
+  const cell = page.locator('#wb-type-2')
+  // Mouse: the caret opens the menu in one click; the option is the deliberate choice.
+  await cell.locator('[data-caret]').click()
+  const menu = page.getByRole('menu', { name: 'Pixel density: Direction' })
+  await expect(menu).toBeVisible()
+  await expect(menu.getByRole('menuitemradio', { name: '↑ Benefit' })).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(menu).toHaveCount(0)
+  await expect(cell).toBeFocused()
+  await expect(cell).toContainText('Benefit')
+  // Keyboard: Enter opens, ArrowDown moves, Enter picks.
+  await page.keyboard.press('Enter')
+  await page.keyboard.press('ArrowDown')
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('menu')).toHaveCount(0)
+  await expect(cell).toBeFocused()
+  await expect(cell).toContainText('Cost')
   await expect(page.getByText('Pixel density is now Cost. Ctrl+Z undoes it.')).toBeVisible()
   await page.keyboard.press('ControlOrMeta+Z')
-  await expect(page.locator('#wb-type-2')).toContainText('Benefit')
+  await expect(cell).toContainText('Benefit')
+  // Mouse: a second click on the selected cell opens the menu too.
+  await cell.locator('button').click()
+  await expect(page.getByRole('menu')).toBeVisible()
+  await page.getByRole('menuitemradio', { name: '↓ Cost' }).click()
+  await expect(cell).toContainText('Cost')
 })
 
 test('Turkish workbench: table references and the page description are Turkish', async ({ page }) => {

@@ -177,7 +177,7 @@
       "direction": "Yön",
       "benefit": "Fayda",
       "cost": "Maliyet",
-      "switchHint": "Fayda ile maliyet arasında geçmek için Boşluk tuşuna basın.",
+      "switchHint": "Fayda ya da maliyet seçimi için Enter veya Boşluk tuşuna basın.",
       "addAlternative": "Alternatif ekle",
       "addCriterion": "Kriter ekle",
       "deleteAlternative": "Alternatifi sil",
