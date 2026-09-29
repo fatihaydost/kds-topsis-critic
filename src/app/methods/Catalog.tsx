@@ -8,7 +8,7 @@ import { Button, EmptyState, SegmentedControl } from '../../ui'
 import { SiteFooter } from '../landing/SiteFooter'
 import { textLink, usePageMeta } from '../landing/usePageMeta'
 import { Guide } from './Guide'
-import { firstSentence, pageContainer, shortOrigin, StatusLabel } from './shared'
+import { firstSentence, pageContainer, StatusLabel } from './shared'
 
 type FamilyFilter = 'all' | MethodFamily
 type StatusFilter = 'all' | MethodStatus
@@ -25,7 +25,6 @@ export default function Catalog() {
     () => allMethods.filter((m) => (family === 'all' || m.family === family) && (status === 'all' || m.status === status)),
     [family, status],
   )
-  const groups = FAMILY_ORDER.map((f) => ({ family: f, items: shown.filter((m) => m.family === f) })).filter((g) => g.items.length > 0)
 
   return (
     <>
@@ -79,7 +78,7 @@ export default function Catalog() {
               </p>
             </div>
 
-            {groups.length === 0 ? (
+            {shown.length === 0 ? (
               <EmptyState
                 title={t('methods.catalog.emptyTitle')}
                 description={t('methods.catalog.emptyBody')}
@@ -95,39 +94,24 @@ export default function Catalog() {
                 }
               />
             ) : (
-              groups.map((g) => (
-                <section key={g.family} aria-labelledby={`family-${g.family}`} className="flex flex-col gap-3">
-                  <div className="flex flex-col gap-1">
-                    <h2 id={`family-${g.family}`} className="text-20 font-semibold text-text">
-                      {t(`methods.families.${g.family}`)}
-                    </h2>
-                    <p className="max-w-[70ch] text-14 text-text-2">{t(`methods.familyNotes.${g.family}`)}</p>
-                  </div>
-                  <ul className="flex flex-col border-t border-line">
-                    {g.items.map((m) => (
-                      <li
-                        key={m.id}
-                        className="grid grid-cols-1 gap-x-6 gap-y-1.5 border-b border-line py-4 md:grid-cols-[180px_minmax(0,1fr)_200px]"
-                      >
-                        <div className="flex flex-col gap-1">
-                          <Link
-                            href={`/methods/${m.id}`}
-                            className="text-16 font-semibold text-text underline decoration-line-strong underline-offset-2 hover:decoration-text"
-                          >
-                            {m.name[lang]}
-                          </Link>
-                          <span className="text-12 text-text-2">{m.fullName[lang] !== m.name[lang] ? m.fullName[lang] : null}</span>
-                        </div>
-                        <p className="text-14 text-text-2">{firstSentence(m[lang].summary)}</p>
-                        <div className="flex flex-row flex-wrap items-center gap-2 md:flex-col md:items-end md:gap-1.5">
-                          <StatusLabel status={m.status} />
-                          <span className="text-13 text-text-2 md:text-right">{shortOrigin(m.origin, lang)}</span>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              ))
+              <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {shown.map((m) => (
+                  <li key={m.id} className="min-w-0">
+                    <Link
+                      href={`/methods/${m.id}`}
+                      className="group flex h-full flex-col gap-2 rounded-control border border-line bg-surface p-4 no-underline transition-colors hover:border-line-strong hover:bg-surface-2"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        {/* Slot: MethodGlyph for the family. */}
+                        <span className="text-12 text-text-2">{t(`methods.familiesShort.${m.family}`)}</span>
+                        <StatusLabel status={m.status} />
+                      </div>
+                      <span className="text-16 font-semibold text-text group-hover:underline">{m.name[lang]}</span>
+                      <span className="line-clamp-2 text-13 text-text-2">{firstSentence(m[lang].summary)}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             )}
           </div>
 

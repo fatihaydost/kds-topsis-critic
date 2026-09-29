@@ -62,3 +62,8 @@ export function SourceItem({ source }: { source: Source }) {
 }
 
 export const pageContainer = 'mx-auto w-full max-w-[1200px] px-4 md:px-8'
+
+/** Sentences of a summary, split at ". " before a capital letter (keeps "e.g." and "vd." inside). */
+export function splitSentences(text: string): string[] {
+  return text.split(/(?<=[.!?])\s+(?=[A-ZÇĞİÖŞÜ(])/u).filter(Boolean)
+}

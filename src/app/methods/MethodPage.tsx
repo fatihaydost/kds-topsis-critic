@@ -1,4 +1,4 @@
-import { ArrowLeft } from '@phosphor-icons/react'
+import { ArrowLeft, CaretRight } from '@phosphor-icons/react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'wouter'
@@ -6,18 +6,21 @@ import { getMethodContent, methodContent } from '../../content/methods'
 import { localizeMethod, type MethodContent } from '../../content/types'
 import { examples } from '../../data/examples'
 import { useLang } from '../../i18n'
-import { buttonClasses, cn, Notice } from '../../ui'
+import { buttonClasses, cn, Notice, Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui'
 import { Formula } from '../../ui/Formula'
 import { SiteFooter } from '../landing/SiteFooter'
 import { textLink, usePageMeta } from '../landing/usePageMeta'
-import { doiHref, pageContainer, shortOrigin, SourceItem, StatusLabel } from './shared'
+import { doiHref, pageContainer, shortOrigin, SourceItem, splitSentences, StatusLabel } from './shared'
 
-const SECTIONS = ['what', 'when', 'inputs', 'algorithm', 'combined', 'pitfalls', 'reference', 'sources'] as const
+const SECTIONS = ['idea', 'details', 'algorithm', 'combined', 'reference', 'sources'] as const
 type SectionId = (typeof SECTIONS)[number]
+const DETAIL_TABS = ['when', 'whenNot', 'inputs', 'pitfalls'] as const
+
+const disclosure = 'cursor-pointer text-13 text-text-2 hover:text-text'
 
 function Section({ id, title, children }: { id: SectionId; title: string; children: ReactNode }) {
   return (
-    <section id={id} aria-labelledby={`${id}-title`} className="flex scroll-mt-16 flex-col gap-3">
+    <section id={id} aria-labelledby={`${id}-title`} className="flex scroll-mt-16 flex-col gap-4">
       <h2 id={`${id}-title`} className="text-20 font-semibold text-text">
         {title}
       </h2>
@@ -26,9 +29,9 @@ function Section({ id, title, children }: { id: SectionId; title: string; childr
   )
 }
 
-function Bullets({ items }: { items: string[] }) {
+function Bullets({ items, className }: { items: string[]; className?: string }) {
   return (
-    <ul className="flex list-disc flex-col gap-1.5 pl-5 text-16 text-text marker:text-text-3">
+    <ul className={cn('flex list-disc flex-col gap-1.5 pl-5 text-16 text-text marker:text-text-3', className)}>
       {items.map((s) => (
         <li key={s}>{s}</li>
       ))}
@@ -50,11 +53,14 @@ function NotFoundMethod({ id }: { id: string }) {
   )
 }
 
-/** `/methods/:id`: the research card of one method, rendered for readers. */
+/** `/methods/:id`: one method, picture and short summary first, details behind disclosures. */
 export default function MethodPage({ id }: { id: string }) {
   const m = getMethodContent(id)
   return m ? <MethodArticle m={m} /> : <NotFoundMethod id={id} />
 }
+
+/** "Opricovic, S.; Tzeng, G.-H. (2004). Title..." -> "Opricovic, S.; Tzeng, G.-H. (2004)". */
+const sourceHead = (source: string): string => source.match(/^.*?\(\d{4}[a-z]?\)/)?.[0] ?? source
 
 function MethodArticle({ m }: { m: MethodContent }) {
   const { t } = useTranslation()
@@ -65,6 +71,13 @@ function MethodArticle({ m }: { m: MethodContent }) {
   const available = m.status === 'available'
   const workbenchExamples = available ? examples.filter((e) => e.referenceFor.includes(m.id)) : []
   const sectionTitle = (s: SectionId) => t(`methods.page.sections.${s}`)
+  const tabItems: Record<(typeof DETAIL_TABS)[number], string[]> = {
+    when: l.whenToUse,
+    whenNot: l.whenNot,
+    inputs: l.inputs,
+    pitfalls: l.pitfalls,
+  }
+  const linked = l.combinedWith.filter((c) => c.methodId)
 
   return (
     <>
@@ -74,143 +87,152 @@ function MethodArticle({ m }: { m: MethodContent }) {
           {t('methods.backToCatalog')}
         </Link>
 
-        <div className="mt-6 grid grid-cols-1 gap-12 xl:grid-cols-[minmax(0,1fr)_220px] xl:gap-16">
-          <article className="flex min-w-0 max-w-[760px] flex-col gap-10">
-            <header className="flex flex-col gap-4">
+        <div className="mt-6 grid grid-cols-1 gap-12 xl:grid-cols-[minmax(0,1fr)_200px] xl:gap-16">
+          <article className="flex min-w-0 max-w-[760px] flex-col gap-12">
+            <header className="flex flex-col gap-5">
               <div className="flex flex-col gap-1">
                 <div className="flex flex-wrap items-center gap-3">
                   <h1 className="text-32 font-semibold text-text">{l.name}</h1>
                   <StatusLabel status={m.status} />
                 </div>
-                {l.fullName !== l.name && <p className="text-16 text-text-2">{l.fullName}</p>}
+                <p className="text-14 text-text-2">
+                  {l.fullName !== l.name ? `${l.fullName}. ` : ''}
+                  {t(`methods.families.${m.family}`)}, {shortOrigin(m.origin, lang)}
+                </p>
               </div>
-              <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5 text-14">
-                <dt className="text-text-2">{t('methods.page.family')}</dt>
-                <dd className="text-text">{t(`methods.families.${m.family}`)}</dd>
-                <dt className="text-text-2">{t('methods.page.origin')}</dt>
-                <dd className="text-text">
-                  {shortOrigin(m.origin, lang)}. {m.origin.title}. <span className="text-text-2">{m.origin.venue}.</span>{' '}
-                  {m.origin.doi && (
-                    <a href={doiHref(m.origin.doi)} target="_blank" rel="noreferrer" className={cn(textLink, '[overflow-wrap:anywhere]')}>
-                      doi:{m.origin.doi}
-                    </a>
-                  )}
-                  {l.originNote && <span className="mt-1 block text-13 text-text-2">{l.originNote}</span>}
-                </dd>
-              </dl>
-              {!available && (
-                <Notice title={t('methods.page.draftTitle')}>
-                  <p>{t('methods.page.draftBody')}</p>
-                </Notice>
-              )}
+              {!available && <Notice title={t('methods.page.draftTitle')} />}
             </header>
 
-            <Section id="what" title={sectionTitle('what')}>
-              <p className="max-w-[70ch] text-16 text-text">{l.summary}</p>
+            <Section id="idea" title={sectionTitle('idea')}>
+              {/* Slot: the method's picture (TopsisGeometry, CriticIdea, or MethodGlyph for research methods). */}
+              <Bullets items={splitSentences(l.summary).slice(0, 3)} />
             </Section>
 
-            <Section id="when" title={sectionTitle('when')}>
-              <Bullets items={l.whenToUse} />
-              <h3 className="mt-4 text-16 font-semibold text-text">{t('methods.page.sections.whenNot')}</h3>
-              <Bullets items={l.whenNot} />
-            </Section>
-
-            <Section id="inputs" title={sectionTitle('inputs')}>
-              <Bullets items={l.inputs} />
+            <Section id="details" title={sectionTitle('details')}>
+              <Tabs defaultValue="when">
+                <TabsList aria-label={sectionTitle('details')} className="overflow-x-auto">
+                  {DETAIL_TABS.map((k) => (
+                    <TabsTrigger key={k} value={k}>
+                      {t(`methods.page.tabs.${k}`)}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+                {DETAIL_TABS.map((k) => (
+                  <TabsContent key={k} value={k} className="pt-4">
+                    <Bullets items={tabItems[k]} />
+                  </TabsContent>
+                ))}
+              </Tabs>
             </Section>
 
             <Section id="algorithm" title={sectionTitle('algorithm')}>
               <ol className="flex flex-col border-t border-line">
                 {l.steps.map((s, i) => (
-                  <li key={i} className="grid grid-cols-[28px_minmax(0,1fr)] gap-x-3 border-b border-line py-4">
-                    <span className="num pt-0.5 font-mono text-14 text-text-2">{i + 1}</span>
-                    <div className="flex min-w-0 flex-col gap-2">
-                      <h3 className="text-16 font-medium text-text">{s.title}</h3>
-                      <Formula display tex={s.tex} className="text-16" />
-                      {s.note && <p className="text-14 text-text-2">{s.note}</p>}
-                    </div>
+                  <li key={i} className="border-b border-line">
+                    <details className="group">
+                      <summary className="grid cursor-pointer list-none grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-x-3 py-3 hover:bg-surface-2 [&::-webkit-details-marker]:hidden">
+                        <span className="num pl-1 font-mono text-14 text-text-2">{i + 1}</span>
+                        <span className="text-16 font-medium text-text">{s.title}</span>
+                        <CaretRight
+                          aria-hidden
+                          className="mr-2 size-4 text-text-2 group-open:rotate-90 motion-safe:transition-transform motion-safe:duration-150"
+                        />
+                      </summary>
+                      <div className="flex flex-col gap-2 pb-4 pl-[40px]">
+                        <Formula display tex={s.tex} className="text-16" />
+                        {s.note && <p className="text-14 text-text-2">{s.note}</p>}
+                      </div>
+                    </details>
                   </li>
                 ))}
               </ol>
             </Section>
 
             <Section id="combined" title={sectionTitle('combined')}>
-              {l.combinedWith.length === 0 ? (
-                <p className="text-16 text-text-2">{t('methods.page.noCombinations')}</p>
-              ) : (
-                <ul className="flex flex-col gap-3">
-                  {l.combinedWith.map((c, i) => (
-                    <li key={i} className="grid grid-cols-1 gap-1 md:grid-cols-[120px_minmax(0,1fr)] md:gap-4">
-                      <span className="text-16 font-semibold">
-                        {c.methodId ? (
-                          <Link href={`/methods/${c.methodId}`} className={textLink}>
-                            {methodContent[c.methodId].name[lang]}
-                          </Link>
-                        ) : null}
-                      </span>
-                      <p className="text-14 text-text-2 md:text-16">{c.text}</p>
+              {linked.length > 0 && (
+                <ul className="flex flex-wrap gap-2">
+                  {linked.map((c) => (
+                    <li key={c.methodId}>
+                      <Link
+                        href={`/methods/${c.methodId}`}
+                        className="inline-flex h-8 items-center gap-2 rounded-control border border-line-strong bg-surface px-3 text-14 font-medium text-text no-underline hover:bg-surface-2"
+                      >
+                        {l.name} <span className="text-text-3">+</span> {methodContent[c.methodId!].name[lang]}
+                      </Link>
                     </li>
                   ))}
                 </ul>
               )}
-            </Section>
-
-            <Section id="pitfalls" title={sectionTitle('pitfalls')}>
-              <Bullets items={l.pitfalls} />
-            </Section>
-
-            <Section id="reference" title={sectionTitle('reference')}>
-              <dl className="grid grid-cols-1 gap-x-6 gap-y-3 text-14 md:grid-cols-[160px_minmax(0,1fr)]">
-                <dt className="text-text-2">{t('landing.verified.reference')}</dt>
-                <dd className="text-text">
-                  {m.reference.source}.{' '}
-                  {m.reference.doi && (
-                    <a href={doiHref(m.reference.doi)} target="_blank" rel="noreferrer" className={cn(textLink, '[overflow-wrap:anywhere]')}>
-                      doi:{m.reference.doi}
-                    </a>
-                  )}
-                </dd>
-                {m.reference.table && (
-                  <>
-                    <dt className="text-text-2">{t('methods.page.reference.where')}</dt>
-                    <dd className="text-text">{m.reference.table}</dd>
-                  </>
-                )}
-                <dt className="text-text-2">{t('methods.page.reference.result')}</dt>
-                <dd className="flex flex-col gap-1 text-text">
-                  <span className="font-medium">{t(`methods.page.reference.${m.reference.match}`)}</span>
-                  <span className="text-text-2">{l.referenceNote}</span>
-                  <span className="text-13 text-text-2">
-                    {t(available ? 'methods.page.reference.tested' : 'methods.page.reference.researchOnly')}
-                  </span>
-                </dd>
-              </dl>
-              {workbenchExamples.length > 0 && (
-                <div className="mt-2 flex flex-col gap-2">
-                  {workbenchExamples.map((e, i) => (
-                    <div key={e.id} className="flex flex-wrap items-center gap-3">
-                      <Link
-                        href={`/app?example=${e.id}`}
-                        aria-label={`${t('methods.page.reference.open')}: ${e.name[lang]}`}
-                        className={buttonClasses({ variant: i === 0 ? 'primary' : 'secondary' })}
-                      >
-                        {t('methods.page.reference.open')}
-                      </Link>
-                      <span className="text-13 text-text-2">{e.name[lang]}</span>
-                    </div>
-                  ))}
-                </div>
+              {l.combinedWith.length === 0 ? (
+                <p className="text-14 text-text-2">{t('methods.page.noCombinations')}</p>
+              ) : (
+                <details>
+                  <summary className={disclosure}>{t('methods.page.why')}</summary>
+                  <Bullets items={l.combinedWith.map((c) => c.text)} className="mt-2 text-14 text-text-2" />
+                </details>
               )}
             </Section>
 
+            <Section id="reference" title={sectionTitle('reference')}>
+              <div className="flex flex-col gap-3 rounded-control border border-line bg-surface p-4">
+                <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                  <span className="text-16 font-medium text-text">{sourceHead(m.reference.source)}</span>
+                  <span className="text-14 text-text-2">{t(`methods.page.reference.${m.reference.match}`)}</span>
+                </div>
+                {workbenchExamples.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {workbenchExamples.map((e, i) => (
+                      <Link
+                        key={e.id}
+                        href={`/app?example=${e.id}`}
+                        aria-label={`${t('methods.page.reference.open')}: ${e.name[lang]}`}
+                        title={e.name[lang]}
+                        className={buttonClasses({ variant: i === 0 ? 'primary' : 'secondary' })}
+                      >
+                        {i === 0 ? t('methods.page.reference.open') : t('methods.page.reference.openOther')}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+                <details>
+                  <summary className={disclosure}>{t('methods.page.reference.more')}</summary>
+                  <div className="mt-2 flex flex-col gap-2 text-14 text-text-2">
+                    <p>
+                      {m.reference.source}.{' '}
+                      {m.reference.doi && (
+                        <a href={doiHref(m.reference.doi)} target="_blank" rel="noreferrer" className={cn(textLink, '[overflow-wrap:anywhere]')}>
+                          doi:{m.reference.doi}
+                        </a>
+                      )}
+                    </p>
+                    {m.reference.table && <p>{m.reference.table}</p>}
+                    <p>{l.referenceNote}</p>
+                    <p className="text-13">{t(available ? 'methods.page.reference.tested' : 'methods.page.reference.researchOnly')}</p>
+                  </div>
+                </details>
+              </div>
+            </Section>
+
             <Section id="sources" title={sectionTitle('sources')}>
-              <ol className="flex list-decimal flex-col gap-2 pl-5 text-14 text-text marker:text-text-3">
-                {m.sources.map((s) => (
-                  <li key={s.label}>
-                    <SourceItem source={s} />
+              <details>
+                <summary className={disclosure}>{t('methods.page.showSources', { count: m.sources.length + 1 })}</summary>
+                <ol className="mt-2 flex list-decimal flex-col gap-2 pl-5 text-14 text-text marker:text-text-3">
+                  <li>
+                    {shortOrigin(m.origin, lang)}. {m.origin.title}. {m.origin.venue}.{' '}
+                    {m.origin.doi && (
+                      <a href={doiHref(m.origin.doi)} target="_blank" rel="noreferrer" className={cn(textLink, '[overflow-wrap:anywhere]')}>
+                        doi:{m.origin.doi}
+                      </a>
+                    )}
+                    {l.originNote && <span className="mt-0.5 block text-13 text-text-2">{l.originNote}</span>}
                   </li>
-                ))}
-              </ol>
+                  {m.sources.map((s) => (
+                    <li key={s.label}>
+                      <SourceItem source={s} />
+                    </li>
+                  ))}
+                </ol>
+              </details>
             </Section>
           </article>
 

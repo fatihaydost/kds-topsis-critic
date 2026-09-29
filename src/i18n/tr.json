@@ -50,7 +50,7 @@
     },
     "result": {
       "title": "Beş akıllı telefonun TOPSIS sıralaması",
-      "subtitle": "Ağırlıklar CRITIC ile, bu sayfada anlık hesaplanır",
+      "subtitle": "CRITIC ağırlıkları, anlık hesaplanır",
       "rank": "Sıra",
       "alternative": "Telefon",
       "closeness": "Yakınlık C",
@@ -58,12 +58,11 @@
       "showTable": "Tablo olarak göster",
       "criterion": "Kriter",
       "weight": "Ağırlık",
-      "data": "Veri: {{citation}}, Tablo 1.",
-      "check": "CRITIC ağırlıkları makalenin Tablo 5'iyle 4 basamakta örtüşür. Makale ağırlıkta durur; TOPSIS sıralaması bu sitenin kendi sonucudur."
+      "data": "Veri: {{citation}}.",
+      "check": "Ağırlıklar makalenin Tablo 5'iyle örtüşür. TOPSIS burada hesaplanır."
     },
     "how": {
       "title": "Nasıl çalışır",
-      "lead": "Çalışma alanı aynı aşamaları izler. Her aşama sonucunu bir sonrakine verir ve adım adım hesap için her ara matrisi saklar.",
       "diagramLabel": "Akış: karar matrisi ağırlıklandırma ve sıralama yöntemine girer; ağırlıklar sıralamaya girer; sıralama için sağlamlık kontrolü planlanıyor.",
       "passes": {
         "matrix": "X",
@@ -73,53 +72,39 @@
       "stages": {
         "data": {
           "name": "Karar matrisi",
-          "method": "Yazılır, tablodan yapıştırılır ya da içe aktarılır",
-          "l1": "m alternatif, n kriter",
-          "l2": "her kriter fayda ya da maliyet",
-          "l3": ".xlsx ya da .csv, noktalı virgül ya da virgül"
+          "method": "Yazılır, yapıştırılır ya da içe aktarılır"
         },
         "weights": {
           "name": "Ağırlıklandırma yöntemi",
-          "method": "CRITIC, eşit ya da elle",
-          "l1": "CRITIC: min-maks normalizasyonu",
-          "l2": "standart sapma, korelasyon",
-          "l3": "bilgi içeriği, ağırlıklar w"
+          "method": "CRITIC, eşit ya da elle"
         },
         "ranking": {
           "name": "Sıralama yöntemi",
-          "method": "TOPSIS",
-          "l1": "vektör normalizasyonu, ağırlıklama",
-          "l2": "ideal A+ ve negatif ideal A-",
-          "l3": "D+ ve D- uzaklıkları, yakınlık C"
+          "method": "TOPSIS"
         },
         "robustness": {
           "name": "Sağlamlık",
-          "method": "v1'den sonra planlanıyor",
-          "l1": "ağırlık oynatma",
-          "l2": "Monte Carlo ağırlıkları",
-          "l3": "sıra uyumu"
+          "method": "v1'den sonra planlanıyor"
         }
       }
     },
     "verified": {
       "title": "Yayımlanmış sonuçlarla doğrulandı",
-      "lead": "CRITIC ve TOPSIS test takımında yayımlanmış örneklerle çalışır ve basılı sayıları gösterilen tolerans içinde üretmek zorundadır.",
-      "method": "Yöntem",
-      "reference": "Kaynak",
-      "compared": "Karşılaştırılan",
-      "tolerance": "Tolerans",
-      "toleranceNote": "son basılı basamağın yarım birimi",
+      "lead": "Testler yayımlanmış sayıları bu toleranslar içinde üretir.",
+      "toleranceNote": "Tolerans, son basılı basamağın yarım birimidir.",
       "critic": {
         "compared": "Beş akıllı telefonun standart sapmaları (Tablo 2) ve ağırlıkları (Tablo 5)."
       },
       "topsis": {
         "compared": "D+ ve D- uzaklıkları, yakınlık C ve sıralar (Tablo 3); aynı veri, birincinin değiştiği iki farklı birimde."
       },
-      "also": "Ayrıca test edilenler: ilk ders projesindeki elle çözülmüş CRITIC tablosu, her ara matris {{tol}} içinde; CRITIC ardından TOPSIS zincirinin ilk Python koduyla eşliği, {{tol}} içinde. Tablo ve Python kodu bağımsız kaynak değildir."
+      "also": "Ayrıca test edilenler: ilk ders projesindeki elle çözülmüş CRITIC tablosu, her ara matris {{tol}} içinde; CRITIC ardından TOPSIS zincirinin ilk Python koduyla eşliği, {{tol}} içinde. Tablo ve Python kodu bağımsız kaynak değildir.",
+      "more": "Neler karşılaştırılıyor",
+      "alsoTitle": "Diğer kontroller"
     },
     "catalogue": {
       "title": "Yöntemler",
-      "lead": "{{total}} yöntemden {{available}} tanesi bugün çalışıyor. Diğerleri araştırıldı ve belgelendi; her biri yapıldığında test edileceği yayımlanmış bir örnekle birlikte.",
+      "lead": "{{total}} yöntemden {{available}} tanesi bugün çalışıyor. Diğerleri araştırmada.",
       "available": "Mevcut",
       "research": "Araştırmada"
     },
@@ -197,18 +182,9 @@
   "methods": {
     "title": "Yöntemler",
     "lead": "Her yöntem sayfası yöntemin ne yaptığını, ne zaman kullanılacağını, formüllerini ve doğrulandığı yayımlanmış örneği gösterir.",
-    "columns": {
-      "name": "Yöntem",
-      "kind": "Tür",
-      "status": "Durum"
-    },
     "status": {
       "available": "Mevcut",
       "research": "Araştırmada"
-    },
-    "kind": {
-      "weighting": "Ağırlıklandırma",
-      "ranking": "Sıralama"
     },
     "names": {
       "critic": "CRITIC",
@@ -235,7 +211,8 @@
       "suggestionsSoFar": "Şimdiye kadar önerilenler",
       "risks": "Bu birleşimlere dikkat et",
       "riskSources": "Kanıt ve kaynaklar",
-      "treeSources": "Karar ağacının kaynakları"
+      "treeSources": "Bu ağaç hakkında",
+      "intro": "Birkaç soru listeyi daraltır."
     },
     "meta": {
       "title": "Yöntemler: KDS",
@@ -259,16 +236,8 @@
       "ranking-ratio": "Oran",
       "ranking-outranking": "Üstünlük"
     },
-    "familyNotes": {
-      "weighting-objective": "Ağırlıklar verinin kendisinden hesaplanır: her sütundaki yayılım, çatışma ya da bilgi.",
-      "weighting-subjective": "Ağırlıklar karar vericinin yargısından gelir: bir sıralama, ikili karşılaştırmalar ya da önem oranları.",
-      "ranking-distance": "Alternatifler ideal ya da ortalama çözüm gibi referans noktalarına uzaklıklarına göre puanlanır.",
-      "ranking-utility": "Normalize değerler her alternatif için tek bir ağırlıklı skorda birleşir.",
-      "ranking-ratio": "Normalize fayda ve maliyet değerleri bir oran sisteminde karşı karşıya konur.",
-      "ranking-outranking": "Alternatifler ikişer ikişer karşılaştırılır; çok kötü bir değer iyi değerlerle kolayca telafi edilmez."
-    },
     "catalog": {
-      "lead": "Ağırlıklandırma yöntemleri kriterleri ağırlığa, sıralama yöntemleri ağırlık ve veriyi bir sıraya çevirir. Bu sitede bugün {{total}} yöntemden {{available}} tanesi çalışıyor; diğerleri araştırıldı ve belgelendi.",
+      "lead": "{{total}} yöntemden {{available}} tanesi bugün burada çalışıyor. Diğerleri araştırılmış taslaklar.",
       "filters": "Filtreler",
       "familyFilter": "Aile",
       "statusFilter": "Durum",
@@ -282,34 +251,34 @@
     },
     "page": {
       "toc": "Bu sayfada",
-      "family": "Aile",
-      "year": "Yıl",
-      "origin": "Köken",
-      "status": "Durum",
       "draftTitle": "Bu yöntem henüz hesaplanmıyor; içerik taslak.",
-      "draftBody": "Burada araştırıldı ve belgelendi. Hesaplaması, referans örneği kodda doğrulandıktan sonra ileriki bir sürümde gelecek.",
       "sections": {
-        "what": "Ne yapar",
-        "when": "Ne zaman kullanılır",
-        "whenNot": "Ne zaman kullanılmaz",
-        "inputs": "Girdiler",
+        "idea": "Fikir",
+        "details": "Ne zaman kullanılır",
         "algorithm": "Algoritma",
         "combined": "Birlikte kullanıldığı yöntemler",
-        "pitfalls": "Tuzaklar",
         "reference": "Referans örnek",
         "sources": "Kaynaklar"
       },
       "reference": {
-        "where": "Makaledeki yeri",
-        "result": "Sonuç",
         "match": "Basılı hassasiyette elde ediliyor",
         "partial": "Kısmen elde ediliyor",
         "mismatch": "Elde edilemiyor",
         "researchOnly": "Yöntem araştırılırken yeniden hesaplanarak kontrol edildi, henüz bu sitenin koduyla değil.",
         "tested": "Bu sitenin test takımı tarafından kontrol ediliyor.",
-        "open": "Bu örneği çalışma alanında aç"
+        "open": "Bu örneği çalışma alanında aç",
+        "more": "Ayrıntılar",
+        "openOther": "Başka birimli örneği aç"
       },
-      "noCombinations": "Bu yöntem için kayıtlı yaygın bir birleşim yok."
+      "noCombinations": "Bu yöntem için kayıtlı yaygın bir birleşim yok.",
+      "tabs": {
+        "when": "Kullan",
+        "whenNot": "Kaçın",
+        "inputs": "Girdiler",
+        "pitfalls": "Tuzaklar"
+      },
+      "why": "Neden bu eşleşmeler",
+      "showSources": "{{count}} kaynağı göster"
     }
   },
   "steps": {

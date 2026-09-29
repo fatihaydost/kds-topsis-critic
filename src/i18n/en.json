@@ -50,7 +50,7 @@
     },
     "result": {
       "title": "TOPSIS ranking of five smartphones",
-      "subtitle": "Weights from CRITIC, computed live in this page",
+      "subtitle": "CRITIC weights, computed live",
       "rank": "Rank",
       "alternative": "Phone",
       "closeness": "Closeness C",
@@ -58,12 +58,11 @@
       "showTable": "Show as table",
       "criterion": "Criterion",
       "weight": "Weight",
-      "data": "Data: {{citation}}, Table 1.",
-      "check": "The CRITIC weights match Table 5 of the paper to 4 decimals. The paper stops at the weights, so the TOPSIS ranking is this site's own result."
+      "data": "Data: {{citation}}.",
+      "check": "Weights match the paper's Table 5. TOPSIS is computed here."
     },
     "how": {
       "title": "How it works",
-      "lead": "The workbench runs the same stages. Each one hands its result to the next and keeps every intermediate matrix for the worked calculation.",
       "diagramLabel": "Pipeline: the decision matrix feeds the weighting method and the ranking method; the weights feed the ranking; a robustness check on the ranking is planned.",
       "passes": {
         "matrix": "X",
@@ -73,53 +72,39 @@
       "stages": {
         "data": {
           "name": "Decision matrix",
-          "method": "Typed, pasted from a spreadsheet or imported",
-          "l1": "m alternatives, n criteria",
-          "l2": "benefit or cost per criterion",
-          "l3": ".xlsx or .csv, semicolon or comma"
+          "method": "Typed, pasted or imported"
         },
         "weights": {
           "name": "Weighting method",
-          "method": "CRITIC, equal or manual",
-          "l1": "CRITIC: min-max normalization",
-          "l2": "standard deviation, correlation",
-          "l3": "information content, weights w"
+          "method": "CRITIC, equal or manual"
         },
         "ranking": {
           "name": "Ranking method",
-          "method": "TOPSIS",
-          "l1": "vector normalization, weighting",
-          "l2": "ideal A+ and anti-ideal A-",
-          "l3": "distances D+ and D-, closeness C"
+          "method": "TOPSIS"
         },
         "robustness": {
           "name": "Robustness",
-          "method": "Planned after v1",
-          "l1": "weight perturbation",
-          "l2": "Monte Carlo weights",
-          "l3": "rank agreement"
+          "method": "Planned after v1"
         }
       }
     },
     "verified": {
       "title": "Checked against published results",
-      "lead": "CRITIC and TOPSIS run in the test suite on published examples and have to reproduce the printed numbers within the tolerance shown.",
-      "method": "Method",
-      "reference": "Reference",
-      "compared": "Compared",
-      "tolerance": "Tolerance",
-      "toleranceNote": "half a unit of the last printed digit",
+      "lead": "The tests reproduce the published numbers within these tolerances.",
+      "toleranceNote": "The tolerance is half a unit of the last printed digit.",
       "critic": {
         "compared": "Standard deviations (Table 2) and weights (Table 5) of five smartphones."
       },
       "topsis": {
         "compared": "Distances D+ and D-, closeness C and ranks (Table 3), for the same data in two units where the winner changes."
       },
-      "also": "Also tested: the hand-solved CRITIC spreadsheet from the original coursework, every intermediate matrix within {{tol}}, and parity of CRITIC then TOPSIS with the original Python code within {{tol}}. The spreadsheet and the Python code are not independent references."
+      "also": "Also tested: the hand-solved CRITIC spreadsheet from the original coursework, every intermediate matrix within {{tol}}, and parity of CRITIC then TOPSIS with the original Python code within {{tol}}. The spreadsheet and the Python code are not independent references.",
+      "more": "What is compared",
+      "alsoTitle": "Other checks"
     },
     "catalogue": {
       "title": "Methods",
-      "lead": "{{available}} of {{total}} methods run today. The others are researched and documented, each with a published example to test against when it is built.",
+      "lead": "{{available}} of {{total}} run today. The rest are in research.",
       "available": "Available",
       "research": "In research"
     },
@@ -197,18 +182,9 @@
   "methods": {
     "title": "Methods",
     "lead": "Each method page shows what the method does, when to use it, its formulas and a published example it has been checked against.",
-    "columns": {
-      "name": "Method",
-      "kind": "Type",
-      "status": "Status"
-    },
     "status": {
       "available": "Available",
       "research": "In research"
-    },
-    "kind": {
-      "weighting": "Weighting",
-      "ranking": "Ranking"
     },
     "names": {
       "critic": "CRITIC",
@@ -235,7 +211,8 @@
       "suggestionsSoFar": "Suggested so far",
       "risks": "Check these combinations",
       "riskSources": "Evidence and sources",
-      "treeSources": "Sources of the decision tree"
+      "treeSources": "About this tree",
+      "intro": "A few questions narrow the list."
     },
     "meta": {
       "title": "Methods: KDS",
@@ -259,16 +236,8 @@
       "ranking-ratio": "Ratio",
       "ranking-outranking": "Outranking"
     },
-    "familyNotes": {
-      "weighting-objective": "Weights computed from the data itself: the spread, conflict or information in each column.",
-      "weighting-subjective": "Weights from the judgement of a decision maker: a ranking, pairwise comparisons or importance ratios.",
-      "ranking-distance": "Alternatives are scored by their distance to reference points such as an ideal or an average solution.",
-      "ranking-utility": "Normalized values are combined into one weighted score per alternative.",
-      "ranking-ratio": "Normalized benefit and cost values are set against each other in a ratio system.",
-      "ranking-outranking": "Alternatives are compared in pairs, so a very bad value is not simply offset by good ones."
-    },
     "catalog": {
-      "lead": "Weighting methods turn criteria into weights, ranking methods turn weights and data into an order. {{available}} of {{total}} run on this site today; the rest are researched and documented.",
+      "lead": "{{available}} of {{total}} run here today. The rest are researched drafts.",
       "filters": "Filters",
       "familyFilter": "Family",
       "statusFilter": "Status",
@@ -282,34 +251,34 @@
     },
     "page": {
       "toc": "On this page",
-      "family": "Family",
-      "year": "Year",
-      "origin": "Origin",
-      "status": "Status",
       "draftTitle": "This method is not computed yet. The content is a draft.",
-      "draftBody": "It is researched and documented here. The calculation comes in a later version, after its reference example is checked in code.",
       "sections": {
-        "what": "What it does",
-        "when": "When to use it",
-        "whenNot": "When not to use it",
-        "inputs": "Inputs",
+        "idea": "The idea",
+        "details": "When to use it",
         "algorithm": "Algorithm",
-        "combined": "Commonly combined with",
-        "pitfalls": "Pitfalls",
+        "combined": "Used together with",
         "reference": "Reference example",
         "sources": "Sources"
       },
       "reference": {
-        "where": "Where in the paper",
-        "result": "Result",
         "match": "Reproduced at the printed precision",
         "partial": "Partly reproduced",
         "mismatch": "Not reproduced",
         "researchOnly": "Checked by recomputing it while researching the method, not yet by this site's code.",
         "tested": "Checked by this site's test suite.",
-        "open": "Open this example in the workbench"
+        "open": "Open this example in the workbench",
+        "more": "Details",
+        "openOther": "Open the example in other units"
       },
-      "noCombinations": "No common combination is recorded for this method."
+      "noCombinations": "No common combination is recorded for this method.",
+      "tabs": {
+        "when": "Use it when",
+        "whenNot": "Avoid it when",
+        "inputs": "Inputs",
+        "pitfalls": "Pitfalls"
+      },
+      "why": "Why these pairs",
+      "showSources": "Show {{count}} sources"
     }
   },
   "steps": {

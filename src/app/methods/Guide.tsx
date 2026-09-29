@@ -72,7 +72,7 @@ export function Guide() {
         <h2 id="guide-title" className="text-20 font-semibold text-text">
           {t('methods.guide.title')}
         </h2>
-        <p className="text-14 text-text-2">{decisionTreeIntro[lang]}</p>
+        <p className="text-14 text-text-2">{t('methods.guide.intro')}</p>
       </div>
 
       {path.length > 0 && (
@@ -206,6 +206,7 @@ export function Guide() {
 
       <details className="text-13 text-text-2">
         <summary className="cursor-pointer hover:text-text">{t('methods.guide.treeSources')}</summary>
+        <p className="mt-2">{decisionTreeIntro[lang]}</p>
         <ul className="mt-2 flex flex-col gap-1 pl-4">
           {decisionTreeSources.map((s) => (
             <li key={s.label}>

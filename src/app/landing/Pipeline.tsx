@@ -6,10 +6,7 @@ const STAGES = ['data', 'weights', 'ranking', 'robustness'] as const
 type StageId = (typeof STAGES)[number]
 const PASSES = ['matrix', 'weights', 'ranking'] as const
 
-/**
- * Connector between two stages: an SVG arrow with what flows along it. Horizontal from 1024 px,
- * vertical below. `dashed` for the planned stage.
- */
+/** Arrow between two stages, with what flows along it. Horizontal from 1024 px, vertical below. */
 function Connector({ label, dashed }: { label: string; dashed: boolean }) {
   const dash = dashed ? '4 4' : undefined
   return (
@@ -30,41 +27,30 @@ function Connector({ label, dashed }: { label: string; dashed: boolean }) {
 function StageBox({ id }: { id: StageId }) {
   const { t } = useTranslation()
   const planned = id === 'robustness'
-  const k = `landing.how.stages.${id}` as const
   return (
     <li
       className={cn(
-        'flex min-w-0 flex-col gap-3 rounded-control border bg-surface p-4 text-pretty',
-        planned ? 'border-dashed border-line-strong bg-transparent' : 'border-line',
+        'flex min-w-0 flex-col gap-1 rounded-control border p-4',
+        planned ? 'border-dashed border-line-strong' : 'border-line bg-surface',
       )}
     >
-      <div className="flex flex-col gap-0.5">
-        <h3 className={cn('text-14 font-semibold', planned ? 'text-text-2' : 'text-text')}>{t(`${k}.name`)}</h3>
-        <p className="text-13 text-text-2">{t(`${k}.method`)}</p>
-      </div>
-      <ul className="flex flex-col gap-1 border-t border-line pt-3 text-13 text-text-2">
-        <li>{t(`${k}.l1`)}</li>
-        <li>{t(`${k}.l2`)}</li>
-        <li>{t(`${k}.l3`)}</li>
-      </ul>
+      <h3 className={cn('text-16 font-semibold', planned ? 'text-text-2' : 'text-text')}>{t(`landing.how.stages.${id}.name`)}</h3>
+      <p className="text-13 text-text-2">{t(`landing.how.stages.${id}.method`)}</p>
     </li>
   )
 }
 
 /**
- * "How it works": the four stages as an ordered list (so it reads in order without the picture),
- * joined by SVG connectors that name what flows from one stage to the next.
+ * "How it works": the four stages as an ordered list joined by arrows that name what flows on.
+ * Stand-in until the pipeline illustration (src/features/illustrations) lands.
  */
 export function Pipeline() {
   const { t } = useTranslation()
   return (
     <section aria-labelledby="how-title" className="flex flex-col gap-6">
-      <div className="flex max-w-[65ch] flex-col gap-2">
-        <h2 id="how-title" className="text-24 font-semibold text-text">
-          {t('landing.how.title')}
-        </h2>
-        <p className="text-16 text-text-2">{t('landing.how.lead')}</p>
-      </div>
+      <h2 id="how-title" className="text-24 font-semibold text-text">
+        {t('landing.how.title')}
+      </h2>
       <ol
         aria-label={t('landing.how.diagramLabel')}
         className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-stretch"
