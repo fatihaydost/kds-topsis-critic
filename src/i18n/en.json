@@ -537,11 +537,20 @@
         "alternative": "Alternative",
         "criterion": "Criterion",
         "topsis": {
-          "title": "Distance to the ideal and the anti-ideal",
+          "title": "Distances to A+ and A−",
           "caption": "Closer to A+ and farther from A− gives a higher C.",
           "projectionNote": "Drawn on the two heaviest criteria; D and C use all criteria.",
           "select": "Choose an alternative",
-          "point": "{{name}}, C {{c}}"
+          "point": "{{name}}, C {{c}}",
+          "view": "View",
+          "viewDistances": "Distances",
+          "viewCriteria": "Two criteria",
+          "axisDPlus": "D+, lower is better",
+          "axisDMinus": "D−, higher is better",
+          "iso": "C {{c}}",
+          "planeCaption": "Top left is best. C is the same along each ray.",
+          "higherBetter": "{{name}}, higher is better",
+          "lowerBetter": "{{name}}, lower is better"
         },
         "critic": {
           "title": "Contrast times conflict gives the weight",

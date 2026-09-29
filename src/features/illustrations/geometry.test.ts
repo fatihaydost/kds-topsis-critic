@@ -5,9 +5,13 @@ import type { Problem } from '../../core/types'
 import { getExample } from '../../data/examples'
 import {
   argMax,
+  closenessAt,
   criticParts,
   defaultAxes,
+  distancePoints,
+  fitDistancePlane,
   fitPlot,
+  isoClosenessEnd,
   flowIndex,
   planarDistance,
   segmentTransform,
@@ -84,12 +88,15 @@ describe('topsisProjection', () => {
 describe('fitPlot', () => {
   const margin = { left: 10, right: 10, top: 10, bottom: 10 }
   for (const id of ['opricovic-tzeng-2004-f', 'opricovic-tzeng-2004-phi']) {
-    it(`puts the ideal right and up, also on a cost axis, with one scale on both axes (${id})`, () => {
+    it(`draws values growing right and up, also on a cost axis, with one scale on both axes (${id})`, () => {
       const proj = topsisProjection(problemOf(id), [0.5, 0.5])!
       const { x, y, box } = fitPlot(proj, 400, { margin, minPlotHeight: 60, maxPlotHeight: 200 })
-      // Risk is a cost criterion: its ideal is the smallest value, drawn on the right anyway.
+      // Risk is a cost criterion: its ideal is the smallest value, so A+ is drawn left of A- (no reversed axis).
       expect(proj.ideal.x).toBeLessThan(proj.antiIdeal.x)
-      expect(x(proj.ideal.x)).toBeGreaterThan(x(proj.antiIdeal.x))
+      expect(x(proj.ideal.x)).toBeLessThan(x(proj.antiIdeal.x))
+      expect(x(1)).toBeGreaterThan(x(0))
+      expect(y(1)).toBeLessThan(y(0))
+      // Altitude is a benefit criterion: A+ is above A-.
       expect(y(proj.ideal.y)).toBeLessThan(y(proj.antiIdeal.y))
       for (const pt of [...proj.points, proj.ideal, proj.antiIdeal]) {
         expect(x(pt.x)).toBeGreaterThanOrEqual(box.left)
@@ -104,6 +111,49 @@ describe('fitPlot', () => {
       expect(Math.hypot(x(a.x) - x(proj.ideal.x), y(a.y) - y(proj.ideal.y))).toBeCloseTo(planarDistance(a, proj.ideal) * k, 9)
     })
   }
+})
+
+describe('distance plane', () => {
+  const margin = { left: 10, right: 10, top: 10, bottom: 10 }
+  for (const [id, weightsOf] of [
+    ['opricovic-tzeng-2004-f', () => [0.5, 0.5]],
+    ['krishnan-2021-smartphones', (p: Problem) => critic.compute(p, {}).weights],
+  ] as const) {
+    it(`places every alternative at the core's (D+, D-), and C = y / (x + y) equals the core (${id})`, () => {
+      const p = problemOf(id)
+      const w = weightsOf(p)
+      const proj = topsisProjection(p, w)!
+      const core = topsis.compute(p, [...w], {})
+      const pts = distancePoints(proj)
+      expect(pts.map((q) => q.x)).toEqual(vec(core.steps, 'topsis.distanceBest'))
+      expect(pts.map((q) => q.y)).toEqual(vec(core.steps, 'topsis.distanceWorst'))
+      pts.forEach((q, i) => expect(closenessAt(q)).toBeCloseTo(core.scores[i]!, 12))
+      // The ranking read from the picture (larger C = further up-left of the rays) is the core's.
+      const byPicture = pts.map((q, i) => ({ i, c: closenessAt(q) })).sort((a, b) => b.c - a.c).map((r) => r.i)
+      const byCore = core.scores.map((c, i) => ({ i, c })).sort((a, b) => b.c - a.c).map((r) => r.i)
+      expect(byPicture).toEqual(byCore)
+
+      const fit = fitDistancePlane(pts, 400, { margin, minPlotHeight: 60, maxPlotHeight: 200 })
+      // Origin at the bottom left, one scale on both axes, every point inside the box.
+      expect(fit.x(0)).toBe(fit.box.left)
+      expect(fit.y(0)).toBe(fit.box.bottom)
+      expect(Math.abs(fit.y(1) - fit.y(0))).toBeCloseTo(Math.abs(fit.x(1) - fit.x(0)), 9)
+      for (const q of pts) {
+        expect(q.x).toBeLessThanOrEqual(fit.xMax)
+        expect(q.y).toBeLessThanOrEqual(fit.yMax)
+      }
+    })
+  }
+
+  it('ends each ray of constant C on the box edge, with closeness C along it', () => {
+    for (const c of [0.25, 0.5, 0.75]) {
+      const e = isoClosenessEnd(c, 2, 1)
+      expect(closenessAt(e)).toBeCloseTo(c, 12)
+      expect(Math.max(e.x / 2, e.y / 1)).toBeCloseTo(1, 12)
+    }
+    expect(isoClosenessEnd(0.5, 2, 1)).toMatchObject({ x: 1, y: 1, side: 'top' })
+    expect(isoClosenessEnd(0.25, 4, 2)).toMatchObject({ side: 'right' })
+  })
 })
 
 describe('segmentTransform', () => {

@@ -1,16 +1,30 @@
-import { useCallback, useId, useMemo, useRef, useState, type KeyboardEvent } from 'react'
+import { useCallback, useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import type { Problem } from '../../core/types'
+import { SegmentedControl } from '../../ui/SegmentedControl'
 import { ChartFigure, type ChartTable } from '../charts/ChartFigure'
 import { estimateTextWidth, truncate } from '../charts/layout'
 import { useAnimateValues, useElementWidth } from '../charts/useElementWidth'
-import { argMax, fitPlot, segmentTransform, topsisProjection, type Point } from './geometry'
+import {
+  argMax,
+  distancePoints,
+  fitDistancePlane,
+  fitPlot,
+  ISO_C_DEFAULT,
+  isoClosenessEnd,
+  segmentTransform,
+  topsisProjection,
+  type Point,
+  type TopsisProjection,
+} from './geometry'
 import s from './illustrations.module.css'
+
+export type TopsisGeometryView = 'distances' | 'criteria'
 
 export type TopsisGeometryLabels = {
   title: string
-  /** One line under the plot, e.g. "The closer to A+ and the farther from A-, the higher C." */
+  /** One line under the criterion-plane picture, e.g. "Closer to A+ and farther from A- gives a higher C." */
   caption: string
-  /** Shown only with more than two criteria: the plot is a projection, the numbers are not. */
+  /** Criterion plane only, with more than two criteria: the plot is a projection, the numbers are not. */
   projectionNote: string
   ideal: string
   antiIdeal: string
@@ -27,6 +41,20 @@ export type TopsisGeometryLabels = {
   alternative: string
   /** Header of the closeness column. */
   closeness: string
+  /** Accessible name of the view switch. */
+  viewLabel: string
+  viewDistances: string
+  viewCriteria: string
+  /** Distance plane axes: the label says which direction is better. */
+  axisDPlus: string
+  axisDMinus: string
+  /** Label of a ray of constant closeness, from the formatted value ("C 0.75"). */
+  isoC: (c: string) => string
+  /** One line under the distance plane. */
+  planeCaption: string
+  /** Criterion axis names with their direction. */
+  higherBetter: (name: string) => string
+  lowerBetter: (name: string) => string
 }
 
 /** Development defaults only: the pages pass translated labels. */
@@ -44,13 +72,24 @@ export const TOPSIS_GEOMETRY_LABELS_EN: TopsisGeometryLabels = {
   showTable: 'Show as table',
   alternative: 'Alternative',
   closeness: 'C',
+  viewLabel: 'View',
+  viewDistances: 'Distances',
+  viewCriteria: 'Two criteria',
+  axisDPlus: 'D+ to the ideal, lower is better',
+  axisDMinus: 'D− to the anti-ideal, higher is better',
+  isoC: (c) => `C ${c}`,
+  planeCaption: 'Top left is best. C is the same along each ray.',
+  higherBetter: (name) => `${name}, higher is better`,
+  lowerBetter: (name) => `${name}, lower is better`,
 }
 
 export type TopsisGeometryProps = {
   problem: Problem
   weights: readonly number[]
-  /** Criterion indices on the x and y axis; default the two with the largest weight. */
+  /** Criterion indices on the x and y axis of the criterion plane; default the two with the largest weight. */
   axes?: [number, number] | undefined
+  /** First view: the D+ / D- plane (exact for any number of criteria, the default) or two criteria. */
+  defaultView?: TopsisGeometryView | undefined
   /** Selected alternative (controlled). Default: the best ranked one. */
   selected?: number | undefined
   onSelectedChange?: ((index: number) => void) | undefined
@@ -61,22 +100,30 @@ export type TopsisGeometryProps = {
 }
 
 const MARGIN = { left: 20, right: 36, top: 28, bottom: 36 }
+const PLANE_MARGIN = { left: 16, right: 52, top: 44, bottom: 28 }
 const defaultFormat = (v: number) => v.toFixed(3)
+/** "0,500" -> "0,5", "0.000" -> "0": a fixed-decimals format made short for ticks and ray labels. */
+const trimZeros = (text: string) => text.replace(/([.,]\d*?)0+$/, '$1').replace(/[.,]$/, '')
+
+type Screen = { x: number; y: number }
 
 /**
- * TOPSIS as a picture: alternatives as points in the weighted normalized space of two criteria,
- * the ideal A+ and anti-ideal A-, and for the selected alternative its distances to both. Axes
- * are oriented so that better is right and up (a cost axis is reversed), with one scale on both
- * axes so drawn lengths are true distances. The readout gives the real n-criteria D+, D- and C.
- * Click a point or use the arrow keys to select.
+ * TOPSIS as a picture, in two views.
+ * - Distances (default): every alternative at (D+, D-), the core's n-criteria distances, with the
+ *   rays of constant closeness C = D- / (D+ + D-). Exact for any number of criteria.
+ * - Two criteria: the weighted normalized values of two criteria with A+ and A- and the selected
+ *   alternative's distance lines. Values grow right and up on both axes; the axis label says which
+ *   direction is better. Exact for two criteria, a projection for more.
+ * Points are a radio group: click, or Tab to it and use the arrow keys / Home / End.
  */
-export function TopsisGeometry({ problem, weights, axes, selected, onSelectedChange, format = defaultFormat, labels, className }: TopsisGeometryProps) {
+export function TopsisGeometry({ problem, weights, axes, defaultView = 'distances', selected, onSelectedChange, format = defaultFormat, labels, className }: TopsisGeometryProps) {
   const l = { ...TOPSIS_GEOMETRY_LABELS_EN, ...labels }
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
   const animate = useAnimateValues(width)
   const proj = useMemo(() => topsisProjection(problem, weights, axes), [problem, weights, axes])
   const [own, setOwn] = useState<number | null>(null)
+  const [view, setView] = useState<TopsisGeometryView>(defaultView)
   const pointRefs = useRef<(SVGGElement | null)[]>([])
 
   const m = problem.alternatives.length
@@ -94,22 +141,9 @@ export function TopsisGeometry({ problem, weights, axes, selected, onSelectedCha
 
   if (!proj) return null
   const [ax, ay] = proj.axes
-  const fit = fitPlot(proj, Math.max(width, 240), { margin: MARGIN, minPlotHeight: 120, maxPlotHeight: 300 })
-  const { box } = fit
-  const P = (p: Point) => ({ x: fit.x(p.x), y: fit.y(p.y) })
-  const ideal = P(proj.ideal)
-  const anti = P(proj.antiIdeal)
-  const pts = proj.points.map(P)
-  const sel = pts[current] ?? ideal
-  // From the fixed ends, so only rotation and length move: A+ is top right of every point, A- bottom left.
-  const toIdeal = segmentTransform(ideal, sel, 135)
-  const toAnti = segmentTransform(anti, sel, -45)
-  const mid = (a: { x: number; y: number }, b: { x: number; y: number }) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 })
-  const midPlus = mid(ideal, sel)
-  const midMinus = mid(anti, sel)
-
   const xName = problem.criteria[ax]?.name ?? ''
   const yName = problem.criteria[ay]?.name ?? ''
+  const dirName = (j: number, name: string) => (problem.criteria[j]?.type === 'cost' ? l.lowerBetter(name) : l.higherBetter(name))
 
   const onKey = (e: KeyboardEvent<SVGGElement>, i: number) => {
     let next = -1
@@ -123,21 +157,34 @@ export function TopsisGeometry({ problem, weights, axes, selected, onSelectedCha
     choose(next, true)
   }
 
-  const table: ChartTable = {
-    corner: l.alternative,
-    columns: [xName, yName, l.dPlus, l.dMinus, l.closeness],
-    rows: [
-      ...problem.alternatives.map((name, i) => ({
-        label: name,
-        cells: [format(proj.points[i]!.x), format(proj.points[i]!.y), format(proj.dPlus[i]!), format(proj.dMinus[i]!), format(proj.closeness[i]!)],
-      })),
-      { label: l.ideal, cells: [format(proj.ideal.x), format(proj.ideal.y), '', '', ''] },
-      { label: l.antiIdeal, cells: [format(proj.antiIdeal.x), format(proj.antiIdeal.y), '', '', ''] },
-    ],
-  }
+  const distanceCells = (i: number) => [format(proj.dPlus[i]!), format(proj.dMinus[i]!), format(proj.closeness[i]!)]
+  const table: ChartTable =
+    view === 'distances'
+      ? {
+          corner: l.alternative,
+          columns: [l.dPlus, l.dMinus, l.closeness],
+          rows: problem.alternatives.map((name, i) => ({ label: name, cells: distanceCells(i) })),
+        }
+      : {
+          corner: l.alternative,
+          columns: [xName, yName, l.dPlus, l.dMinus, l.closeness],
+          rows: [
+            ...problem.alternatives.map((name, i) => ({
+              label: name,
+              cells: [format(proj.points[i]!.x), format(proj.points[i]!.y), ...distanceCells(i)],
+            })),
+            { label: l.ideal, cells: [format(proj.ideal.x), format(proj.ideal.y), '', '', ''] },
+            { label: l.antiIdeal, cells: [format(proj.antiIdeal.x), format(proj.antiIdeal.y), '', '', ''] },
+          ],
+        }
 
-  const nameMax = Math.max(40, Math.min(120, (box.right - box.left) / 3))
-  const refLabelW = Math.max(estimateTextWidth(l.ideal, 12), estimateTextWidth(l.antiIdeal, 12))
+  const w = Math.max(width, 240)
+  const drawing = view === 'distances' ? planeDrawing(proj, w, l, uid, format) : criteriaDrawing(proj, w, l, uid, xName, yName, dirName(ax, xName), dirName(ay, yName))
+  const pts = drawing.points
+  const nameMax = Math.max(40, Math.min(120, (drawing.box.right - drawing.box.left) / 3))
+
+  const caption = view === 'distances' ? l.planeCaption : l.caption
+  const note = view === 'criteria' && !proj.exact ? l.projectionNote : null
 
   return (
     <ChartFigure
@@ -149,11 +196,22 @@ export function TopsisGeometry({ problem, weights, axes, selected, onSelectedCha
       plotRef={plotRef}
       className={className}
     >
+      <SegmentedControl<TopsisGeometryView>
+        aria-label={l.viewLabel}
+        size="sm"
+        className={s.viewSwitch}
+        value={view}
+        onValueChange={setView}
+        options={[
+          { value: 'distances', label: l.viewDistances },
+          { value: 'criteria', label: l.viewCriteria },
+        ]}
+      />
       <svg
         className={animate ? `${s.svg} ${s.animate}` : s.svg}
         width={width}
-        height={fit.height}
-        viewBox={`0 0 ${width} ${fit.height}`}
+        height={drawing.height}
+        viewBox={`0 0 ${width} ${drawing.height}`}
         aria-labelledby={`${uid}-title`}
         aria-describedby={`${uid}-table`}
       >
@@ -162,55 +220,8 @@ export function TopsisGeometry({ problem, weights, axes, selected, onSelectedCha
             <path className={s.axisHead} d="M0 0.5 8 4 0 7.5z" />
           </marker>
         </defs>
-        {/* Axes: arrowheads point to "better". */}
-        <path className={s.axis} d={`M${box.left - 8} ${box.bottom + 8}H${box.right + 16}`} markerEnd={`url(#${uid}-head)`} />
-        <path className={s.axis} d={`M${box.left - 8} ${box.bottom + 8}V${box.top - 16}`} markerEnd={`url(#${uid}-head)`} />
-        <text className={s.axisName} x={box.right + 16} y={box.bottom + 26} textAnchor="end">
-          <title>{xName}</title>
-          {truncate(xName, box.right - box.left, 12)}
-        </text>
-        <text className={s.axisName} x={box.left} y={box.top - 14} dominantBaseline="central">
-          <title>{yName}</title>
-          {truncate(yName, box.right - box.left, 12)}
-        </text>
-
-        {/* Distance lines of the selected alternative: unit lines moved by transform, so they can transition. */}
-        <line
-          className={s.dist}
-          x1={0}
-          y1={0}
-          x2={1}
-          y2={0}
-          vectorEffect="non-scaling-stroke"
-          style={{ transform: `translate(${toIdeal.x}px, ${toIdeal.y}px) rotate(${toIdeal.angle}deg) scale(${toIdeal.length}, 1)` }}
-        />
-        <line
-          className={`${s.dist} ${s.distMinus}`}
-          x1={0}
-          y1={0}
-          x2={1}
-          y2={0}
-          vectorEffect="non-scaling-stroke"
-          style={{ transform: `translate(${toAnti.x}px, ${toAnti.y}px) rotate(${toAnti.angle}deg) scale(${toAnti.length}, 1)` }}
-        />
-        <text className={s.distLabel} x={0} y={0} dx={6} dy={-6} style={{ transform: `translate(${midPlus.x}px, ${midPlus.y}px)` }}>
-          {l.dPlus}
-        </text>
-        <text className={s.distLabel} x={0} y={0} dx={6} dy={-6} style={{ transform: `translate(${midMinus.x}px, ${midMinus.y}px)` }}>
-          {l.dMinus}
-        </text>
-
-        {/* Ideal and anti-ideal. */}
-        <g aria-hidden="true">
-          <path className={s.refMark} d={`M${ideal.x} ${ideal.y - 6}l6 6-6 6-6-6z`} />
-          <text className={s.refLabel} x={Math.min(ideal.x + 10, width - refLabelW)} y={ideal.y - 12}>
-            {l.ideal}
-          </text>
-          <path className={s.refMark} d={`M${anti.x} ${anti.y - 6}l6 6-6 6-6-6z`} />
-          <text className={s.refLabel} x={anti.x - 10} y={anti.y + 18} textAnchor={anti.x - 10 - refLabelW < 0 ? 'start' : 'end'}>
-            {l.antiIdeal}
-          </text>
-        </g>
+        {drawing.background}
+        {drawing.selection(pts[current] ?? pts[0]!, current)}
 
         {/* Alternatives: a radio group, one tab stop, arrows move the selection. */}
         <g role="radiogroup" aria-label={l.select}>
@@ -258,14 +269,177 @@ export function TopsisGeometry({ problem, weights, axes, selected, onSelectedCha
         </span>
       </div>
       <p className={s.caption}>
-        {l.caption}
-        {proj.exact ? null : (
+        {caption}
+        {note ? (
           <>
             {' '}
-            <span className={s.note}>{l.projectionNote}</span>
+            <span className={s.note}>{note}</span>
           </>
-        )}
+        ) : null}
       </p>
     </ChartFigure>
   )
+}
+
+type Drawing = {
+  height: number
+  box: { left: number; right: number; top: number; bottom: number }
+  points: Screen[]
+  background: ReactNode
+  selection: (sel: Screen, index: number) => ReactNode
+}
+
+/** The D+ / D- plane: origin bottom left, rays of constant C, guides from the selected point to both axes. */
+function planeDrawing(proj: TopsisProjection, width: number, l: TopsisGeometryLabels, uid: string, format: (v: number) => string): Drawing {
+  const data = distancePoints(proj)
+  const fit = fitDistancePlane(data, width, { margin: PLANE_MARGIN, minPlotHeight: 160, maxPlotHeight: 300 })
+  const { box } = fit
+  const P = (p: Point): Screen => ({ x: fit.x(p.x), y: fit.y(p.y) })
+  const short = (v: number) => trimZeros(format(v))
+  const xLabelW = box.right + 12
+  return {
+    height: fit.height,
+    box,
+    points: data.map(P),
+    background: (
+      <>
+        {/* Rays of constant closeness through the origin. */}
+        <g aria-hidden="true">
+          {ISO_C_DEFAULT.map((c, k) => {
+            const end = isoClosenessEnd(c, fit.xMax, fit.yMax)
+            const e = P(end)
+            return (
+              <g key={c}>
+                <line className={s.iso} x1={box.left} y1={box.bottom} x2={e.x} y2={e.y} />
+                <text
+                  className={s.isoLabel}
+                  x={end.side === 'top' ? e.x : e.x + 6}
+                  y={end.side === 'top' ? e.y - 6 : e.y}
+                  textAnchor={end.side === 'top' ? 'middle' : 'start'}
+                  dominantBaseline={end.side === 'top' ? 'auto' : 'central'}
+                >
+                  {k === ISO_C_DEFAULT.length - 1 ? l.isoC(short(c)) : short(c)}
+                </text>
+              </g>
+            )
+          })}
+        </g>
+        {/* Axes from the origin; arrowheads point to larger distances. */}
+        <path className={s.axis} d={`M${box.left} ${box.bottom}H${box.right + 12}`} markerEnd={`url(#${uid}-head)`} />
+        <path className={s.axis} d={`M${box.left} ${box.bottom}V${box.top - 14}`} markerEnd={`url(#${uid}-head)`} />
+        <text className={s.axisName} x={box.right + 12} y={box.bottom + 20} textAnchor="end">
+          <title>{l.axisDPlus}</title>
+          {truncate(l.axisDPlus, xLabelW, 12)}
+        </text>
+        <text className={s.axisName} x={box.left - 4} y={box.top - 32} dominantBaseline="central">
+          <title>{l.axisDMinus}</title>
+          {truncate(l.axisDMinus, width - box.left, 12)}
+        </text>
+      </>
+    ),
+    selection: (sel) => (
+      <g aria-hidden="true">
+        <line className={s.guide} x1={sel.x} y1={sel.y} x2={sel.x} y2={box.bottom} />
+        <line className={s.guide} x1={sel.x} y1={sel.y} x2={box.left} y2={sel.y} />
+      </g>
+    ),
+  }
+}
+
+/** Two criteria: weighted normalized values, A+ and A-, distance lines of the selected alternative. */
+function criteriaDrawing(
+  proj: TopsisProjection,
+  width: number,
+  l: TopsisGeometryLabels,
+  uid: string,
+  xName: string,
+  yName: string,
+  xLabel: string,
+  yLabel: string,
+): Drawing {
+  const fit = fitPlot(proj, width, { margin: MARGIN, minPlotHeight: 120, maxPlotHeight: 300 })
+  const { box } = fit
+  const P = (p: Point): Screen => ({ x: fit.x(p.x), y: fit.y(p.y) })
+  const ideal = P(proj.ideal)
+  const anti = P(proj.antiIdeal)
+  const refLabelW = Math.max(estimateTextWidth(l.ideal, 12), estimateTextWidth(l.antiIdeal, 12))
+  // A zero-length line keeps the direction from A+ towards A- (and back), so it does not spin when it grows.
+  const back = segmentTransform(ideal, anti, 0).angle
+  const labelW = box.right - box.left
+  return {
+    height: fit.height,
+    box,
+    points: proj.points.map(P),
+    background: (
+      <>
+        {/* Axes: values grow right and up; the labels say which direction is better. */}
+        <path className={s.axis} d={`M${box.left - 8} ${box.bottom + 8}H${box.right + 16}`} markerEnd={`url(#${uid}-head)`} />
+        <path className={s.axis} d={`M${box.left - 8} ${box.bottom + 8}V${box.top - 16}`} markerEnd={`url(#${uid}-head)`} />
+        <text className={s.axisName} x={box.right + 16} y={box.bottom + 26} textAnchor="end">
+          <title>{xName}</title>
+          {truncate(xLabel, labelW, 12)}
+        </text>
+        <text className={s.axisName} x={box.left} y={box.top - 14} dominantBaseline="central">
+          <title>{yName}</title>
+          {truncate(yLabel, labelW, 12)}
+        </text>
+        <g aria-hidden="true">
+          <path className={s.refMark} d={`M${ideal.x} ${ideal.y - 6}l6 6-6 6-6-6z`} />
+          <text
+            className={s.refLabel}
+            x={ideal.x + 10 + refLabelW > width ? ideal.x - 10 : ideal.x + 10}
+            y={ideal.y - 10}
+            textAnchor={ideal.x + 10 + refLabelW > width ? 'end' : 'start'}
+          >
+            {l.ideal}
+          </text>
+          <path className={s.refMark} d={`M${anti.x} ${anti.y - 6}l6 6-6 6-6-6z`} />
+          <text
+            className={s.refLabel}
+            x={anti.x + 10 + refLabelW > width ? anti.x - 10 : anti.x + 10}
+            y={anti.y + 18}
+            textAnchor={anti.x + 10 + refLabelW > width ? 'end' : 'start'}
+          >
+            {l.antiIdeal}
+          </text>
+        </g>
+      </>
+    ),
+    selection: (sel) => {
+      const toIdeal = segmentTransform(ideal, sel, back + 180)
+      const toAnti = segmentTransform(anti, sel, back)
+      const mid = (a: Screen, b: Screen) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 })
+      const midPlus = mid(ideal, sel)
+      const midMinus = mid(anti, sel)
+      return (
+        <>
+          {/* Unit lines moved by transform, so they can transition. */}
+          <line
+            className={s.dist}
+            x1={0}
+            y1={0}
+            x2={1}
+            y2={0}
+            vectorEffect="non-scaling-stroke"
+            style={{ transform: `translate(${toIdeal.x}px, ${toIdeal.y}px) rotate(${toIdeal.angle}deg) scale(${toIdeal.length}, 1)` }}
+          />
+          <line
+            className={`${s.dist} ${s.distMinus}`}
+            x1={0}
+            y1={0}
+            x2={1}
+            y2={0}
+            vectorEffect="non-scaling-stroke"
+            style={{ transform: `translate(${toAnti.x}px, ${toAnti.y}px) rotate(${toAnti.angle}deg) scale(${toAnti.length}, 1)` }}
+          />
+          <text className={s.distLabel} x={0} y={0} dx={6} dy={-6} style={{ transform: `translate(${midPlus.x}px, ${midPlus.y}px)` }}>
+            {l.dPlus}
+          </text>
+          <text className={s.distLabel} x={0} y={0} dx={6} dy={-6} style={{ transform: `translate(${midMinus.x}px, ${midMinus.y}px)` }}>
+            {l.dMinus}
+          </text>
+        </>
+      )
+    },
+  }
 }

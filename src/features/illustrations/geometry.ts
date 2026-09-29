@@ -100,11 +100,11 @@ export type FitOptions = {
 }
 
 /**
- * Screen scales for the projection.
+ * Screen scales for the criterion-plane picture.
  * - One unit is the same number of pixels on both axes, so a drawn distance is a true (planar)
  *   Euclidean distance; the height follows the data, clamped, and the data is centred.
- * - Oriented so that "better" is always right and up: a cost axis is reversed. A+ is then the top
- *   right corner of the data and A- the bottom left, whatever the criterion directions are.
+ * - Values grow to the right and up on both axes, also on a cost criterion (no reversed axis):
+ *   the axis label says which direction is better, and A+ sits wherever the data puts it.
  */
 export function fitPlot(proj: Pick<TopsisProjection, 'ideal' | 'antiIdeal'>, width: number, opts: FitOptions): PlotFit {
   const { margin, minPlotHeight = 140, maxPlotHeight = 300, pad = 0.08 } = opts
@@ -124,16 +124,79 @@ export function fitPlot(proj: Pick<TopsisProjection, 'ideal' | 'antiIdeal'>, wid
   }
   plotH = Math.max(plotH, minPlotHeight)
   const box: PlotBox = { left: margin.left, right: margin.left + plotW, top: margin.top, bottom: margin.top + plotH }
-  const axis = (worst: number, best: number, half: number, r: Domain): LinearScale => {
-    const mid = (worst + best) / 2
-    const dir = best >= worst ? 1 : -1
-    return scaleLinear([mid - dir * half, mid + dir * half], r)
+  const axis = (a: number, b: number, half: number, r: Domain): LinearScale => {
+    const mid = (a + b) / 2
+    return scaleLinear([mid - half, mid + half], r)
   }
   return {
     x: axis(antiIdeal.x, ideal.x, plotW / k / 2, [box.left, box.right]),
     y: axis(antiIdeal.y, ideal.y, plotH / k / 2, [box.bottom, box.top]),
     box,
     height: box.bottom + margin.bottom,
+  }
+}
+
+// ---------------------------------------------------------------------------------------------
+// TOPSIS distance plane (exact in any number of criteria)
+// ---------------------------------------------------------------------------------------------
+
+/** The rays of constant closeness drawn on the distance plane. */
+export const ISO_C_DEFAULT = [0.25, 0.5, 0.75] as const
+
+/** Every alternative as (D+, D-): x is the distance to A+, y the distance to A-, from the core. */
+export function distancePoints(proj: Pick<TopsisProjection, 'dPlus' | 'dMinus'>): Point[] {
+  return proj.dPlus.map((d, i) => ({ x: d, y: proj.dMinus[i]! }))
+}
+
+/** Closeness of a point of the distance plane: C = D- / (D+ + D-) = y / (x + y). */
+export const closenessAt = (p: Point): number => (p.x + p.y > 0 ? p.y / (p.x + p.y) : 0)
+
+/**
+ * Where the ray of constant closeness C leaves the box [0, xMax] x [0, yMax]. Every point on
+ * the ray y = x * C / (1 - C) has closeness C; `side` says which edge it leaves by.
+ */
+export function isoClosenessEnd(c: number, xMax: number, yMax: number): Point & { side: 'top' | 'right' } {
+  const ux = 1 - c
+  const uy = c
+  const tx = ux > 0 ? xMax / ux : Infinity
+  const ty = uy > 0 ? yMax / uy : Infinity
+  const t = Math.min(tx, ty)
+  return { x: ux * t, y: uy * t, side: ty <= tx ? 'top' : 'right' }
+}
+
+export type PlaneFit = PlotFit & { xMax: number; yMax: number }
+
+/**
+ * Screen scales for the distance plane: both axes start at 0, one scale on both (so the C = 0.5
+ * ray is the 45 degree diagonal), the height follows the data and is clamped.
+ */
+export function fitDistancePlane(points: readonly Point[], width: number, opts: FitOptions): PlaneFit {
+  const { margin, minPlotHeight = 140, maxPlotHeight = 300, pad = 0.12 } = opts
+  let plotW = Math.max(1, width - margin.left - margin.right)
+  const mx = Math.max(...points.map((p) => p.x), 0)
+  const my = Math.max(...points.map((p) => p.y), 0)
+  const m = Math.max(mx, my) || 1
+  const dx = Math.max(mx, m * 0.25) * (1 + pad)
+  const dy = Math.max(my, m * 0.25) * (1 + pad)
+  let k = plotW / dx
+  let plotH = dy * k
+  if (plotH > maxPlotHeight) {
+    plotH = maxPlotHeight
+    k = plotH / dy
+  }
+  plotH = Math.max(plotH, minPlotHeight)
+  // No empty band on the right: the plot is only as wide as the data needs at this scale.
+  plotW = Math.min(plotW, dx * k)
+  const box: PlotBox = { left: margin.left, right: margin.left + plotW, top: margin.top, bottom: margin.top + plotH }
+  const xMax = plotW / k
+  const yMax = plotH / k
+  return {
+    x: scaleLinear([0, xMax], [box.left, box.right]),
+    y: scaleLinear([0, yMax], [box.bottom, box.top]),
+    box,
+    height: box.bottom + margin.bottom,
+    xMax,
+    yMax,
   }
 }
 

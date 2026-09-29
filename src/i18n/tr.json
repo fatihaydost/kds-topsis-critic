@@ -537,11 +537,20 @@
         "alternative": "Alternatif",
         "criterion": "Kriter",
         "topsis": {
-          "title": "İdeale ve negatif ideale uzaklık",
+          "title": "A+ ve A−'ye uzaklık",
           "caption": "A+'ya yakın ve A−'den uzak olan daha yüksek C alır.",
           "projectionNote": "En ağır iki kriter üzerinde çizildi; D ve C tüm kriterleri kullanır.",
-          "select": "Bir alternatif seç",
-          "point": "{{name}}, C {{c}}"
+          "select": "Bir alternatif seçin",
+          "point": "{{name}}, C {{c}}",
+          "view": "Görünüm",
+          "viewDistances": "Uzaklıklar",
+          "viewCriteria": "İki kriter",
+          "axisDPlus": "D+, düşük daha iyi",
+          "axisDMinus": "D−, yüksek daha iyi",
+          "iso": "C {{c}}",
+          "planeCaption": "En iyisi sol üst. Her ışın boyunca C aynıdır.",
+          "higherBetter": "{{name}}, yüksek daha iyi",
+          "lowerBetter": "{{name}}, düşük daha iyi"
         },
         "critic": {
           "title": "Kontrast çarpı çatışma ağırlığı verir",

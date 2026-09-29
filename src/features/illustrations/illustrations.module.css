@@ -496,3 +496,46 @@
   stroke: var(--accent);
   stroke-width: 1.5;
 }
+
+/* TOPSIS distance plane ----------------------------------------------------------------------- */
+
+.viewSwitch {
+  margin-bottom: 8px;
+}
+
+.iso {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+
+.isoLabel {
+  fill: var(--text-2);
+  font-size: 12px;
+}
+
+.guide {
+  stroke: var(--data-accent);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+}
+
+/* Method thumbnails (catalogue cards) --------------------------------------------------------- */
+
+.thumb {
+  display: block;
+  flex: none;
+}
+
+.thumbAxis {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+
+.thumbMark {
+  fill: var(--data-context);
+}
+
+.thumbAccent {
+  fill: var(--data-accent);
+}
