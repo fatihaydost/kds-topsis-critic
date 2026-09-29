@@ -1,0 +1,303 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import type { ValidationIssue, WeightingResult } from '../../core'
+import { getExample, shortCitation } from '../../data/examples'
+import { BarChart } from '../../features/charts'
+import { useNumberFormat } from '../../i18n'
+import {
+  computeWeights,
+  isEmptyProblem,
+  useWeights,
+  useWorkbench,
+  type DraftProblem,
+  type WeightMethodId,
+} from '../../state/workbench'
+import { Button, cn, EmptyState, ErrorSummary, NumberInput, SegmentedControl, Table, TBody, Td, Th, THead, Tr, type ErrorSummaryItem } from '../../ui'
+import { useWorkbenchNav } from './nav'
+import { BlockedByIssues, CalculationToggle, ContinueBar, MethodWarnings, SectionTitle } from './parts'
+import { criterionName, DECIMALS, findStep, ids, placeIssue, stepName, sumDecimals, weightMethodLabel } from './shared'
+
+const METHODS: readonly WeightMethodId[] = ['critic', 'equal', 'manual']
+
+export function WeightsStage() {
+  const { t } = useTranslation()
+  const problem = useWorkbench((s) => s.problem)
+  const weightMethod = useWorkbench((s) => s.weightMethod)
+  const setWeightMethod = useWorkbench((s) => s.setWeightMethod)
+  const weights = useWeights()
+  const { goTo, attempted, setAttempted } = useWorkbenchNav()
+  const summaryRoot = useRef<HTMLDivElement>(null)
+  const [focusSummary, setFocusSummary] = useState(0)
+
+  useEffect(() => {
+    if (focusSummary > 0) summaryRoot.current?.querySelector<HTMLElement>('[tabindex="-1"]')?.focus()
+  }, [focusSummary])
+
+  if (isEmptyProblem(problem)) {
+    return (
+      <EmptyState
+        title={t('workbench.empty.weights.title')}
+        description={t('workbench.empty.weights.body')}
+        action={<Button onClick={() => goTo('data')}>{t('workbench.empty.weights.action')}</Button>}
+      />
+    )
+  }
+
+  const onContinue = () => {
+    if (weights.value === null) {
+      setAttempted('weights', true)
+      setFocusSummary((k) => k + 1)
+      return
+    }
+    goTo('ranking')
+  }
+
+  const dataBlocked = weights.value === null && weightMethod !== 'manual'
+
+  return (
+    <div className="flex flex-col gap-6 pt-4">
+      <div className="flex flex-col gap-2">
+        <SegmentedControl<WeightMethodId>
+          aria-label={t('workbench.weightMethod.label')}
+          value={weightMethod}
+          onValueChange={setWeightMethod}
+          options={METHODS.map((m) => ({ value: m, label: weightMethodLabel(m, t) }))}
+          size="md"
+          className="self-start"
+        />
+        <span id={ids.weightMethod} tabIndex={-1} className="sr-only">
+          {t('workbench.weightMethod.label')}
+        </span>
+        <p className="max-w-[72ch] text-13 text-text-2">{t(`workbench.weights.methodHint.${weightMethod}`)}</p>
+      </div>
+
+      {weightMethod === 'manual' ? (
+        <ManualWeights problem={problem} issues={weights.issues} showErrors={attempted.weights} summaryRoot={summaryRoot} />
+      ) : dataBlocked ? (
+        <BlockedByIssues issues={weights.issues} problem={problem} />
+      ) : weights.value ? (
+        <ComputedWeights problem={problem} method={weightMethod} result={weights.value} />
+      ) : null}
+
+      <ContinueBar to="ranking" onContinue={onContinue} />
+    </div>
+  )
+}
+
+function ComputedWeights({ problem, method, result }: { problem: DraftProblem; method: 'critic' | 'equal'; result: WeightingResult }) {
+  const { t } = useTranslation()
+  const nf = useNumberFormat(DECIMALS.weight)
+  const format = useCallback((v: number) => nf.format(v), [nf])
+  const names = problem.criteria.map((_, j) => criterionName(problem.criteria, j, t))
+  const sigma = findStep(result.steps, 'critic.sigma')?.vector
+  const conflict = findStep(result.steps, 'critic.conflict')?.vector
+  const information = findStep(result.steps, 'critic.information')?.vector
+  const n = problem.criteria.length
+
+  return (
+    <>
+      <MethodWarnings warnings={result.warnings} problem={problem} />
+      {method === 'equal' && (
+        <p className="text-14 text-text">{t('workbench.weights.equalNote', { n, value: nf.format(1 / n) })}</p>
+      )}
+      <section className="flex flex-col gap-3" aria-labelledby="wb-weights-table">
+        <SectionTitle>
+          <span id="wb-weights-table">{t('workbench.weights.tableTitle')}</span>
+        </SectionTitle>
+        <div className="min-w-0">
+          <Table density="compact" className="w-auto min-w-[min(100%,560px)]">
+            <THead>
+              <Tr>
+                <Th>{t('workbench.weights.columns.criterion')}</Th>
+                <Th>{t('workbench.weights.columns.direction')}</Th>
+                {method === 'critic' && (
+                  <>
+                    <Th numeric>{t('workbench.weights.columns.sigma')}</Th>
+                    <Th numeric>{t('workbench.weights.columns.conflict')}</Th>
+                    <Th numeric>{t('workbench.weights.columns.information')}</Th>
+                  </>
+                )}
+                <Th numeric>{t('workbench.weights.columns.weight')}</Th>
+              </Tr>
+            </THead>
+            <TBody>
+              {problem.criteria.map((c, j) => (
+                <Tr key={j}>
+                  <Th scope="row">{names[j]}</Th>
+                  <Td className="text-text-2">{t(`workbench.criterionType.${c.type}`)}</Td>
+                  {method === 'critic' && (
+                    <>
+                      <Td numeric>{nf.format(sigma?.[j])}</Td>
+                      <Td numeric>{nf.format(conflict?.[j])}</Td>
+                      <Td numeric>{nf.format(information?.[j])}</Td>
+                    </>
+                  )}
+                  <Td numeric className="font-medium">
+                    {nf.format(result.weights[j])}
+                  </Td>
+                </Tr>
+              ))}
+            </TBody>
+          </Table>
+        </div>
+      </section>
+
+      {method === 'critic' && (
+        <>
+          <WeightsChart names={names} weights={result.weights} format={format} />
+          <CalculationToggle groups={[{ steps: result.steps }]} problem={problem} />
+        </>
+      )}
+    </>
+  )
+}
+
+export function WeightsChart({ names, weights, format, className }: { names: string[]; weights: number[]; format: (v: number) => string; className?: string }) {
+  const { t } = useTranslation()
+  return (
+    <BarChart
+      title={t('workbench.weights.chartTitle')}
+      labels={names}
+      values={weights}
+      format={format}
+      tableLabels={{ show: t('workbench.chart.showTable'), label: t('workbench.criterion'), value: t('workbench.weights.columns.weight') }}
+      className={cn('max-w-[640px]', className)}
+    />
+  )
+}
+
+type ManualProps = {
+  problem: DraftProblem
+  issues: ValidationIssue[]
+  showErrors: boolean
+  summaryRoot: React.RefObject<HTMLDivElement | null>
+}
+
+function ManualWeights({ problem, issues, showErrors, summaryRoot }: ManualProps) {
+  const { t } = useTranslation()
+  const nf = useNumberFormat(DECIMALS.weight)
+  const format = useCallback((v: number) => nf.format(v), [nf])
+  const manualWeights = useWorkbench((s) => s.manualWeights)
+  const setManualWeight = useWorkbench((s) => s.setManualWeight)
+  const exampleId = useWorkbench((s) => s.exampleId)
+  const n = problem.criteria.length
+  const w = Array.from({ length: n }, (_, j) => manualWeights[j] ?? null)
+  const names = problem.criteria.map((_, j) => criterionName(problem.criteria, j, t))
+
+  const filled = w.every((x): x is number => x !== null)
+  const sum = w.reduce<number>((a, x) => a + (x ?? 0), 0)
+  const sumOk = filled && issues.every((x) => x.code !== 'weights-sum')
+  const canNormalize = filled && w.every((x) => (x ?? 0) >= 0) && sum > 0 && !sumOk
+
+  const critic = useMemo(() => computeWeights({ problem, weightMethod: 'critic', manualWeights: [] }), [problem])
+  const example = exampleId ? getExample(exampleId) : undefined
+  const fromPaper = example?.weights && example.weights.length === n && example.weights.every((x, j) => x === w[j])
+
+  const fill = (values: number[]) => values.forEach((v, j) => setManualWeight(j, v))
+  const normalize = () => fill(w.map((x) => (x ?? 0) / sum))
+
+  const errorFor = (j: number): string | undefined => {
+    const x = issues.find((i) => i.col === j && (i.code === 'invalid-weight' || i.code === 'negative-weight'))
+    if (!x) return undefined
+    if (x.code === 'invalid-weight') return t('workbench.weights.emptyWeight', { criterion: names[j] })
+    return placeIssue(x, problem, t, nf.format).message
+  }
+
+  const blocking = issues.filter((x) => x.severity === 'error')
+  const summaryItems: ErrorSummaryItem[] = blocking.map((x) => {
+    const p = placeIssue(x, problem, t, nf.format)
+    return { targetId: p.targetId, message: x.code === 'invalid-weight' && x.col !== undefined ? t('workbench.weights.emptyWeight', { criterion: names[x.col] }) : p.message }
+  })
+  const sumMessage = filled && !sumOk ? t('workbench.weights.sumError', { value: nf.format(sum, sumDecimals(sum)) }) : null
+
+  return (
+    <>
+      <div ref={summaryRoot} className={showErrors && summaryItems.length > 0 ? undefined : 'hidden'}>
+        <ErrorSummary autoFocus={false} errors={showErrors ? summaryItems : []} />
+      </div>
+
+      {fromPaper && example && (
+        <p className="text-13 text-text-2">{t('workbench.weights.fromPaper', { citation: shortCitation(example.citation, nf.lang) })}</p>
+      )}
+
+      <section className="flex flex-col gap-3" aria-labelledby="wb-weights-table">
+        <SectionTitle>
+          <span id="wb-weights-table">{t('workbench.weights.tableTitle')}</span>
+        </SectionTitle>
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="ghost" onClick={() => fill(new Array<number>(n).fill(1 / n))}>
+            {t('workbench.weights.startEqual')}
+          </Button>
+          {critic.value && (
+            <Button size="sm" variant="ghost" onClick={() => fill(critic.value!.weights)}>
+              {t('workbench.weights.startCritic')}
+            </Button>
+          )}
+        </div>
+        <div className="min-w-0">
+          <Table density="regular" stickyHeader={false} className="w-auto min-w-[min(100%,480px)]">
+            <THead>
+              <Tr>
+                <Th>{t('workbench.weights.columns.criterion')}</Th>
+                <Th>{t('workbench.weights.columns.direction')}</Th>
+                <Th numeric className="w-40">
+                  {t('workbench.weights.columns.weight')}
+                </Th>
+              </Tr>
+            </THead>
+            <TBody>
+              {problem.criteria.map((c, j) => {
+                const err = showErrors ? errorFor(j) : undefined
+                return (
+                  <Tr key={j}>
+                    <Th scope="row">
+                      <label htmlFor={ids.weight(j)}>{names[j]}</label>
+                    </Th>
+                    <Td className="text-text-2">{t(`workbench.criterionType.${c.type}`)}</Td>
+                    <Td className="py-1">
+                      <NumberInput
+                        id={ids.weight(j)}
+                        value={w[j] ?? null}
+                        decimals={DECIMALS.weight}
+                        controlSize="sm"
+                        invalid={Boolean(err)}
+                        aria-describedby={err ? `${ids.weight(j)}-error` : undefined}
+                        onValueChange={(v) => setManualWeight(j, v)}
+                        className="w-32"
+                      />
+                      {err && (
+                        <p id={`${ids.weight(j)}-error`} className="mt-1 max-w-40 text-12 text-danger">
+                          {err}
+                        </p>
+                      )}
+                    </Td>
+                  </Tr>
+                )
+              })}
+              <Tr>
+                <Th scope="row" className="font-semibold">
+                  {t('workbench.weights.total')}
+                </Th>
+                <Td />
+                <Td numeric className={cn('pr-5 font-semibold', filled && !sumOk ? 'text-danger' : 'text-text')} aria-live="polite">
+                  {nf.format(sum, Math.max(DECIMALS.weight, sumDecimals(sum)))}
+                </Td>
+              </Tr>
+            </TBody>
+          </Table>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <Button id={ids.normalize} onClick={normalize} disabled={!canNormalize} aria-describedby="wb-normalize-hint">
+            {t('workbench.weights.normalize')}
+          </Button>
+          <p id="wb-normalize-hint" className={cn('text-13', sumMessage ? 'text-danger' : filled ? 'text-ok' : 'text-text-3')}>
+            {sumMessage ?? (filled ? t('workbench.weights.sumOk') : t('workbench.weights.normalizeHint'))}
+          </p>
+        </div>
+      </section>
+
+      {sumOk && filled && <WeightsChart names={names} weights={w as number[]} format={format} />}
+    </>
+  )
+}
+

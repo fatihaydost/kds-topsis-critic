@@ -177,6 +177,229 @@
       "label": "Örnek",
       "loaded": "Örnek veri: {{citation}}",
       "source": "Kaynak"
+    },
+    "continue": {
+      "weights": "Ağırlıklara geç",
+      "ranking": "Sıralamaya geç",
+      "results": "Sonuçlara geç"
+    },
+    "loadingStage": "Çalışma alanı yükleniyor",
+    "grid": {
+      "name": "Karar matrisi",
+      "corner": "Alternatif",
+      "direction": "Yön",
+      "benefit": "Fayda",
+      "cost": "Maliyet",
+      "switchHint": "Fayda ile maliyet arasında geçmek için Boşluk tuşuna bas.",
+      "addAlternative": "Alternatif ekle",
+      "addCriterion": "Kriter ekle",
+      "deleteAlternative": "Alternatifi sil",
+      "deleteCriterion": "Kriteri sil",
+      "undo": "Geri al",
+      "redo": "Yinele",
+      "notANumber": "\"{{text}}\" bir sayı değil.",
+      "pastedWithNames": "İlk satır ve sütun ad olarak kullanıldı.",
+      "pasteAsValues": "Bunun yerine değer olarak yapıştır",
+      "pasteSkipped_one": "Yapıştırılan {{count}} hücre sayı değildi, atlandı.",
+      "pasteSkipped_other": "Yapıştırılan {{count}} hücre sayı değildi, atlandı."
+    },
+    "data": {
+      "hint": "Ok tuşları ve Tab ile gezin; yazmaya başlamak hücreyi değiştirir, F2 düzenler. Excel ya da Sheets'ten kopyaladığın bir bloğu herhangi bir hücreye yapıştırabilirsin.",
+      "importFile": "Dosya içe aktar",
+      "loadExample": "Örnek yükle",
+      "examplesLabel": "Yayımlanmış örnekler",
+      "otherExamples": "Diğer yayımlanmış örnekler",
+      "clear": "Tabloyu temizle",
+      "clearTitle": "Tablo temizlensin mi?",
+      "clearBody": "Alternatifler, kriterler, değerler ve ağırlıklar silinir. Bu işlem geri alınamaz.",
+      "importing": "{{name}} okunuyor",
+      "imported": "{{name}} içe aktarıldı (alternatif: {{alternatives}}, kriter: {{criteria}}). Geri almak için tabloda Ctrl+Z'ye bas.",
+      "importEmpty": "{{name}} içinde karar matrisi bulunamadı. Dosyada önce kriter adlarının olduğu bir satır, ardından her alternatif için bir satır olmalı.",
+      "importFailed": "{{name}} okunamadı. Dosyayı .xlsx ya da .csv olarak kaydedip yeniden dene.",
+      "importTitle": "İçe aktarılan veriyi kontrol et",
+      "importNotes": "İçe aktarma notları",
+      "cell": "{{cell}} hücresi",
+      "line": "Satır {{row}}, alan {{col}}",
+      "decimalPoint": "nokta",
+      "decimalComma": "virgül",
+      "importIssues": {
+        "empty-file": "Dosya boş.",
+        "missing-header": "Kriter adlarının olduğu bir satır bulunamadı, kriterler {{criterion}} ve sonrası diye adlandırıldı.",
+        "missing-criterion-name": "Bir kriterin adı yok. {{criterion}} diye adlandırıldı.",
+        "duplicate-criterion-name": "{{criterion}} kriter adı birden fazla kez geçiyor.",
+        "missing-type-row": "Fayda ya da maliyet satırı bulunamadı, bütün kriterler fayda sayıldı. Tablodaki yönleri kontrol et.",
+        "missing-type": "{{criterion}} için yön yok, fayda sayıldı.",
+        "invalid-type": "{{criterion}} için yazılan yön fayda ya da maliyet değil, fayda sayıldı.",
+        "conflicting-type": "İki satır {{criterion}} için farklı yön veriyor. Adların yanındaki satır kullanıldı.",
+        "missing-alternative-name": "Bir alternatifin adı yok. {{alternative}} diye adlandırıldı.",
+        "duplicate-alternative-name": "{{alternative}} alternatif adı birden fazla kez geçiyor.",
+        "empty-cell": "{{alternative}} için {{criterion}} değeri boş. Bir sayı gir.",
+        "not-a-number": "{{alternative}} için {{criterion}} değeri sayı değil, boş bırakıldı. Bir sayı gir.",
+        "extra-cell": "{{alternative}} satırında son kriterin sağında bir değer var. Okunmadı.",
+        "trailing-content-ignored": "Okuma bir özet satırında ya da ikinci bir tabloda durdu. Altındaki satırlar okunmadı.",
+        "ambiguous-decimal": "1.234 gibi sayılar iki türlü okunabiliyor. Ondalık ayırıcı {{separator}} kabul edilerek okundu.",
+        "mixed-decimal": "Bazı sayılarda ondalık ayırıcı nokta, bazılarında virgül. Hepsi için {{separator}} kullanıldı."
+      },
+      "moreProblems_one": "Tabloda {{count}} sorun daha işaretli.",
+      "moreProblems_other": "Tabloda {{count}} sorun daha işaretli."
+    },
+    "weights": {
+      "methodHint": {
+        "critic": "Her kriterin ne kadar değiştiğine ve diğerleriyle ne kadar çeliştiğine bakan nesnel ağırlıklar.",
+        "equal": "Her kriter aynı ağırlığı alır.",
+        "manual": "Ağırlıkları kendin gir. Her biri 0 ya da daha büyük olmalı, toplamları 1 etmeli."
+      },
+      "columns": {
+        "criterion": "Kriter",
+        "direction": "Yön",
+        "sigma": "Kontrast σ",
+        "conflict": "Çatışma Σ(1 − ρ)",
+        "information": "Bilgi miktarı C",
+        "weight": "Ağırlık w"
+      },
+      "tableTitle": "Kriter ağırlıkları",
+      "chartTitle": "Kriter ağırlıkları",
+      "showCalculation": "Hesabı göster",
+      "hideCalculation": "Hesabı gizle",
+      "total": "Toplam",
+      "normalize": "Toplamı 1'e ölçekle",
+      "normalizeHint": "Her ağırlığı toplama böler, böylece toplam 1 olur.",
+      "startEqual": "Eşit ağırlıkla doldur",
+      "startCritic": "CRITIC ağırlıklarıyla doldur",
+      "sumError": "Ağırlıkların toplamı {{value}}; 1 olmalı.",
+      "sumOk": "Ağırlıkların toplamı 1.",
+      "weightOf": "{{criterion}} ağırlığı",
+      "emptyWeight": "{{criterion}} için bir ağırlık gir.",
+      "fromPaper": "Ağırlıklar {{citation}} çalışmasındaki gibi.",
+      "equalNote": "{{n}} kriter var, her ağırlık 1 / {{n}} = {{value}}."
+    },
+    "ranking": {
+      "methodHint": {
+        "topsis": "Alternatifleri ideal ve negatif ideal çözüme olan uzaklıklarına göre sıralar."
+      },
+      "moreMethods": "Yeni sıralama yöntemleri tek tek eklenecek; her biri önce yayımlanmış bir örnekle doğrulanıyor.",
+      "columns": {
+        "rank": "Sıra",
+        "alternative": "Alternatif",
+        "dPlus": "D+",
+        "dMinus": "D−",
+        "closeness": "Yakınlık C"
+      },
+      "tableTitle": "Sıralama",
+      "chartTitle": "Yakınlık katsayısı C",
+      "weightsUsed": "Ağırlıklar: {{method}}",
+      "changeWeights": "Ağırlıkları değiştir",
+      "best": "{{name}}, C = {{value}} ile ilk sırada."
+    },
+    "results": {
+      "summaryTitle": "Özet",
+      "data": "Veri",
+      "weights": "Ağırlıklar",
+      "ranking": "Sıralama",
+      "first": "İlk sıra",
+      "shape": "{{m}} alternatif, {{n}} kriter",
+      "sourceFile": "{{name}} dosyasından içe aktarıldı",
+      "sourceManual": "Çalışma alanında girildi",
+      "firstValue": "{{name}}, C = {{value}}",
+      "downloadXlsx": "Tüm hesabı indir (.xlsx)",
+      "downloadCsv": "Veriyi indir (.csv)",
+      "preparing": "Dosya hazırlanıyor",
+      "downloadFailed": "Dosya oluşturulamadı. Yeniden dene.",
+      "rankingTitle": "Sıralama",
+      "chartsTitle": "Grafikler",
+      "correlationTitle": "Kriterler arası korelasyon (CRITIC)",
+      "correlationHint": "Normalize sütunların Pearson korelasyonu. Düşük ya da negatif değer çatışma demektir ve kriterin ağırlığını artırır.",
+      "calculationTitle": "Hesap",
+      "calculationLead": "Bütün ara adımlar, hesaplandıkları sırayla. Bir bloğu tabloya yapıştırmak için TSV, makale için LaTeX olarak kopyalayabilirsin.",
+      "weightingPart": "Ağırlıklandırma: {{method}}",
+      "rankingPart": "Sıralama: {{method}}",
+      "file": {
+        "xlsx": "kds-hesap.xlsx",
+        "csv": "kds-veri.csv"
+      },
+      "workbook": {
+        "data": "Veri",
+        "weights": "Ağırlıklar",
+        "ranking": "Sıralama",
+        "calculation": "Hesap",
+        "type": "Yön",
+        "method": "Yöntem",
+        "weight": "Ağırlık",
+        "score": "Yakınlık C",
+        "rank": "Sıra",
+        "benefit": "fayda",
+        "cost": "maliyet"
+      }
+    },
+    "calc": {
+      "step": "Adım {{n}}",
+      "copyTsv": "TSV kopyala",
+      "copyLatex": "LaTeX kopyala",
+      "copyTsvLabel": "{{n}}. adımı TSV olarak kopyala",
+      "copyLatexLabel": "{{n}}. adımı LaTeX olarak kopyala",
+      "copied": "Kopyalandı",
+      "copiedTsv": "{{n}}. adım TSV olarak kopyalandı.",
+      "copiedLatex": "{{n}}. adım LaTeX olarak kopyalandı.",
+      "copyFailed": "Tarayıcı kopyalamaya izin vermedi. Tabloyu seçip elle kopyala.",
+      "loading": "Hesap yükleniyor",
+      "tableLabel": "{{n}}. adım: {{name}}"
+    },
+    "stepNames": {
+      "critic": {
+        "normalized": "Normalize matris r",
+        "sigma": "Kontrast σ",
+        "correlation": "Korelasyon ρ",
+        "conflict": "Çatışma Σ(1 − ρ)",
+        "information": "Bilgi miktarı C",
+        "informationTotal": "Toplam bilgi ΣC",
+        "weights": "Ağırlıklar w"
+      },
+      "topsis": {
+        "normalized": "Normalize matris r",
+        "weighted": "Ağırlıklı matris v",
+        "idealBest": "İdeal çözüm A+",
+        "idealWorst": "Negatif ideal çözüm A−",
+        "distanceBest": "İdeale uzaklık D+",
+        "distanceWorst": "Negatif ideale uzaklık D−",
+        "closeness": "Yakınlık C"
+      },
+      "equal": {
+        "weights": "Eşit ağırlıklar w"
+      },
+      "manual": {
+        "weights": "Elle girilen ağırlıklar w"
+      }
+    },
+    "issues": {
+      "dataTitle": "Karar matrisinde sorunlar var",
+      "weightsTitle": "Ağırlıklarda sorunlar var",
+      "more_one": "ve {{count}} sorun daha",
+      "more_other": "ve {{count}} sorun daha",
+      "goToData": "Veri aşamasına git",
+      "goToWeights": "Ağırlıklar aşamasına git"
+    },
+    "chart": {
+      "showTable": "Tablo olarak göster",
+      "value": "Değer"
+    },
+    "panel": {
+      "whenToUse": "Ne zaman kullanılır",
+      "pitfalls": "Dikkat",
+      "origin": "Özgün kaynak",
+      "methodPage": "{{method}} yöntem sayfasını aç",
+      "data": {
+        "title": "Karar matrisi",
+        "body": "Her alternatif bir satır, her kriter bir sütun. Her kriteri fayda (yüksek olan iyi) ya da maliyet (düşük olan iyi) olarak işaretle.",
+        "keysTitle": "Klavye",
+        "keys": "Ok tuşları, Tab ve Enter ile gezin. Yazmaya başlamak hücreyi değiştirir; F2 ya da çift tık düzenler, Esc vazgeçer. Boşluk fayda ile maliyet arasında geçer. Ctrl+Z geri alır.",
+        "importTitle": "İçe aktarma",
+        "import": "Kriter adlarının olduğu bir satır, isteğe bağlı bir fayda ya da maliyet satırı, ardından ilk sütunda adıyla her alternatif için bir satır içeren .xlsx ya da .csv dosyası (virgül ya da noktalı virgülle ayrılmış). Ondalık virgül de nokta da okunur.",
+        "exampleTitle": "Örneğin kaynağı"
+      },
+      "manual": {
+        "title": "Elle girilen ağırlıklar",
+        "body": "Kendi belirlediğin ağırlıklar; örneğin bir uzman anketinden ya da bir politikadan. Her biri 0 ya da daha büyük olmalı, toplamları 1 etmeli. Ölçekleme her ağırlığı toplama böler."
+      }
     }
   },
   "methods": {

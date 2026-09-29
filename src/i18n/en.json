@@ -177,6 +177,229 @@
       "label": "Example",
       "loaded": "Example data from {{citation}}",
       "source": "Source"
+    },
+    "continue": {
+      "weights": "Continue to weights",
+      "ranking": "Continue to ranking",
+      "results": "Continue to results"
+    },
+    "loadingStage": "Loading the workbench",
+    "grid": {
+      "name": "Decision matrix",
+      "corner": "Alternative",
+      "direction": "Direction",
+      "benefit": "Benefit",
+      "cost": "Cost",
+      "switchHint": "Press Space to switch between benefit and cost.",
+      "addAlternative": "Add alternative",
+      "addCriterion": "Add criterion",
+      "deleteAlternative": "Delete alternative",
+      "deleteCriterion": "Delete criterion",
+      "undo": "Undo",
+      "redo": "Redo",
+      "notANumber": "\"{{text}}\" is not a number.",
+      "pastedWithNames": "The first row and column were used as names.",
+      "pasteAsValues": "Paste as values instead",
+      "pasteSkipped_one": "{{count}} pasted cell was not a number and was skipped.",
+      "pasteSkipped_other": "{{count}} pasted cells were not numbers and were skipped."
+    },
+    "data": {
+      "hint": "Arrow keys and Tab move, typing replaces a cell, F2 edits it. Paste a block copied from Excel or Sheets into any cell.",
+      "importFile": "Import file",
+      "loadExample": "Load example",
+      "examplesLabel": "Published examples",
+      "otherExamples": "Other published examples",
+      "clear": "Clear table",
+      "clearTitle": "Clear the table?",
+      "clearBody": "The alternatives, criteria, values and weights are removed. This cannot be undone.",
+      "importing": "Reading {{name}}",
+      "imported": "Imported {{name}} (alternatives: {{alternatives}}, criteria: {{criteria}}). Press Ctrl+Z in the table to undo the import.",
+      "importEmpty": "No decision matrix was found in {{name}}. The file needs a row of criterion names and then one row per alternative.",
+      "importFailed": "{{name}} could not be read. Save it as .xlsx or .csv and try again.",
+      "importTitle": "Check the imported data",
+      "importNotes": "Notes on the import",
+      "cell": "Cell {{cell}}",
+      "line": "Line {{row}}, field {{col}}",
+      "decimalPoint": "a point",
+      "decimalComma": "a comma",
+      "importIssues": {
+        "empty-file": "The file is empty.",
+        "missing-header": "No row of criterion names was found, so the criteria were named {{criterion}} and onwards.",
+        "missing-criterion-name": "A criterion has no name. It was named {{criterion}}.",
+        "duplicate-criterion-name": "The criterion name {{criterion}} appears more than once.",
+        "missing-type-row": "No benefit or cost row was found, so every criterion was set to benefit. Check the directions in the table.",
+        "missing-type": "{{criterion}} has no direction, so it was set to benefit.",
+        "invalid-type": "The direction of {{criterion}} is not benefit or cost, so it was set to benefit.",
+        "conflicting-type": "Two rows give different directions for {{criterion}}. The row next to the names was used.",
+        "missing-alternative-name": "An alternative has no name. It was named {{alternative}}.",
+        "duplicate-alternative-name": "The alternative name {{alternative}} appears more than once.",
+        "empty-cell": "{{alternative}} on {{criterion}} is empty. Enter a number.",
+        "not-a-number": "{{alternative}} on {{criterion}} is not a number, so it was left empty. Enter a number.",
+        "extra-cell": "{{alternative}} has a value to the right of the last criterion. It was not read.",
+        "trailing-content-ignored": "Reading stopped at a summary row or a second table. The rows below it were not read.",
+        "ambiguous-decimal": "Numbers such as 1.234 can be read two ways. They were read with {{separator}} as the decimal separator.",
+        "mixed-decimal": "Some numbers use a point and others a comma as the decimal separator. All of them were read with {{separator}} as the decimal separator."
+      },
+      "moreProblems_one": "{{count}} more problem is marked in the table.",
+      "moreProblems_other": "{{count}} more problems are marked in the table."
+    },
+    "weights": {
+      "methodHint": {
+        "critic": "Objective weights from how much each criterion varies and how much it disagrees with the others.",
+        "equal": "Every criterion gets the same weight.",
+        "manual": "Enter your own weights. They must be 0 or more and sum to 1."
+      },
+      "columns": {
+        "criterion": "Criterion",
+        "direction": "Direction",
+        "sigma": "Contrast σ",
+        "conflict": "Conflict Σ(1 − ρ)",
+        "information": "Information C",
+        "weight": "Weight w"
+      },
+      "tableTitle": "Weights by criterion",
+      "chartTitle": "Criterion weights",
+      "showCalculation": "Show the calculation",
+      "hideCalculation": "Hide the calculation",
+      "total": "Total",
+      "normalize": "Normalize to 1",
+      "normalizeHint": "Divides each weight by the total, so the weights sum to 1.",
+      "startEqual": "Fill with equal weights",
+      "startCritic": "Fill with CRITIC weights",
+      "sumError": "Weights sum to {{value}}, they must sum to 1.",
+      "sumOk": "Weights sum to 1.",
+      "weightOf": "Weight of {{criterion}}",
+      "emptyWeight": "Enter a weight for {{criterion}}.",
+      "fromPaper": "Weights as given in {{citation}}.",
+      "equalNote": "{{n}} criteria, so each weight is 1 / {{n}} = {{value}}."
+    },
+    "ranking": {
+      "methodHint": {
+        "topsis": "Ranks the alternatives by their distance from an ideal and a negative-ideal solution."
+      },
+      "moreMethods": "Further ranking methods are added one at a time, each checked against a published example first.",
+      "columns": {
+        "rank": "Rank",
+        "alternative": "Alternative",
+        "dPlus": "D+",
+        "dMinus": "D−",
+        "closeness": "Closeness C"
+      },
+      "tableTitle": "Ranking",
+      "chartTitle": "Closeness coefficient C",
+      "weightsUsed": "Weights: {{method}}",
+      "changeWeights": "Change weights",
+      "best": "{{name}} ranks first with C = {{value}}."
+    },
+    "results": {
+      "summaryTitle": "Summary",
+      "data": "Data",
+      "weights": "Weights",
+      "ranking": "Ranking",
+      "first": "First place",
+      "shape": "{{m}} alternatives, {{n}} criteria",
+      "sourceFile": "Imported from {{name}}",
+      "sourceManual": "Entered in the workbench",
+      "firstValue": "{{name}}, C = {{value}}",
+      "downloadXlsx": "Download full calculation (.xlsx)",
+      "downloadCsv": "Download data (.csv)",
+      "preparing": "Preparing the file",
+      "downloadFailed": "The file could not be created. Try again.",
+      "rankingTitle": "Ranking",
+      "chartsTitle": "Charts",
+      "correlationTitle": "Correlation between criteria (CRITIC)",
+      "correlationHint": "Pearson correlation of the normalized columns. Low or negative values mean conflict, which raises a criterion's weight.",
+      "calculationTitle": "Calculation",
+      "calculationLead": "Every intermediate step in the order it was calculated. Copy a block as TSV for a spreadsheet or as LaTeX for a paper.",
+      "weightingPart": "Weighting: {{method}}",
+      "rankingPart": "Ranking: {{method}}",
+      "file": {
+        "xlsx": "kds-calculation.xlsx",
+        "csv": "kds-data.csv"
+      },
+      "workbook": {
+        "data": "Data",
+        "weights": "Weights",
+        "ranking": "Ranking",
+        "calculation": "Calculation",
+        "type": "Type",
+        "method": "Method",
+        "weight": "Weight",
+        "score": "Closeness C",
+        "rank": "Rank",
+        "benefit": "benefit",
+        "cost": "cost"
+      }
+    },
+    "calc": {
+      "step": "Step {{n}}",
+      "copyTsv": "Copy TSV",
+      "copyLatex": "Copy LaTeX",
+      "copyTsvLabel": "Copy step {{n}} as TSV",
+      "copyLatexLabel": "Copy step {{n}} as LaTeX",
+      "copied": "Copied",
+      "copiedTsv": "Step {{n}} copied as TSV.",
+      "copiedLatex": "Step {{n}} copied as LaTeX.",
+      "copyFailed": "This browser blocked copying. Select the table and copy it by hand.",
+      "loading": "Loading the calculation",
+      "tableLabel": "Step {{n}}: {{name}}"
+    },
+    "stepNames": {
+      "critic": {
+        "normalized": "Normalized matrix r",
+        "sigma": "Contrast σ",
+        "correlation": "Correlation ρ",
+        "conflict": "Conflict Σ(1 − ρ)",
+        "information": "Information C",
+        "informationTotal": "Total information ΣC",
+        "weights": "Weights w"
+      },
+      "topsis": {
+        "normalized": "Normalized matrix r",
+        "weighted": "Weighted matrix v",
+        "idealBest": "Ideal solution A+",
+        "idealWorst": "Negative-ideal solution A−",
+        "distanceBest": "Distance to the ideal D+",
+        "distanceWorst": "Distance to the negative ideal D−",
+        "closeness": "Closeness C"
+      },
+      "equal": {
+        "weights": "Equal weights w"
+      },
+      "manual": {
+        "weights": "Manual weights w"
+      }
+    },
+    "issues": {
+      "dataTitle": "The decision matrix has problems",
+      "weightsTitle": "The weights have problems",
+      "more_one": "and {{count}} more",
+      "more_other": "and {{count}} more",
+      "goToData": "Go to Data",
+      "goToWeights": "Go to Weights"
+    },
+    "chart": {
+      "showTable": "Show as table",
+      "value": "Value"
+    },
+    "panel": {
+      "whenToUse": "When to use",
+      "pitfalls": "Watch out",
+      "origin": "Origin",
+      "methodPage": "Open the {{method}} method page",
+      "data": {
+        "title": "Decision matrix",
+        "body": "One row per alternative, one column per criterion. Mark each criterion as benefit (higher is better) or cost (lower is better).",
+        "keysTitle": "Keyboard",
+        "keys": "Arrow keys, Tab and Enter move. Typing replaces a cell, F2 or a double click edits it, Esc cancels. Space switches benefit and cost. Ctrl+Z undoes.",
+        "importTitle": "Import",
+        "import": "An .xlsx or .csv file (comma or semicolon) with a row of criterion names, an optional benefit or cost row, then one row per alternative with its name in the first column. Decimal commas and points are both read.",
+        "exampleTitle": "Example source"
+      },
+      "manual": {
+        "title": "Manual weights",
+        "body": "Weights you set yourself, for example from an expert survey or a policy. They must be 0 or more and sum to 1. Normalize divides each weight by the total."
+      }
     }
   },
   "methods": {

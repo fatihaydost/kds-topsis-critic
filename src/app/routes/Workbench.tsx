@@ -1,69 +1,35 @@
+import { lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useLang } from '../../i18n'
-import { isEmptyProblem, useWorkbench, type Stage } from '../../state/workbench'
-import { Button, EmptyState } from '../../ui'
-import { WorkbenchLayout } from '../shell/WorkbenchLayout'
+import { Skeleton } from '../../ui'
 
-const DEFAULT_EXAMPLE = 'krishnan-2021-smartphones'
+// The workbench (grid, charts, IO, calculation) is its own chunk; the landing page does not load it.
+const WorkbenchPage = lazy(() => import('../workbench/WorkbenchPage'))
 
-const previous: Record<Exclude<Stage, 'data'>, Stage> = { weights: 'data', ranking: 'weights', results: 'ranking' }
-
-/** `/app`. Stub: the stage frame with each stage's empty state. */
-export function Workbench() {
+/** Layout-shaped placeholder while the workbench chunk loads: rail, heading, table. */
+function WorkbenchSkeleton() {
   const { t } = useTranslation()
-  const [lang] = useLang()
-  const stage = useWorkbench((s) => s.stage)
-  const setStage = useWorkbench((s) => s.setStage)
-  const problem = useWorkbench((s) => s.problem)
-  const loadExample = useWorkbench((s) => s.loadExample)
-  const startBlank = useWorkbench((s) => s.startBlank)
-
-  let content
-  if (stage === 'data') {
-    content = isEmptyProblem(problem) ? (
-      <EmptyState
-        title={t('workbench.empty.data.title')}
-        description={t('workbench.empty.data.body')}
-        action={
-          <>
-            <Button variant="primary" onClick={() => loadExample(DEFAULT_EXAMPLE, lang)}>
-              {t('workbench.empty.data.loadExample')}
-            </Button>
-            <Button
-              onClick={() =>
-                startBlank(3, 3, {
-                  alternative: (i) => t('workbench.alternativeN', { n: i + 1 }),
-                  criterion: (j) => t('workbench.criterionN', { n: j + 1 }),
-                })
-              }
-            >
-              {t('workbench.empty.data.startBlank')}
-            </Button>
-          </>
-        }
-      />
-    ) : (
-      <p className="py-10 text-14 text-text-3">
-        {problem.alternatives.length} × {problem.criteria.length}. {t('common.stub')}
-      </p>
-    )
-  } else {
-    content = (
-      <EmptyState
-        title={t(`workbench.empty.${stage}.title`)}
-        description={t(`workbench.empty.${stage}.body`)}
-        action={<Button onClick={() => setStage(previous[stage])}>{t(`workbench.empty.${stage}.action`)}</Button>}
-      />
-    )
-  }
-
   return (
-    <WorkbenchLayout
-      stage={stage}
-      onStageChange={setStage}
-      explanation={<p>{t('workbench.explanation.empty')}</p>}
-    >
-      {content}
-    </WorkbenchLayout>
+    <div role="status" aria-label={t('workbench.loadingStage')} className="flex min-h-0 flex-1">
+      <div className="hidden w-56 shrink-0 flex-col gap-3 border-r border-line px-4 py-5 md:flex">
+        <Skeleton width={96} />
+        <Skeleton width={120} />
+        <Skeleton width={104} />
+        <Skeleton width={88} />
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col gap-4 px-4 pt-4 md:px-6">
+        <Skeleton width={120} height={28} />
+        <Skeleton width={360} height={32} />
+        <Skeleton height={240} />
+      </div>
+    </div>
+  )
+}
+
+/** `/app`. */
+export function Workbench() {
+  return (
+    <Suspense fallback={<WorkbenchSkeleton />}>
+      <WorkbenchPage />
+    </Suspense>
   )
 }
