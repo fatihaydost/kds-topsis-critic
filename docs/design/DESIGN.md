@@ -36,7 +36,9 @@ or Tailwind palette names (`bg-blue-500` is a bug). Light and dark are the same 
 - **Status:** `--danger`, `--warning`, `--ok` with a matching `-bg` tint. Used only for validation and
   method warnings, always with text, never as decorative dots.
 - **Data colour is a separate system** (`--data-*`): context grey for the rest, accent for the selected
-  or best alternative, and a single-hue lightness ramp for heatmaps (correlation, normalized matrix).
+  or best alternative, a single-hue lightness ramp for unsigned heatmaps (normalized matrix), and a diverging ramp for signed
+  data (correlation): muted red for negative, neutral at zero, petrol for positive. The red is kept low in
+  chroma so it reads as data, not as an accent.
   No library default palettes.
 
 ## Type

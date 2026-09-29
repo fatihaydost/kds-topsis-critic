@@ -35,7 +35,7 @@
   --data-accent: var(--accent);
   --data-heat-0: oklch(0.975 0.004 218);
   --data-heat-1: oklch(0.47 0.08 218);
-  --data-negative: oklch(0.6 0.12 27);
+  --data-negative: oklch(0.6 0.09 22);
 
   --shadow-float: 0 1px 2px oklch(0.3 0.02 250 / 0.08), 0 8px 24px oklch(0.3 0.02 250 / 0.1);
   /* Added by the UI foundation: scrim behind modal dialogs and the bottom sheet. */
@@ -71,7 +71,7 @@
   --data-context: oklch(0.52 0.01 250);
   --data-heat-0: oklch(0.22 0.01 218);
   --data-heat-1: oklch(0.74 0.09 212);
-  --data-negative: oklch(0.7 0.13 27);
+  --data-negative: oklch(0.7 0.1 22);
   --shadow-float: 0 1px 2px oklch(0 0 0 / 0.3), 0 8px 24px oklch(0 0 0 / 0.35);
   --overlay: oklch(0 0 0 / 0.5);
 }
@@ -100,7 +100,7 @@
     --data-context: oklch(0.52 0.01 250);
     --data-heat-0: oklch(0.22 0.01 218);
     --data-heat-1: oklch(0.74 0.09 212);
-    --data-negative: oklch(0.7 0.13 27);
+    --data-negative: oklch(0.7 0.1 22);
     --shadow-float: 0 1px 2px oklch(0 0 0 / 0.3), 0 8px 24px oklch(0 0 0 / 0.35);
     --overlay: oklch(0 0 0 / 0.5);
   }
