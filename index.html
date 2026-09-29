@@ -3,7 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>KDS: CRITIC + TOPSIS</title>
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content="Rank alternatives with CRITIC weights and TOPSIS, with every intermediate step shown. Runs in the browser, in Turkish and English." />
+    <title>KDS: multi-criteria decision tool</title>
+    <script>
+      // Before first paint: saved theme and language, so there is no flash of the wrong theme.
+      // Keys match src/state/theme.ts and src/i18n/lang.ts.
+      ;(function () {
+        var d = document.documentElement
+        try {
+          var t = localStorage.getItem('kds.theme')
+          if (t === 'light' || t === 'dark') d.setAttribute('data-theme', t)
+          var l = localStorage.getItem('kds.lang')
+          if (l !== 'en' && l !== 'tr') l = (navigator.language || '').toLowerCase().indexOf('tr') === 0 ? 'tr' : 'en'
+          d.lang = l
+        } catch (e) {}
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>
