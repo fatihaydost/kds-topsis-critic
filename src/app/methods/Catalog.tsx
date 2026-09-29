@@ -7,6 +7,7 @@ import { useLang } from '../../i18n'
 import { Button, EmptyState, SegmentedControl } from '../../ui'
 import { SiteFooter } from '../landing/SiteFooter'
 import { textLink, usePageMeta } from '../landing/usePageMeta'
+import { MethodGlyph } from '../../features/illustrations/MethodGlyph'
 import { Guide } from './Guide'
 import { firstSentence, pageContainer, StatusLabel } from './shared'
 
@@ -102,8 +103,10 @@ export default function Catalog() {
                       className="group flex h-full flex-col gap-2 rounded-control border border-line bg-surface p-4 no-underline transition-colors hover:border-line-strong hover:bg-surface-2"
                     >
                       <div className="flex items-center justify-between gap-2">
-                        {/* Slot: MethodGlyph for the family. */}
-                        <span className="text-12 text-text-2">{t(`methods.familiesShort.${m.family}`)}</span>
+                        <span className="inline-flex items-center gap-1.5 text-12 text-text-2">
+                          <MethodGlyph family={m.family} size={16} />
+                          {t(`methods.familiesShort.${m.family}`)}
+                        </span>
                         <StatusLabel status={m.status} />
                       </div>
                       <span className="text-16 font-semibold text-text group-hover:underline">{m.name[lang]}</span>

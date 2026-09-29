@@ -63,29 +63,13 @@
     },
     "how": {
       "title": "How it works",
-      "diagramLabel": "Pipeline: the decision matrix feeds the weighting method and the ranking method; the weights feed the ranking; a robustness check on the ranking is planned.",
-      "passes": {
-        "matrix": "X",
-        "weights": "X, w",
-        "ranking": "C, ranks"
-      },
-      "stages": {
-        "data": {
-          "name": "Decision matrix",
-          "method": "Typed, pasted or imported"
-        },
-        "weights": {
-          "name": "Weighting method",
-          "method": "CRITIC, equal or manual"
-        },
-        "ranking": {
-          "name": "Ranking method",
-          "method": "TOPSIS"
-        },
-        "robustness": {
-          "name": "Robustness",
-          "method": "Planned after v1"
-        }
+      "labels": {
+        "data": "Decision matrix",
+        "weights": "Weighting method",
+        "ranking": "Ranking method",
+        "results": "Result",
+        "robustness": "Robustness",
+        "soon": "Coming later"
       }
     },
     "verified": {
@@ -504,7 +488,27 @@
         "pitfalls": "Pitfalls"
       },
       "why": "Why these pairs",
-      "showSources": "Show {{count}} sources"
+      "showSources": "Show {{count}} sources",
+      "idea": {
+        "source": "Data: {{citation}}.",
+        "showTable": "Show as table",
+        "alternative": "Alternative",
+        "criterion": "Criterion",
+        "topsis": {
+          "title": "Distance to the ideal and the anti-ideal",
+          "caption": "Closer to A+ and farther from A− gives a higher C.",
+          "projectionNote": "Drawn on the two heaviest criteria; D and C use all criteria.",
+          "select": "Choose an alternative",
+          "point": "{{name}}, C {{c}}"
+        },
+        "critic": {
+          "title": "Contrast times conflict gives the weight",
+          "contrast": "Contrast (σ)",
+          "conflict": "Conflict Σ(1 − ρ)",
+          "weight": "Weight",
+          "information": "Information C"
+        }
+      }
     }
   },
   "steps": {

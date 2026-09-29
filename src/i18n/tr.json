@@ -63,29 +63,13 @@
     },
     "how": {
       "title": "Nasıl çalışır",
-      "diagramLabel": "Akış: karar matrisi ağırlıklandırma ve sıralama yöntemine girer; ağırlıklar sıralamaya girer; sıralama için sağlamlık kontrolü planlanıyor.",
-      "passes": {
-        "matrix": "X",
-        "weights": "X, w",
-        "ranking": "C, sıralar"
-      },
-      "stages": {
-        "data": {
-          "name": "Karar matrisi",
-          "method": "Yazılır, yapıştırılır ya da içe aktarılır"
-        },
-        "weights": {
-          "name": "Ağırlıklandırma yöntemi",
-          "method": "CRITIC, eşit ya da elle"
-        },
-        "ranking": {
-          "name": "Sıralama yöntemi",
-          "method": "TOPSIS"
-        },
-        "robustness": {
-          "name": "Sağlamlık",
-          "method": "v1'den sonra planlanıyor"
-        }
+      "labels": {
+        "data": "Karar matrisi",
+        "weights": "Ağırlıklandırma",
+        "ranking": "Sıralama",
+        "results": "Sonuç",
+        "robustness": "Sağlamlık",
+        "soon": "Sonra gelecek"
       }
     },
     "verified": {
@@ -504,7 +488,27 @@
         "pitfalls": "Tuzaklar"
       },
       "why": "Neden bu eşleşmeler",
-      "showSources": "{{count}} kaynağı göster"
+      "showSources": "{{count}} kaynağı göster",
+      "idea": {
+        "source": "Veri: {{citation}}.",
+        "showTable": "Tablo olarak göster",
+        "alternative": "Alternatif",
+        "criterion": "Kriter",
+        "topsis": {
+          "title": "İdeale ve negatif ideale uzaklık",
+          "caption": "A+'ya yakın ve A−'den uzak olan daha yüksek C alır.",
+          "projectionNote": "En ağır iki kriter üzerinde çizildi; D ve C tüm kriterleri kullanır.",
+          "select": "Bir alternatif seç",
+          "point": "{{name}}, C {{c}}"
+        },
+        "critic": {
+          "title": "Kontrast çarpı çatışma ağırlığı verir",
+          "contrast": "Kontrast (σ)",
+          "conflict": "Çatışma Σ(1 − ρ)",
+          "weight": "Ağırlık",
+          "information": "Bilgi C"
+        }
+      }
     }
   },
   "steps": {

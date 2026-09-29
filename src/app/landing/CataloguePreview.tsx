@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Link } from 'wouter'
 import { allMethods, FAMILY_ORDER, methodsByFamily } from '../../content/methods'
+import { MethodGlyph } from '../../features/illustrations/MethodGlyph'
 import { useLang } from '../../i18n'
 
 /**
@@ -29,7 +30,10 @@ export default function CataloguePreview() {
             .filter((g) => g.items.length > 0)
           return (
             <div key={family} className="flex flex-col gap-3 border-t border-line-strong pt-3">
-              <h3 className="text-14 font-semibold text-text">{t(`methods.families.${family}`)}</h3>
+              <h3 className="flex items-center gap-2 text-14 font-semibold text-text">
+                <MethodGlyph family={family} size={20} className="text-text-2" />
+                {t(`methods.families.${family}`)}
+              </h3>
               <dl className="flex flex-col gap-2 text-14">
                 {groups.map((g) => (
                   <div key={g.status} className="grid grid-cols-[96px_minmax(0,1fr)] gap-3">

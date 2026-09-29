@@ -10,6 +10,7 @@ import { buttonClasses, cn, Notice, Tabs, TabsContent, TabsList, TabsTrigger } f
 import { Formula } from '../../ui/Formula'
 import { SiteFooter } from '../landing/SiteFooter'
 import { textLink, usePageMeta } from '../landing/usePageMeta'
+import { MethodIdea } from './MethodIdea'
 import { doiHref, pageContainer, shortOrigin, SourceItem, splitSentences, StatusLabel } from './shared'
 
 const SECTIONS = ['idea', 'details', 'algorithm', 'combined', 'reference', 'sources'] as const
@@ -104,7 +105,7 @@ function MethodArticle({ m }: { m: MethodContent }) {
             </header>
 
             <Section id="idea" title={sectionTitle('idea')}>
-              {/* Slot: the method's picture (TopsisGeometry, CriticIdea, or MethodGlyph for research methods). */}
+              <MethodIdea m={m} />
               <Bullets items={splitSentences(l.summary).slice(0, 3)} />
             </Section>
 
