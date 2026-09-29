@@ -1,0 +1,81 @@
+import { Fragment } from 'react'
+import { useTranslation } from 'react-i18next'
+import { cn } from '../../ui'
+
+const STAGES = ['data', 'weights', 'ranking', 'robustness'] as const
+type StageId = (typeof STAGES)[number]
+const PASSES = ['matrix', 'weights', 'ranking'] as const
+
+/**
+ * Connector between two stages: an SVG arrow with what flows along it. Horizontal from 1024 px,
+ * vertical below. `dashed` for the planned stage.
+ */
+function Connector({ label, dashed }: { label: string; dashed: boolean }) {
+  const dash = dashed ? '4 4' : undefined
+  return (
+    <li aria-hidden className="flex items-center justify-center gap-2 py-1 lg:flex-col lg:gap-1 lg:px-1 lg:py-0">
+      <svg className="h-8 w-4 lg:hidden" viewBox="0 0 16 32">
+        <line x1="8" y1="0" x2="8" y2="26" stroke="var(--line-strong)" strokeWidth="1.5" strokeDasharray={dash} />
+        <path d="M3 22 L8 30 L13 22" fill="none" stroke="var(--line-strong)" strokeWidth="1.5" />
+      </svg>
+      <span className="font-mono text-12 whitespace-nowrap text-text-2">{label}</span>
+      <svg className="hidden h-4 w-14 lg:block" viewBox="0 0 56 16">
+        <line x1="0" y1="8" x2="48" y2="8" stroke="var(--line-strong)" strokeWidth="1.5" strokeDasharray={dash} />
+        <path d="M44 3 L53 8 L44 13" fill="none" stroke="var(--line-strong)" strokeWidth="1.5" />
+      </svg>
+    </li>
+  )
+}
+
+function StageBox({ id }: { id: StageId }) {
+  const { t } = useTranslation()
+  const planned = id === 'robustness'
+  const k = `landing.how.stages.${id}` as const
+  return (
+    <li
+      className={cn(
+        'flex min-w-0 flex-col gap-3 rounded-control border bg-surface p-4 text-pretty',
+        planned ? 'border-dashed border-line-strong bg-transparent' : 'border-line',
+      )}
+    >
+      <div className="flex flex-col gap-0.5">
+        <h3 className={cn('text-14 font-semibold', planned ? 'text-text-2' : 'text-text')}>{t(`${k}.name`)}</h3>
+        <p className="text-13 text-text-2">{t(`${k}.method`)}</p>
+      </div>
+      <ul className="flex flex-col gap-1 border-t border-line pt-3 text-13 text-text-2">
+        <li>{t(`${k}.l1`)}</li>
+        <li>{t(`${k}.l2`)}</li>
+        <li>{t(`${k}.l3`)}</li>
+      </ul>
+    </li>
+  )
+}
+
+/**
+ * "How it works": the four stages as an ordered list (so it reads in order without the picture),
+ * joined by SVG connectors that name what flows from one stage to the next.
+ */
+export function Pipeline() {
+  const { t } = useTranslation()
+  return (
+    <section aria-labelledby="how-title" className="flex flex-col gap-6">
+      <div className="flex max-w-[65ch] flex-col gap-2">
+        <h2 id="how-title" className="text-24 font-semibold text-text">
+          {t('landing.how.title')}
+        </h2>
+        <p className="text-16 text-text-2">{t('landing.how.lead')}</p>
+      </div>
+      <ol
+        aria-label={t('landing.how.diagramLabel')}
+        className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-stretch"
+      >
+        {STAGES.map((id, i) => (
+          <Fragment key={id}>
+            <StageBox id={id} />
+            {i < PASSES.length && <Connector label={t(`landing.how.passes.${PASSES[i]!}`)} dashed={i === PASSES.length - 1} />}
+          </Fragment>
+        ))}
+      </ol>
+    </section>
+  )
+}

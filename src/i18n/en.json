@@ -40,10 +40,95 @@
     }
   },
   "landing": {
-    "title": "Rank alternatives with methods you can check",
-    "lead": "Enter a decision matrix, derive criterion weights with CRITIC, rank the alternatives with TOPSIS, and see every intermediate step. Everything runs in your browser.",
+    "title": "Decision analysis checked against the literature",
+    "lead": "Weight criteria with CRITIC and rank with TOPSIS, step by step. It runs in your browser: no account, no upload.",
     "openWorkbench": "Open workbench",
-    "methods": "Methods"
+    "methods": "Methods",
+    "meta": {
+      "title": "KDS: multi-criteria decision analysis in the browser",
+      "description": "Weight criteria with CRITIC and rank alternatives with TOPSIS, with every intermediate step shown and checked against published examples. Runs in your browser, in English and Turkish."
+    },
+    "result": {
+      "title": "TOPSIS ranking of five smartphones",
+      "subtitle": "Weights from CRITIC, computed live in this page",
+      "rank": "Rank",
+      "alternative": "Phone",
+      "closeness": "Closeness C",
+      "weightsTitle": "CRITIC weights",
+      "showTable": "Show as table",
+      "criterion": "Criterion",
+      "weight": "Weight",
+      "data": "Data: {{citation}}, Table 1.",
+      "check": "The CRITIC weights match Table 5 of the paper to 4 decimals. The paper stops at the weights, so the TOPSIS ranking is this site's own result."
+    },
+    "how": {
+      "title": "How it works",
+      "lead": "The workbench runs the same stages. Each one hands its result to the next and keeps every intermediate matrix for the worked calculation.",
+      "diagramLabel": "Pipeline: the decision matrix feeds the weighting method and the ranking method; the weights feed the ranking; a robustness check on the ranking is planned.",
+      "passes": {
+        "matrix": "X",
+        "weights": "X, w",
+        "ranking": "C, ranks"
+      },
+      "stages": {
+        "data": {
+          "name": "Decision matrix",
+          "method": "Typed, pasted from a spreadsheet or imported",
+          "l1": "m alternatives, n criteria",
+          "l2": "benefit or cost per criterion",
+          "l3": ".xlsx or .csv, semicolon or comma"
+        },
+        "weights": {
+          "name": "Weighting method",
+          "method": "CRITIC, equal or manual",
+          "l1": "CRITIC: min-max normalization",
+          "l2": "standard deviation, correlation",
+          "l3": "information content, weights w"
+        },
+        "ranking": {
+          "name": "Ranking method",
+          "method": "TOPSIS",
+          "l1": "vector normalization, weighting",
+          "l2": "ideal A+ and anti-ideal A-",
+          "l3": "distances D+ and D-, closeness C"
+        },
+        "robustness": {
+          "name": "Robustness",
+          "method": "Planned after v1",
+          "l1": "weight perturbation",
+          "l2": "Monte Carlo weights",
+          "l3": "rank agreement"
+        }
+      }
+    },
+    "verified": {
+      "title": "Checked against published results",
+      "lead": "Each available method runs in the test suite on a published example and has to reproduce the printed numbers within the tolerance shown.",
+      "method": "Method",
+      "reference": "Reference",
+      "compared": "Compared",
+      "tolerance": "Tolerance",
+      "toleranceNote": "half a unit of the last printed digit",
+      "critic": {
+        "compared": "Standard deviations (Table 2) and weights (Table 5) of five smartphones."
+      },
+      "topsis": {
+        "compared": "Distances D+ and D-, closeness C and ranks (Table 3), for the same data in two units where the winner changes."
+      },
+      "also": "Also tested: the hand-solved CRITIC spreadsheet from the original coursework, every intermediate matrix within {{tol}}, and parity of CRITIC then TOPSIS with the original Python code within {{tol}}. The spreadsheet and the Python code are not independent references."
+    },
+    "catalogue": {
+      "title": "Methods",
+      "lead": "{{available}} of {{total}} methods run today. The others are researched and documented, each with a published example to test against when it is built.",
+      "available": "Available",
+      "research": "In research"
+    },
+    "footer": {
+      "source": "Source on GitHub",
+      "author": "Built by Fatih Aydost",
+      "license": "MIT License",
+      "privacy": "Your data stays in your browser. Nothing you enter is sent to a server."
+    }
   },
   "workbench": {
     "stagesLabel": "Stages",
@@ -136,7 +221,96 @@
       "topsis": "Technique for Order of Preference by Similarity to Ideal Solution"
     },
     "notFound": "There is no method with the id {{id}}.",
-    "backToCatalog": "All methods"
+    "backToCatalog": "All methods",
+    "guide": {
+      "title": "Which method should I choose?",
+      "answers": "Your answers",
+      "change": "Change",
+      "restart": "Start over",
+      "stage": {
+        "weighting": "Weights",
+        "ranking": "Ranking"
+      },
+      "suggestions": "Suggested methods",
+      "suggestionsSoFar": "Suggested so far",
+      "risks": "Check these combinations",
+      "riskSources": "Evidence and sources",
+      "treeSources": "Sources of the decision tree"
+    },
+    "meta": {
+      "title": "Methods: KDS",
+      "description": "Weighting and ranking methods for multi-criteria decisions, with formulas, pitfalls, a published reference example and sources for each.",
+      "methodTitle": "{{name}}: KDS"
+    },
+    "families": {
+      "weighting-objective": "Objective weighting",
+      "weighting-subjective": "Subjective weighting",
+      "ranking-distance": "Distance-based ranking",
+      "ranking-utility": "Utility-based ranking",
+      "ranking-ratio": "Ratio-based ranking",
+      "ranking-outranking": "Outranking"
+    },
+    "familiesShort": {
+      "all": "All",
+      "weighting-objective": "Objective",
+      "weighting-subjective": "Subjective",
+      "ranking-distance": "Distance",
+      "ranking-utility": "Utility",
+      "ranking-ratio": "Ratio",
+      "ranking-outranking": "Outranking"
+    },
+    "familyNotes": {
+      "weighting-objective": "Weights computed from the data itself: the spread, conflict or information in each column.",
+      "weighting-subjective": "Weights from the judgement of a decision maker: a ranking, pairwise comparisons or importance ratios.",
+      "ranking-distance": "Alternatives are scored by their distance to reference points such as an ideal or an average solution.",
+      "ranking-utility": "Normalized values are combined into one weighted score per alternative.",
+      "ranking-ratio": "Normalized benefit and cost values are set against each other in a ratio system.",
+      "ranking-outranking": "Alternatives are compared in pairs, so a very bad value is not simply offset by good ones."
+    },
+    "catalog": {
+      "lead": "Weighting methods turn criteria into weights, ranking methods turn weights and data into an order. Two run on this site today; the rest are researched and documented.",
+      "filters": "Filters",
+      "familyFilter": "Family",
+      "statusFilter": "Status",
+      "allStatuses": "All",
+      "shown": "Methods shown: {{count}} of {{total}}",
+      "emptyTitle": "No method matches these filters",
+      "emptyBody": "Every method with this status is in another family.",
+      "emptyAction": "Show all methods",
+      "origin": "Origin",
+      "guideLink": "Which method should I choose?"
+    },
+    "page": {
+      "toc": "On this page",
+      "family": "Family",
+      "year": "Year",
+      "origin": "Origin",
+      "status": "Status",
+      "draftTitle": "This method is not computed yet. The content is a draft.",
+      "draftBody": "It is researched and documented here. The calculation comes in a later version, after its reference example is checked in code.",
+      "sections": {
+        "what": "What it does",
+        "when": "When to use it",
+        "whenNot": "When not to use it",
+        "inputs": "Inputs",
+        "algorithm": "Algorithm",
+        "combined": "Commonly combined with",
+        "pitfalls": "Pitfalls",
+        "reference": "Reference example",
+        "sources": "Sources"
+      },
+      "reference": {
+        "where": "Where in the paper",
+        "result": "Result",
+        "match": "Reproduced at the printed precision",
+        "partial": "Partly reproduced",
+        "mismatch": "Not reproduced",
+        "researchOnly": "Checked by recomputing it while researching the method, not yet by this site's code.",
+        "tested": "Checked by this site's test suite.",
+        "open": "Open this example in the workbench"
+      },
+      "noCombinations": "No common combination is recorded for this method."
+    }
   },
   "steps": {
     "critic": {
