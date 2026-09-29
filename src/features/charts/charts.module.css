@@ -1,0 +1,204 @@
+/* Chart styles. Colours come only from tokens.css (data colour system: --data-*). */
+
+.figure {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  color: var(--text);
+}
+
+.caption {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.title {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+}
+
+.description {
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+/* The plot measures its width; a heatmap wider than that scrolls inside it, never the page. */
+.plot {
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.svg {
+  display: block;
+  overflow: visible;
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Bar chart ---------------------------------------------------------------------------------- */
+
+.barLabel {
+  fill: var(--text);
+  font-size: 13px;
+}
+
+.barValue {
+  fill: var(--text-2);
+  font-size: 13px;
+}
+
+.bar {
+  fill: var(--data-context);
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+
+.row {
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+
+.row[data-highlight] .bar {
+  fill: var(--data-accent);
+}
+
+.row[data-highlight] .barLabel,
+.row[data-highlight] .barValue {
+  fill: var(--text);
+  font-weight: 600;
+}
+
+.zero {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+/* Only value changes move, in 150 ms; resizing redraws at once. */
+.animate .row,
+.animate .bar,
+.animate .barValue {
+  transition: transform var(--dur) var(--ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate .row,
+  .animate .bar,
+  .animate .barValue {
+    transition: none;
+  }
+}
+
+/* Heatmap ------------------------------------------------------------------------------------ */
+
+.axisLabel {
+  fill: var(--text-2);
+  font-size: 12px;
+}
+
+.cell {
+  shape-rendering: crispEdges;
+}
+
+.cellText {
+  fill: var(--text);
+  font-size: 12px;
+}
+
+/*
+ * Value text on strong cells switches to the page background colour. The thresholds sit where
+ * that ink starts to read better than --text over the ramp, which differs per theme:
+ * light: positive arm from level 8, the negative arm never gets dark enough;
+ * dark: both arms from level 7.
+ */
+.cellText[data-tone='pos'][data-level='8'],
+.cellText[data-tone='pos'][data-level='9'],
+.cellText[data-tone='pos'][data-level='10'] {
+  fill: var(--bg);
+}
+
+:global(:root[data-theme='dark']) .cellText[data-level='7'],
+:global(:root[data-theme='dark']) .cellText[data-level='8'],
+:global(:root[data-theme='dark']) .cellText[data-level='9'],
+:global(:root[data-theme='dark']) .cellText[data-level='10'] {
+  fill: var(--bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  :global(:root:not([data-theme='light'])) .cellText[data-level='7'],
+  :global(:root:not([data-theme='light'])) .cellText[data-level='8'],
+  :global(:root:not([data-theme='light'])) .cellText[data-level='9'],
+  :global(:root:not([data-theme='light'])) .cellText[data-level='10'] {
+    fill: var(--bg);
+  }
+}
+
+/* Table equivalent --------------------------------------------------------------------------- */
+
+.details {
+  font-size: 13px;
+}
+
+.summary {
+  width: fit-content;
+  border-radius: var(--radius-control);
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.summary:hover {
+  color: var(--accent-hover);
+}
+
+.summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.tableWrap {
+  max-width: 100%;
+  margin-top: 8px;
+  overflow-x: auto;
+}
+
+.table {
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 100%;
+}
+
+.table th,
+.table td {
+  height: 32px;
+  padding: 0 12px 0 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.table thead th {
+  color: var(--text-2);
+  font-weight: 500;
+  background: var(--surface-2);
+  padding-left: 8px;
+}
+
+.table tbody th {
+  padding-left: 8px;
+}
+
+.table tbody tr:hover > * {
+  background: var(--surface-2);
+}
+
+.table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}

@@ -1,0 +1,290 @@
+/* Decision matrix grid. Colours come only from tokens.css. */
+
+.root {
+  --grid-row-h: 32px;
+  --grid-name-w: 176px;
+  --grid-value-w: 104px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+/* Toolbar ------------------------------------------------------------------------------------ */
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.button {
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.button:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+
+.button:disabled {
+  color: var(--text-3);
+  border-color: var(--line);
+  cursor: default;
+}
+
+.button:focus-visible,
+.linkButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Scroll container: the grid scrolls sideways inside it, never the page. */
+
+.scroller {
+  max-width: 100%;
+  overflow: auto;
+  border-top: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  scroll-padding-left: var(--grid-name-w);
+  scroll-padding-top: calc(var(--grid-row-h) * 2);
+  overscroll-behavior-x: contain;
+}
+
+.grid {
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  min-width: 100%;
+  width: max-content;
+  outline: none;
+}
+
+/* Cells -------------------------------------------------------------------------------------- */
+
+.cell {
+  position: relative;
+  height: var(--grid-row-h);
+  padding: 0 8px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+  text-align: left;
+  font-weight: 400;
+  white-space: nowrap;
+  cursor: cell;
+  user-select: none;
+  outline: none;
+}
+
+.text {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header {
+  min-width: var(--grid-value-w);
+  font-weight: 500;
+  text-align: right;
+}
+
+.value {
+  min-width: var(--grid-value-w);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.corner,
+.rowHeader {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  width: var(--grid-name-w);
+  min-width: var(--grid-name-w);
+  max-width: var(--grid-name-w);
+}
+
+.corner {
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: default;
+}
+
+.cornerType {
+  font-weight: 400;
+}
+
+.rowHeader {
+  font-weight: 500;
+}
+
+/* Sticky header rows. The two header rows stay while the body scrolls vertically. */
+
+.nameRow > .cell {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.typeRow > .cell {
+  position: sticky;
+  top: var(--grid-row-h);
+  z-index: 2;
+  border-bottom-color: var(--line-strong);
+}
+
+.nameRow > .corner,
+.typeRow > .corner {
+  left: 0;
+  z-index: 3;
+}
+
+/* Type control: the text says the direction, not an icon alone. */
+
+.type {
+  text-align: right;
+  padding: 0 4px;
+}
+
+.typeButton {
+  height: 24px;
+  padding: 0 4px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text-2);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.type[data-type='cost'] .typeButton {
+  color: var(--text);
+}
+
+.typeButton:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+/* Row hover, selection, cursor, errors ------------------------------------------------------ */
+
+tbody tr:hover > .cell {
+  background: var(--surface-2);
+}
+
+.cell[data-selected] {
+  background: var(--accent-bg);
+}
+
+tbody tr:hover > .cell[data-selected] {
+  background: var(--accent-bg);
+}
+
+.cell[data-invalid] {
+  background: var(--danger-bg);
+  box-shadow: inset 0 -2px 0 var(--danger);
+}
+
+/* The active cell: 2 px accent frame drawn inside so the scroller never clips it. */
+.cell[data-cursor]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-control);
+  pointer-events: none;
+}
+
+.grid:not(:focus-within) .cell[data-cursor]::after {
+  border-width: 1px;
+  border-color: var(--line-strong);
+}
+
+/* Editor ------------------------------------------------------------------------------------- */
+
+.editor {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  padding: 0 8px;
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: inherit;
+  outline: none;
+  user-select: text;
+}
+
+.editorNumeric {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.editor[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
+/* Messages under the grid -------------------------------------------------------------------- */
+
+.status {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 20px;
+}
+
+.message {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin: 0;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.message:empty {
+  display: none;
+}
+
+.msgDanger {
+  color: var(--danger);
+}
+
+.linkButton {
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.linkButton:hover {
+  color: var(--accent-hover);
+}
