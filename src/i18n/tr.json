@@ -103,7 +103,7 @@
     },
     "verified": {
       "title": "Yayımlanmış sonuçlarla doğrulandı",
-      "lead": "Kullanılabilen her yöntem test takımında yayımlanmış bir örnekle çalışır ve basılı sayıları gösterilen tolerans içinde üretmek zorundadır.",
+      "lead": "CRITIC ve TOPSIS test takımında yayımlanmış örneklerle çalışır ve basılı sayıları gösterilen tolerans içinde üretmek zorundadır.",
       "method": "Yöntem",
       "reference": "Kaynak",
       "compared": "Karşılaştırılan",
@@ -268,7 +268,7 @@
       "ranking-outranking": "Alternatifler ikişer ikişer karşılaştırılır; çok kötü bir değer iyi değerlerle kolayca telafi edilmez."
     },
     "catalog": {
-      "lead": "Ağırlıklandırma yöntemleri kriterleri ağırlığa, sıralama yöntemleri ağırlık ve veriyi bir sıraya çevirir. Bu sitede bugün iki yöntem çalışıyor; diğerleri araştırıldı ve belgelendi.",
+      "lead": "Ağırlıklandırma yöntemleri kriterleri ağırlığa, sıralama yöntemleri ağırlık ve veriyi bir sıraya çevirir. Bu sitede bugün {{total}} yöntemden {{available}} tanesi çalışıyor; diğerleri araştırıldı ve belgelendi.",
       "filters": "Filtreler",
       "familyFilter": "Aile",
       "statusFilter": "Durum",

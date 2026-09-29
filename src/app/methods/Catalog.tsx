@@ -32,7 +32,7 @@ export default function Catalog() {
       <main id="main" tabIndex={-1} className={`${pageContainer} py-10 outline-none md:py-12`}>
         <div className="flex max-w-[70ch] flex-col gap-3">
           <h1 className="text-32 font-semibold text-text">{t('methods.title')}</h1>
-          <p className="text-16 text-text-2">{t('methods.catalog.lead')}</p>
+          <p className="text-16 text-text-2">{t('methods.catalog.lead', { available: allMethods.filter((m) => m.status === 'available').length, total: allMethods.length })}</p>
           <p className="text-14">
             <a href="#guide" className={textLink}>
               {t('methods.catalog.guideLink')}
@@ -64,6 +64,7 @@ export default function Catalog() {
                 <span className="text-12 text-text-2">{t('methods.catalog.statusFilter')}</span>
                 <SegmentedControl<StatusFilter>
                   aria-label={t('methods.catalog.statusFilter')}
+                  className="self-start"
                   value={status}
                   onValueChange={setStatus}
                   options={[

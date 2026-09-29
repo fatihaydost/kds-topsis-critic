@@ -91,7 +91,7 @@ function MethodArticle({ m }: { m: MethodContent }) {
                 <dd className="text-text">
                   {shortOrigin(m.origin, lang)}. {m.origin.title}. <span className="text-text-2">{m.origin.venue}.</span>{' '}
                   {m.origin.doi && (
-                    <a href={doiHref(m.origin.doi)} target="_blank" rel="noreferrer" className={cn(textLink, 'break-all')}>
+                    <a href={doiHref(m.origin.doi)} target="_blank" rel="noreferrer" className={cn(textLink, '[overflow-wrap:anywhere]')}>
                       doi:{m.origin.doi}
                     </a>
                   )}
@@ -165,7 +165,7 @@ function MethodArticle({ m }: { m: MethodContent }) {
                 <dd className="text-text">
                   {m.reference.source}.{' '}
                   {m.reference.doi && (
-                    <a href={doiHref(m.reference.doi)} target="_blank" rel="noreferrer" className={cn(textLink, 'break-all')}>
+                    <a href={doiHref(m.reference.doi)} target="_blank" rel="noreferrer" className={cn(textLink, '[overflow-wrap:anywhere]')}>
                       doi:{m.reference.doi}
                     </a>
                   )}
@@ -189,7 +189,11 @@ function MethodArticle({ m }: { m: MethodContent }) {
                 <div className="mt-2 flex flex-col gap-2">
                   {workbenchExamples.map((e, i) => (
                     <div key={e.id} className="flex flex-wrap items-center gap-3">
-                      <Link href={`/app?example=${e.id}`} className={buttonClasses({ variant: i === 0 ? 'primary' : 'secondary' })}>
+                      <Link
+                        href={`/app?example=${e.id}`}
+                        aria-label={`${t('methods.page.reference.open')}: ${e.name[lang]}`}
+                        className={buttonClasses({ variant: i === 0 ? 'primary' : 'secondary' })}
+                      >
                         {t('methods.page.reference.open')}
                       </Link>
                       <span className="text-13 text-text-2">{e.name[lang]}</span>

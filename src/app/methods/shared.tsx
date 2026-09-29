@@ -45,14 +45,14 @@ export function SourceItem({ source }: { source: Source }) {
       {source.doi ? (
         <>
           {' '}
-          <a href={doiHref(source.doi)} target="_blank" rel="noreferrer" className={cn(textLink, 'break-all')}>
+          <a href={doiHref(source.doi)} target="_blank" rel="noreferrer" className={cn(textLink, '[overflow-wrap:anywhere]')}>
             doi:{source.doi}
           </a>
         </>
       ) : source.url ? (
         <>
           {' '}
-          <a href={source.url} target="_blank" rel="noreferrer" className={cn(textLink, 'break-all')}>
+          <a href={source.url} target="_blank" rel="noreferrer" className={cn(textLink, '[overflow-wrap:anywhere]')}>
             {source.url.replace(/^https?:\/\//, '')}
           </a>
         </>

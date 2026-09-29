@@ -103,7 +103,7 @@
     },
     "verified": {
       "title": "Checked against published results",
-      "lead": "Each available method runs in the test suite on a published example and has to reproduce the printed numbers within the tolerance shown.",
+      "lead": "CRITIC and TOPSIS run in the test suite on published examples and have to reproduce the printed numbers within the tolerance shown.",
       "method": "Method",
       "reference": "Reference",
       "compared": "Compared",
@@ -268,7 +268,7 @@
       "ranking-outranking": "Alternatives are compared in pairs, so a very bad value is not simply offset by good ones."
     },
     "catalog": {
-      "lead": "Weighting methods turn criteria into weights, ranking methods turn weights and data into an order. Two run on this site today; the rest are researched and documented.",
+      "lead": "Weighting methods turn criteria into weights, ranking methods turn weights and data into an order. {{available}} of {{total}} run on this site today; the rest are researched and documented.",
       "filters": "Filters",
       "familyFilter": "Family",
       "statusFilter": "Status",
