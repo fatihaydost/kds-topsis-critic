@@ -16,9 +16,9 @@ Status as of 2026-09-29 evening. Read DESIGN.md first, then FOUNDATION.md (writt
   landing, catalogue, method pages and the method-choice guide. 561 unit tests + 7 e2e.
 - Owner review: "less text, more visuals" (DESIGN.md §Copy). Applied once; independent review running.
 
-## Open decisions (Fatih)
-- Licence (MIT proposed; the footer names none until chosen), product name (top bar says "KDS"),
-  Turkish address form ("sen" now, "siz" proposed).
+## Decisions (Fatih)
+- Decided 29.09: MIT licence (`LICENSE`), product name "MCDM Workbench" (TR subtitle "Çok kriterli karar analizi"),
+  Turkish address form "siz". Apply all three in the fix round.
 
 ## Next
 1. ~~Workbench~~ done. (`/app`): spreadsheet-like decision matrix grid (keyboard, paste from Excel, import
