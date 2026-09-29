@@ -1,0 +1,198 @@
+{
+  "common": {
+    "wordmark": "KDS",
+    "productName": "Çok kriterli karar aracı",
+    "documentTitle": "KDS: çok kriterli karar aracı",
+    "actions": {
+      "add": "Ekle",
+      "remove": "Kaldır",
+      "cancel": "Vazgeç",
+      "close": "Kapat",
+      "confirm": "Onayla",
+      "copy": "Kopyala",
+      "copied": "Kopyalandı",
+      "reset": "Sıfırla",
+      "more": "Diğer işlemler"
+    },
+    "optional": "isteğe bağlı",
+    "loading": "Yükleniyor",
+    "notFound": {
+      "title": "Sayfa bulunamadı",
+      "body": "Bu adreste bir sayfa yok. Taşınmış olabilir ya da bağlantıda yazım hatası var.",
+      "action": "Ana sayfaya dön"
+    },
+    "stub": "Yer tutucu. Bu sayfa bir sonraki adımda yapılacak."
+  },
+  "nav": {
+    "main": "Ana menü",
+    "skipToContent": "İçeriğe geç",
+    "home": "Ana sayfa",
+    "workbench": "Çalışma alanı",
+    "methods": "Yöntemler",
+    "github": "GitHub'daki kaynak kod",
+    "language": "Dil",
+    "theme": {
+      "label": "Tema",
+      "system": "Sistem",
+      "light": "Açık",
+      "dark": "Koyu",
+      "button": "Tema: {{mode}}. Temayı değiştir"
+    }
+  },
+  "landing": {
+    "title": "Alternatifleri, sonucunu kontrol edebileceğin yöntemlerle sırala",
+    "lead": "Karar matrisini gir, kriter ağırlıklarını CRITIC ile hesapla, alternatifleri TOPSIS ile sırala ve her ara adımı gör. Her şey tarayıcında çalışır.",
+    "openWorkbench": "Çalışma alanını aç",
+    "methods": "Yöntemler"
+  },
+  "workbench": {
+    "stagesLabel": "Aşamalar",
+    "stages": {
+      "data": "Veri",
+      "weights": "Ağırlıklar",
+      "ranking": "Sıralama",
+      "results": "Sonuçlar"
+    },
+    "empty": {
+      "data": {
+        "title": "Henüz karar matrisi yok",
+        "body": "Alternatifleri ve kriterleri ekle, bir tablodan kopyaladığın bloğu yapıştır ya da yayımlanmış bir örneği yükle.",
+        "loadExample": "Örneği yükle",
+        "startBlank": "Boş tabloyla başla"
+      },
+      "weights": {
+        "title": "Ağırlıklar için karar matrisi gerekli",
+        "body": "Önce Veri aşamasında alternatifleri, kriterleri ve değerleri gir.",
+        "action": "Veri aşamasına git"
+      },
+      "ranking": {
+        "title": "Sıralama için geçerli veri ve ağırlık gerekli",
+        "body": "Matris ve ağırlıklar tamamlandığında TOPSIS alternatifleri burada sıralar.",
+        "action": "Ağırlıklar aşamasına git"
+      },
+      "results": {
+        "title": "Henüz sonuç yok",
+        "body": "Sıralama hesaplanabildiğinde sonuçlar burada görünür.",
+        "action": "Sıralama aşamasına git"
+      }
+    },
+    "explanation": {
+      "title": "Açıklama",
+      "open": "Açıklamayı göster",
+      "close": "Açıklamayı gizle",
+      "empty": "Bu aşamadaki yöntemin notları, formülleri ve kaynakları burada görünür."
+    },
+    "alternative": "Alternatif",
+    "alternatives": "Alternatifler",
+    "criterion": "Kriter",
+    "criteria": "Kriterler",
+    "alternativeN": "A{{n}}",
+    "criterionN": "K{{n}}",
+    "criterionType": {
+      "label": "Yön",
+      "benefit": "↑ Fayda",
+      "cost": "↓ Maliyet"
+    },
+    "weightMethod": {
+      "label": "Ağırlıklandırma yöntemi",
+      "critic": "CRITIC",
+      "equal": "Eşit ağırlık",
+      "manual": "Elle"
+    },
+    "rankingMethod": {
+      "label": "Sıralama yöntemi",
+      "topsis": "TOPSIS"
+    },
+    "example": {
+      "label": "Örnek",
+      "loaded": "Örnek veri: {{citation}}",
+      "source": "Kaynak"
+    }
+  },
+  "methods": {
+    "title": "Yöntemler",
+    "lead": "Her yöntem sayfası yöntemin ne yaptığını, ne zaman kullanılacağını, formüllerini ve doğrulandığı yayımlanmış örneği gösterir.",
+    "columns": {
+      "name": "Yöntem",
+      "kind": "Tür",
+      "status": "Durum"
+    },
+    "status": {
+      "available": "Kullanılabilir",
+      "research": "Araştırılıyor"
+    },
+    "kind": {
+      "weighting": "Ağırlıklandırma",
+      "ranking": "Sıralama"
+    },
+    "names": {
+      "critic": "CRITIC",
+      "topsis": "TOPSIS",
+      "equal": "Eşit ağırlık",
+      "manual": "Elle girilen ağırlık"
+    },
+    "fullNames": {
+      "critic": "Criteria Importance Through Intercriteria Correlation",
+      "topsis": "Technique for Order of Preference by Similarity to Ideal Solution"
+    },
+    "notFound": "{{id}} kimliğiyle bir yöntem yok.",
+    "backToCatalog": "Tüm yöntemler"
+  },
+  "steps": {
+    "critic": {
+      "normalized": "Min-max normalizasyonu: her sütun 0 ile 1 arasına ölçeklenir, maliyet kriterleri ters çevrilir; böylece 1 her zaman en iyi değerdir.",
+      "sigma": "Kontrast: normalize edilmiş her sütunun örneklem standart sapması.",
+      "correlation": "Kriterler arası çatışma: normalize sütun çiftlerinin Pearson korelasyonu.",
+      "conflict": "Her kriterin toplam çatışması: diğer kriterlerle korelasyonunun 1'den farklarının toplamı.",
+      "information": "Her kriterin bilgi içeriği: standart sapmasıyla toplam çatışmasının çarpımı.",
+      "informationTotal": "Tüm kriterlerin toplam bilgi içeriği.",
+      "weights": "Ağırlıklar: her kriterin toplam bilgi içeriğindeki payı."
+    },
+    "topsis": {
+      "normalized": "Vektör normalizasyonu: her değer kendi sütununun uzunluğuna bölünür.",
+      "weighted": "Ağırlıklı normalize matris: her sütun kendi ağırlığıyla çarpılır.",
+      "idealBest": "İdeal çözüm A+: her kriterdeki en iyi ağırlıklı değer (fayda için en büyük, maliyet için en küçük).",
+      "idealWorst": "Negatif ideal çözüm A-: her kriterdeki en kötü ağırlıklı değer.",
+      "distanceBest": "Her alternatifin ideal çözüme Öklid uzaklığı D+.",
+      "distanceWorst": "Her alternatifin negatif ideal çözüme Öklid uzaklığı D-.",
+      "closeness": "Yakınlık katsayısı C = D- / (D+ + D-). Değer büyüdükçe sıra yükselir."
+    },
+    "equal": {
+      "weights": "Eşit ağırlık: her kritere 1 / n verilir."
+    },
+    "manual": {
+      "weights": "Elle girilen ağırlıklar."
+    }
+  },
+  "validation": {
+    "summaryTitle": "Düzeltilmesi gereken sorunlar var",
+    "notANumber": "Bir sayı gir, örneğin 0,25.",
+    "required": "Bir değer gir.",
+    "ambiguousNumber": "{{value}} olarak okundu.",
+    "codes": {
+      "too-few-alternatives": "En az {{min}} alternatif ekle.",
+      "too-few-criteria": "En az {{min}} kriter ekle.",
+      "alternatives-count-mismatch": "Alternatif adlarının sayısı satır sayısıyla eşleşmiyor.",
+      "row-length-mismatch": "{{alternative}} satırında {{value}} değer var, her satırda {{n}} değer olmalı.",
+      "invalid-cell": "{{alternative}} için {{criterion}} değerine bir sayı gir.",
+      "invalid-criterion-type": "{{criterion}} için fayda ya da maliyet seç.",
+      "constant-column": "{{criterion}} kriterinde bütün alternatiflerin değeri aynı, bu yüzden alternatifleri ayırt edemiyor.",
+      "non-positive-value": "{{alternative}} için {{criterion}} değeri {{value}}. Bu yöntem 0'dan büyük değerler ister.",
+      "weights-length-mismatch": "{{n}} kriter için {{value}} ağırlık var.",
+      "invalid-weight": "{{criterion}} ağırlığına bir sayı gir.",
+      "negative-weight": "{{criterion}} ağırlığı {{value}}. Ağırlıklar negatif olamaz.",
+      "weights-sum": "Ağırlıkların toplamı {{value}}, toplam 1 olmalı."
+    }
+  },
+  "warnings": {
+    "critic": {
+      "constant-column": "{{criterion}} kriterinde her alternatifin değeri aynı, bu yüzden CRITIC ağırlığı 0.",
+      "few-alternatives": "4'ten az alternatifle korelasyonlar kararsızdır. CRITIC ağırlıklarını dikkatle yorumla.",
+      "all-constant-equal-weights": "Bütün kriterler sabit, ağırlıklandırılacak bilgi yok. Bunun yerine eşit ağırlık kullanıldı."
+    },
+    "topsis": {
+      "zero-column": "{{criterion}} kriterinin bütün değerleri 0, bu yüzden sıralamayı etkilemiyor.",
+      "zero-distance": "Bazı alternatifler hem ideal hem negatif ideal çözümle çakışıyor. Bunların yakınlık katsayısı 0,5."
+    }
+  }
+}

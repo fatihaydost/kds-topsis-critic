@@ -1,0 +1,198 @@
+{
+  "common": {
+    "wordmark": "KDS",
+    "productName": "Multi-criteria decision tool",
+    "documentTitle": "KDS: multi-criteria decision tool",
+    "actions": {
+      "add": "Add",
+      "remove": "Remove",
+      "cancel": "Cancel",
+      "close": "Close",
+      "confirm": "Confirm",
+      "copy": "Copy",
+      "copied": "Copied",
+      "reset": "Reset",
+      "more": "More actions"
+    },
+    "optional": "optional",
+    "loading": "Loading",
+    "notFound": {
+      "title": "Page not found",
+      "body": "There is no page at this address. It may have moved, or the link has a typo.",
+      "action": "Go to the home page"
+    },
+    "stub": "Placeholder. This page is built in the next step."
+  },
+  "nav": {
+    "main": "Main",
+    "skipToContent": "Skip to content",
+    "home": "Home",
+    "workbench": "Workbench",
+    "methods": "Methods",
+    "github": "Source code on GitHub",
+    "language": "Language",
+    "theme": {
+      "label": "Theme",
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark",
+      "button": "Theme: {{mode}}. Change theme"
+    }
+  },
+  "landing": {
+    "title": "Rank alternatives with methods you can check",
+    "lead": "Enter a decision matrix, derive criterion weights with CRITIC, rank the alternatives with TOPSIS, and see every intermediate step. Everything runs in your browser.",
+    "openWorkbench": "Open workbench",
+    "methods": "Methods"
+  },
+  "workbench": {
+    "stagesLabel": "Stages",
+    "stages": {
+      "data": "Data",
+      "weights": "Weights",
+      "ranking": "Ranking",
+      "results": "Results"
+    },
+    "empty": {
+      "data": {
+        "title": "No decision matrix yet",
+        "body": "Add alternatives and criteria, paste a block copied from a spreadsheet, or load a published example.",
+        "loadExample": "Load example",
+        "startBlank": "Start with an empty table"
+      },
+      "weights": {
+        "title": "Weights need a decision matrix",
+        "body": "Enter the alternatives, criteria and values on the Data stage first.",
+        "action": "Go to Data"
+      },
+      "ranking": {
+        "title": "Ranking needs valid data and weights",
+        "body": "When the matrix and the weights are complete, TOPSIS ranks the alternatives here.",
+        "action": "Go to Weights"
+      },
+      "results": {
+        "title": "No results yet",
+        "body": "Results appear once the ranking can be calculated.",
+        "action": "Go to Ranking"
+      }
+    },
+    "explanation": {
+      "title": "Explanation",
+      "open": "Show explanation",
+      "close": "Hide explanation",
+      "empty": "Method notes, formulas and sources for the current stage appear here."
+    },
+    "alternative": "Alternative",
+    "alternatives": "Alternatives",
+    "criterion": "Criterion",
+    "criteria": "Criteria",
+    "alternativeN": "A{{n}}",
+    "criterionN": "C{{n}}",
+    "criterionType": {
+      "label": "Direction",
+      "benefit": "↑ Benefit",
+      "cost": "↓ Cost"
+    },
+    "weightMethod": {
+      "label": "Weighting method",
+      "critic": "CRITIC",
+      "equal": "Equal weights",
+      "manual": "Manual"
+    },
+    "rankingMethod": {
+      "label": "Ranking method",
+      "topsis": "TOPSIS"
+    },
+    "example": {
+      "label": "Example",
+      "loaded": "Example data from {{citation}}",
+      "source": "Source"
+    }
+  },
+  "methods": {
+    "title": "Methods",
+    "lead": "Each method page shows what the method does, when to use it, its formulas and a published example it has been checked against.",
+    "columns": {
+      "name": "Method",
+      "kind": "Type",
+      "status": "Status"
+    },
+    "status": {
+      "available": "Available",
+      "research": "In research"
+    },
+    "kind": {
+      "weighting": "Weighting",
+      "ranking": "Ranking"
+    },
+    "names": {
+      "critic": "CRITIC",
+      "topsis": "TOPSIS",
+      "equal": "Equal weights",
+      "manual": "Manual weights"
+    },
+    "fullNames": {
+      "critic": "Criteria Importance Through Intercriteria Correlation",
+      "topsis": "Technique for Order of Preference by Similarity to Ideal Solution"
+    },
+    "notFound": "There is no method with the id {{id}}.",
+    "backToCatalog": "All methods"
+  },
+  "steps": {
+    "critic": {
+      "normalized": "Min-max normalization: each column is rescaled to the range 0 to 1, with cost criteria reversed so that 1 is always the best value.",
+      "sigma": "Contrast: the sample standard deviation of each normalized column.",
+      "correlation": "Conflict between criteria: the Pearson correlation of every pair of normalized columns.",
+      "conflict": "Total conflict of each criterion: the sum of 1 minus its correlation with every criterion.",
+      "information": "Information content of each criterion: its standard deviation times its total conflict.",
+      "informationTotal": "Total information content over all criteria.",
+      "weights": "Weights: each criterion's share of the total information content."
+    },
+    "topsis": {
+      "normalized": "Vector normalization: each value divided by the length of its column.",
+      "weighted": "Weighted normalized matrix: each column multiplied by its weight.",
+      "idealBest": "Ideal solution A+: the best weighted value on each criterion (the maximum for benefit, the minimum for cost).",
+      "idealWorst": "Anti-ideal solution A-: the worst weighted value on each criterion.",
+      "distanceBest": "Euclidean distance D+ of each alternative from the ideal solution.",
+      "distanceWorst": "Euclidean distance D- of each alternative from the anti-ideal solution.",
+      "closeness": "Closeness coefficient C = D- / (D+ + D-). A higher value ranks higher."
+    },
+    "equal": {
+      "weights": "Equal weights: every criterion gets 1 / n."
+    },
+    "manual": {
+      "weights": "Weights entered by hand."
+    }
+  },
+  "validation": {
+    "summaryTitle": "There is a problem",
+    "notANumber": "Enter a number, for example 0.25.",
+    "required": "Enter a value.",
+    "ambiguousNumber": "Read as {{value}}.",
+    "codes": {
+      "too-few-alternatives": "Add at least {{min}} alternatives.",
+      "too-few-criteria": "Add at least {{min}} criteria.",
+      "alternatives-count-mismatch": "The number of alternative names does not match the number of rows.",
+      "row-length-mismatch": "{{alternative}} has {{value}} values, every row needs {{n}}.",
+      "invalid-cell": "Enter a number for {{alternative}} on {{criterion}}.",
+      "invalid-criterion-type": "Choose benefit or cost for {{criterion}}.",
+      "constant-column": "Every alternative has the same value on {{criterion}}, so it cannot tell them apart.",
+      "non-positive-value": "{{alternative}} on {{criterion}} is {{value}}. This method needs values above 0.",
+      "weights-length-mismatch": "There are {{value}} weights for {{n}} criteria.",
+      "invalid-weight": "Enter a number for the weight of {{criterion}}.",
+      "negative-weight": "The weight of {{criterion}} is {{value}}. Weights cannot be negative.",
+      "weights-sum": "Weights sum to {{value}}, they must sum to 1."
+    }
+  },
+  "warnings": {
+    "critic": {
+      "constant-column": "{{criterion}} has the same value for every alternative, so its CRITIC weight is 0.",
+      "few-alternatives": "With fewer than 4 alternatives the correlations are unstable. Read the CRITIC weights with care.",
+      "all-constant-equal-weights": "Every criterion is constant, so there is no information to weigh. Equal weights are used instead."
+    },
+    "topsis": {
+      "zero-column": "Every value of {{criterion}} is 0, so it does not affect the ranking.",
+      "zero-distance": "Some alternatives coincide with both the ideal and the anti-ideal solution. They get a closeness of 0.5."
+    }
+  }
+}
