@@ -461,6 +461,8 @@ export function DecisionGrid({
       'data-selected': (multi && inRange(selection, pos)) || undefined,
       'data-invalid': invalid || undefined,
       'data-kind': kind,
+      // Focus from outside the grid (an error summary link, assistive tech) moves the cursor there.
+      onFocus: () => { if (!dragging.current && !samePos(pos, cursor)) { setCursorRaw(pos); setAnchorRaw(pos) } },
       onMouseDown: (e: MouseEvent) => onCellMouseDown(pos, e),
       onMouseEnter: (e: MouseEvent) => onCellMouseEnter(pos, e),
       onDoubleClick: () => {
