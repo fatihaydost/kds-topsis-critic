@@ -1,7 +1,7 @@
 import './styles/app.css'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { App, loadLanding } from './app/App'
+import { App, preloadRoute, ROUTER_BASE } from './app/App'
 import { initI18n } from './i18n'
 
 initI18n()
@@ -16,7 +16,9 @@ const start = () =>
     </StrictMode>,
   )
 
-// The home page arrives prerendered (vite.config.ts). Load the landing chunk first, so React's first
-// commit replaces that HTML with the same page instead of a blank loading frame.
-if (root.hasChildNodes()) loadLanding().then(start, start)
+// The home page, /methods and the method pages arrive prerendered (vite.config.ts). Load the page's
+// chunk (and a method's card) first, so React's first commit replaces that HTML with the same page
+// instead of a blank loading frame.
+const path = location.pathname.slice(ROUTER_BASE.length) || '/'
+if (root.hasChildNodes()) preloadRoute(path).then(start, start)
 else start()

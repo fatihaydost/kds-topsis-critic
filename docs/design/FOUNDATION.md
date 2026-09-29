@@ -90,10 +90,18 @@ empty, disabled) and both table densities.
 - Routes (`src/app/App.tsx`, wouter, base `import.meta.env.BASE_URL` without the trailing slash):
   `/` Landing, `/app` Workbench, `/methods`, `/methods/:id`, `/dev/ui` (dev only), anything else 404.
   Route components are stubs to be replaced.
-- GitHub Pages: `base` is `/kds-topsis-critic/` for `build` and `preview`, `/` for dev. The build copies
-  `dist/index.html` to `dist/404.html`, so deep links boot the app without a hash router or redirect.
-  Then it prerenders the home page into `dist/index.html` (EN in `#root`, TR in a template;
-  `src/app/prerender.tsx`, `vite.config.ts`), and preloads the Plex Sans faces of the first screen.
+- GitHub Pages: `base` is `/kds-topsis-critic/` for `build` and `preview`, `/` for dev. The build writes
+  one `index.html` per static route (`/`, `/app/`, `/methods/`, `/methods/<id>/`) with its own title,
+  description, canonical and og tags, so a deep link is an HTTP 200 page; `404.html` (bare app,
+  "not found" title, `noindex`) is left for unknown addresses, plus `sitemap.xml`. The home page,
+  `/methods` and every method page are prerendered (EN in `#root`, TR in a template;
+  `src/app/prerender.tsx`, `vite.config.ts`); `main.tsx` loads that page's chunk (`preloadRoute`)
+  before it replaces the HTML. `/app` is not prerendered (it shows the saved matrix) and preloads its
+  chunk. Every copy preloads the Plex Sans faces of the first screen. `vite preview` answers like
+  Pages (301 to the trailing slash, 404.html with HTTP 404).
+- Method cards: lists read `src/content/methods/catalog.ts` (id, name, family, status, year); a page
+  loads its own card with `loadMethod(id)` (`load.ts`, one chunk per method). KaTeX loads when an
+  algorithm step is first opened.
 - `index.html` has an inline script that applies the saved theme and language before first paint.
 
 ## Theme
@@ -211,5 +219,5 @@ if the revision changes).
 ## Checks
 
 `pnpm typecheck && pnpm test && pnpm build`. Vitest runs `tests/**/*.test.ts` and `src/**/*.test.ts`.
-The production JS is one ~650 kB chunk (KaTeX, React, Radix, i18next); splitting routes with
-`React.lazy` is the obvious next step when the workbench and method pages are real.
+Routes are split with `React.lazy`: the entry (React, Radix, i18next, both translations) is about
+370 kB; the workbench, each method card, KaTeX and SheetJS are chunks of their own.
