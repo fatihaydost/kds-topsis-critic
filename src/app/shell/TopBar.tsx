@@ -15,6 +15,7 @@ import {
   iconButtonClasses,
   SegmentedControl,
 } from '../../ui'
+import { LogoMark } from './LogoMark'
 
 export const REPO_URL = 'https://github.com/fatihaydost/kds-topsis-critic'
 
@@ -93,7 +94,8 @@ export function TopBar() {
       >
         {t('nav.skipToContent')}
       </a>
-      <Link href="/" className="mr-2 flex shrink-0 items-baseline gap-2 rounded-control no-underline">
+      <Link href="/" className="mr-2 flex shrink-0 items-center gap-2 rounded-control no-underline">
+        <LogoMark size={18} className="shrink-0 text-accent" />
         {/* Phones: "MCDM" only, so the nav and the controls fit in 360 px. */}
         <span aria-hidden className="text-14 font-semibold text-text sm:hidden">
           {t('common.wordmark').split(' ')[0]}

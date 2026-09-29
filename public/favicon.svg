@@ -1,14 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <style>
-    .bg { fill: #106579 }
-    .fg { fill: #f7fafb }
-    @media (prefers-color-scheme: dark) {
-      .bg { fill: #5fbacc }
-      .fg { fill: #0f1a1e }
-    }
-  </style>
-  <rect class="bg" width="32" height="32" rx="2" />
-  <rect class="fg" x="7" y="15" width="4" height="10" />
-  <rect class="fg" x="14" y="10" width="4" height="15" />
-  <rect class="fg" x="21" y="18" width="4" height="7" />
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><title>MCDM Workbench</title><style>path{fill:#106579}@media (prefers-color-scheme:dark){path{fill:#5fbacc}}</style><path d="M16 32H80V64H48V192H80V224H16ZM240 32H176V64H208V192H176V224H240ZM128 72L184 128L128 184L72 128Z"/></svg>

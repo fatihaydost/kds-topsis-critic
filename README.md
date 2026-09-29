@@ -1,4 +1,4 @@
-# MCDM Workbench
+<h1><img src="docs/brand/lockup-horizontal.svg" alt="MCDM Workbench" height="48"></h1>
 
 A browser tool for multi-criteria decision analysis: weight criteria with CRITIC, rank alternatives with TOPSIS and read every intermediate step, in English or Turkish.
 
