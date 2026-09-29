@@ -42,7 +42,7 @@ function Bullets({ items, className }: { items: string[]; className?: string }) 
 
 function NotFoundMethod({ id }: { id: string }) {
   const { t } = useTranslation()
-  usePageMeta(t('common.notFound.title'), t('methods.notFound', { id }))
+  usePageMeta(t('common.notFound.metaTitle'), t('methods.notFound', { id }))
   return (
     <main id="main" tabIndex={-1} className={`${pageContainer} min-h-[60dvh] py-12 outline-none`}>
       <h1 className="text-24 font-semibold text-text">{t('common.notFound.title')}</h1>
@@ -191,7 +191,12 @@ function MethodArticle({ m }: { m: MethodContent }) {
                       <Link
                         key={e.id}
                         href={`/app?example=${e.id}`}
-                        aria-label={`${t('methods.page.reference.open')}: ${e.name[lang]}`}
+                        // The visible text starts the accessible name (WCAG 2.5.3, Label in Name).
+                        aria-label={
+                          i === 0
+                            ? `${t('methods.page.reference.open')}: ${e.name[lang]}`
+                            : `${t('methods.page.reference.openOther')}: ${t('methods.page.reference.open')}, ${e.name[lang]}`
+                        }
                         title={e.name[lang]}
                         className={buttonClasses({ variant: i === 0 ? 'primary' : 'secondary' })}
                       >

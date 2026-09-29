@@ -150,8 +150,7 @@ export function ResultsStage() {
       <section aria-labelledby="wb-results-headline" className="flex flex-col gap-5">
         <div className="flex flex-col gap-1">
           <p id="wb-results-headline" className="text-24 font-semibold text-text">
-            {t('workbench.results.headline', { name: alternativeName(problem, best, t) })}
-            <span className="num ml-3 text-20 font-normal text-text-2">C = {nf.format(result.scores[best])}</span>
+            {t('workbench.results.headline', { name: alternativeName(problem, best, t), value: nf.format(result.scores[best]) })}
           </p>
           <p className="text-13 text-text-2">
             {t('workbench.results.byline', {

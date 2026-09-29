@@ -283,7 +283,7 @@
       "chartTitle": "Closeness coefficient C",
       "weightsUsed": "Weights: {{method}}",
       "changeWeights": "Change weights",
-      "best": "{{name}} ranks first with C = {{value}}."
+      "best": "{{name}} ranks first (C = {{value}})."
     },
     "results": {
       "sourceFile": "Imported from {{name}}",
@@ -316,7 +316,7 @@
         "cost": "cost",
         "about": "About"
       },
-      "headline": "{{name}} ranks first",
+      "headline": "{{name}} ranks first (C = {{value}}).",
       "byline": "Weights: {{weights}}. Ranking: {{ranking}}. {{m}} alternatives, {{n}} criteria.",
       "about": {
         "tool": "Tool",

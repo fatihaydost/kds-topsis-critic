@@ -283,7 +283,7 @@
       "chartTitle": "Yakınlık katsayısı C",
       "weightsUsed": "Ağırlıklar: {{method}}",
       "changeWeights": "Ağırlıkları değiştir",
-      "best": "{{name}}, C = {{value}} ile ilk sırada."
+      "best": "İlk sırada {{name}} (C = {{value}})."
     },
     "results": {
       "sourceFile": "{{name}} dosyasından içe aktarıldı",
@@ -316,7 +316,7 @@
         "cost": "maliyet",
         "about": "Hakkında"
       },
-      "headline": "{{name}} ilk sırada",
+      "headline": "İlk sırada {{name}} (C = {{value}}).",
       "byline": "Ağırlık: {{weights}}. Sıralama: {{ranking}}. {{m}} alternatif, {{n}} kriter.",
       "about": {
         "tool": "Araç",
