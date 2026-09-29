@@ -1,124 +1,125 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'wouter'
-import { allMethods, FAMILY_ORDER } from '../../content/methods'
-import type { MethodFamily, MethodStatus } from '../../content/types'
-import { useLang } from '../../i18n'
-import { Button, EmptyState, SegmentedControl } from '../../ui'
-import { SiteFooter } from '../landing/SiteFooter'
-import { textLink, usePageMeta } from '../landing/usePageMeta'
+import { critic, type Problem } from '../../core'
+import { allMethods, FAMILY_ORDER, methodsByFamily } from '../../content/methods'
+import { getExample } from '../../data/examples'
 import { MethodGlyph } from '../../features/illustrations/MethodGlyph'
+import { MethodThumb } from '../../features/illustrations/MethodThumb'
+import { argMax, distancePoints, topsisProjection } from '../../features/illustrations/geometry'
+import { useLang } from '../../i18n'
+import { SiteFooter } from '../landing/SiteFooter'
+import { usePageMeta } from '../landing/usePageMeta'
 import { Guide } from './Guide'
-import { firstSentence, pageContainer, StatusLabel } from './shared'
+import { pageContainer } from './shared'
 
-type FamilyFilter = 'all' | MethodFamily
-type StatusFilter = 'all' | MethodStatus
+type Available = 'critic' | 'topsis' | 'equal'
+const AVAILABLE: readonly Available[] = ['topsis', 'critic', 'equal']
 
-/** `/methods`: every method grouped by family, filterable by family and status, plus the guide. */
+function exampleProblem(id: string): Problem {
+  const ex = getExample(id)!
+  return { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
+}
+
+/** The pictures on the three available methods' cards, computed from the published examples. */
+function useThumbs() {
+  return useMemo(() => {
+    const phones = exampleProblem('krishnan-2021-smartphones')
+    const weights = critic.compute(phones, {}).weights
+    // TOPSIS on its own reference example: three well spread points (Opricovic and Tzeng 2004).
+    const climbing = exampleProblem('opricovic-tzeng-2004-f')
+    const proj = topsisProjection(climbing, [0.5, 0.5])
+    const plane = proj ? distancePoints(proj) : []
+    const n = phones.criteria.length
+    return {
+      critic: { kind: 'bars' as const, values: weights, highlight: argMax(weights) },
+      topsis: { kind: 'plane' as const, points: plane, highlight: proj ? argMax(proj.closeness) : undefined },
+      equal: { kind: 'bars' as const, values: Array.from({ length: n }, () => 1 / n), highlight: undefined },
+    }
+  }, [])
+}
+
+/**
+ * `/methods`: the three methods that compute here as large cards with a picture and one line,
+ * the methods in research as names grouped by family, and the method-choice guide.
+ */
 export default function Catalog() {
   const { t } = useTranslation()
   const [lang] = useLang()
-  const [family, setFamily] = useState<FamilyFilter>('all')
-  const [status, setStatus] = useState<StatusFilter>('all')
   usePageMeta(t('methods.meta.title'), t('methods.meta.description'))
-
-  const shown = useMemo(
-    () => allMethods.filter((m) => (family === 'all' || m.family === family) && (status === 'all' || m.status === status)),
-    [family, status],
-  )
+  const thumbs = useThumbs()
+  const available = allMethods.filter((m) => m.status === 'available')
 
   return (
     <>
       <main id="main" tabIndex={-1} className={`${pageContainer} py-10 outline-none md:py-12`}>
         <div className="flex max-w-[70ch] flex-col gap-3">
           <h1 className="text-32 font-semibold text-text">{t('methods.title')}</h1>
-          <p className="text-16 text-text-2">{t('methods.catalog.lead', { available: allMethods.filter((m) => m.status === 'available').length, total: allMethods.length })}</p>
-          <p className="text-14">
-            <a href="#guide" className={textLink}>
-              {t('methods.catalog.guideLink')}
-            </a>
-          </p>
+          <p className="text-16 text-text-2">{t('methods.catalog.lead', { available: available.length, total: allMethods.length })}</p>
         </div>
 
-        <div className="mt-10 grid grid-cols-1 gap-12 xl:grid-cols-[minmax(0,1fr)_380px] xl:gap-16">
-          <div className="flex min-w-0 flex-col gap-8">
-            <div role="group" aria-label={t('methods.catalog.filters')} className="flex flex-col gap-3">
-              <div className="flex flex-col gap-1.5">
-                <span className="text-12 text-text-2">
-                  {t('methods.catalog.familyFilter')}
-                </span>
-                <div className="-mx-4 overflow-x-auto px-4 pb-1 md:mx-0 md:px-0">
-                  <SegmentedControl<FamilyFilter>
-                    aria-label={t('methods.catalog.familyFilter')}
-                    value={family}
-                    onValueChange={setFamily}
-                    options={(['all', ...FAMILY_ORDER] as const).map((f) => ({
-                      value: f,
-                      label: t(`methods.familiesShort.${f}`),
-                      ...(f !== 'all' && { ariaLabel: t(`methods.families.${f}`) }),
-                    }))}
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <span className="text-12 text-text-2">{t('methods.catalog.statusFilter')}</span>
-                <SegmentedControl<StatusFilter>
-                  aria-label={t('methods.catalog.statusFilter')}
-                  className="self-start"
-                  value={status}
-                  onValueChange={setStatus}
-                  options={[
-                    { value: 'all', label: t('methods.catalog.allStatuses') },
-                    { value: 'available', label: t('methods.status.available') },
-                    { value: 'research', label: t('methods.status.research') },
-                  ]}
-                />
-              </div>
-              <p className="text-13 text-text-2" aria-live="polite">
-                {t('methods.catalog.shown', { count: shown.length, total: allMethods.length })}
-              </p>
-            </div>
-
-            {shown.length === 0 ? (
-              <EmptyState
-                title={t('methods.catalog.emptyTitle')}
-                description={t('methods.catalog.emptyBody')}
-                action={
-                  <Button
-                    onClick={() => {
-                      setFamily('all')
-                      setStatus('all')
-                    }}
-                  >
-                    {t('methods.catalog.emptyAction')}
-                  </Button>
-                }
-              />
-            ) : (
-              <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {shown.map((m) => (
-                  <li key={m.id} className="min-w-0">
-                    <Link
-                      href={`/methods/${m.id}`}
-                      className="group flex h-full flex-col gap-2 rounded-control border border-line bg-surface p-4 no-underline transition-colors hover:border-line-strong hover:bg-surface-2"
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="inline-flex items-center gap-1.5 text-12 text-text-2">
-                          <MethodGlyph family={m.family} size={16} />
-                          {t(`methods.familiesShort.${m.family}`)}
+        <div className="mt-10 grid grid-cols-1 gap-12 xl:grid-cols-[minmax(0,1fr)_360px] xl:gap-16">
+          <div className="flex min-w-0 flex-col gap-12">
+            <section aria-labelledby="available-title" className="flex flex-col gap-4">
+              <h2 id="available-title" className="text-20 font-semibold text-text">
+                {t('methods.status.available')}
+              </h2>
+              <ul className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                {AVAILABLE.map((id) => {
+                  const m = available.find((x) => x.id === id)
+                  if (!m) return null
+                  return (
+                    <li key={id} className="min-w-0">
+                      <Link
+                        href={`/methods/${id}`}
+                        className="group flex h-full flex-col gap-4 rounded-control border border-line bg-surface p-4 no-underline transition-colors hover:border-line-strong hover:bg-surface-2"
+                      >
+                        <MethodThumb {...thumbs[id]} />
+                        <span className="flex flex-col gap-1">
+                          <span className="text-20 font-semibold text-text group-hover:underline">{m.name[lang]}</span>
+                          <span className="text-14 text-text-2">{t(`methods.catalog.oneLiner.${id}`)}</span>
                         </span>
-                        <StatusLabel status={m.status} />
-                      </div>
-                      <span className="text-16 font-semibold text-text group-hover:underline">{m.name[lang]}</span>
-                      <span className="line-clamp-2 text-13 text-text-2">{firstSentence(m[lang].summary)}</span>
-                    </Link>
-                  </li>
-                ))}
+                      </Link>
+                    </li>
+                  )
+                })}
               </ul>
-            )}
+            </section>
+
+            <section aria-labelledby="research-title" className="flex flex-col gap-4">
+              <h2 id="research-title" className="text-20 font-semibold text-text">
+                {t('methods.status.research')}
+              </h2>
+              <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
+                {FAMILY_ORDER.map((family) => {
+                  const items = methodsByFamily(family).filter((m) => m.status === 'research')
+                  if (items.length === 0) return null
+                  return (
+                    <div key={family} className="flex flex-col gap-2 border-t border-line pt-3">
+                      <h3 className="flex items-center gap-2 text-13 font-medium text-text-2">
+                        <MethodGlyph family={family} size={16} />
+                        {t(`methods.families.${family}`)}
+                      </h3>
+                      <ul className="flex flex-wrap gap-1.5">
+                        {items.map((m) => (
+                          <li key={m.id}>
+                            <Link
+                              href={`/methods/${m.id}`}
+                              className="inline-flex h-7 items-center rounded-control border border-line px-2 text-13 text-text no-underline transition-colors hover:border-line-strong hover:bg-surface-2"
+                            >
+                              {m.name[lang]}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )
+                })}
+              </div>
+            </section>
           </div>
 
-          <aside className="order-first min-w-0 xl:order-none">
+          <aside className="min-w-0">
             <div className="rounded-control border border-line bg-surface p-4 md:p-5 xl:sticky xl:top-16 xl:max-h-[calc(100dvh-80px)] xl:overflow-y-auto">
               <Guide />
             </div>

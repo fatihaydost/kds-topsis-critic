@@ -88,7 +88,7 @@ function MethodArticle({ m }: { m: MethodContent }) {
           {t('methods.backToCatalog')}
         </Link>
 
-        <div className="mt-6 grid grid-cols-1 gap-12 xl:grid-cols-[minmax(0,1fr)_200px] xl:gap-16">
+        <div className="mt-6">
           <article className="flex min-w-0 max-w-[760px] flex-col gap-12">
             <header className="flex flex-col gap-5">
               <div className="flex flex-col gap-1">
@@ -98,15 +98,15 @@ function MethodArticle({ m }: { m: MethodContent }) {
                 </div>
                 <p className="text-14 text-text-2">
                   {l.fullName !== l.name ? `${l.fullName}. ` : ''}
-                  {t(`methods.families.${m.family}`)}, {shortOrigin(m.origin, lang)}
+                  {shortOrigin(m.origin, lang)}
                 </p>
               </div>
-              {!available && <Notice title={t('methods.page.draftTitle')} />}
+              {!available && <Notice tone="warning" title={t('methods.page.draftTitle')} />}
             </header>
 
             <Section id="idea" title={sectionTitle('idea')}>
               <MethodIdea m={m} />
-              <Bullets items={splitSentences(l.summary).slice(0, 3)} />
+              <p className="max-w-[65ch] text-16 text-text">{splitSentences(l.summary)[0]}</p>
             </Section>
 
             <Section id="details" title={sectionTitle('details')}>
@@ -158,7 +158,10 @@ function MethodArticle({ m }: { m: MethodContent }) {
                         href={`/methods/${c.methodId}`}
                         className="inline-flex h-8 items-center gap-2 rounded-control border border-line-strong bg-surface px-3 text-14 font-medium text-text no-underline hover:bg-surface-2"
                       >
-                        {l.name} <span className="text-text-3">+</span> {methodContent[c.methodId!].name[lang]}
+                        <span className="text-text-3" aria-hidden>
+                          +
+                        </span>
+                        {methodContent[c.methodId!].name[lang]}
                       </Link>
                     </li>
                   ))}
@@ -174,11 +177,13 @@ function MethodArticle({ m }: { m: MethodContent }) {
               )}
             </Section>
 
-            <Section id="reference" title={sectionTitle('reference')}>
+            <Section id="reference" title={available ? sectionTitle('reference') : t('methods.page.reference.researchTitle')}>
               <div className="flex flex-col gap-3 rounded-control border border-line bg-surface p-4">
                 <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
                   <span className="text-16 font-medium text-text">{sourceHead(m.reference.source)}</span>
-                  <span className="text-14 text-text-2">{t(`methods.page.reference.${m.reference.match}`)}</span>
+                  <span className="text-14 text-text-2">
+                    {t(available ? `methods.page.reference.${m.reference.match}` : `methods.page.reference.research.${m.reference.match}`)}
+                  </span>
                 </div>
                 {workbenchExamples.length > 0 && (
                   <div className="flex flex-wrap gap-2">
@@ -237,23 +242,9 @@ function MethodArticle({ m }: { m: MethodContent }) {
             </Section>
           </article>
 
-          <nav aria-label={t('methods.page.toc')} className="hidden xl:block">
-            <div className="sticky top-16 flex flex-col gap-2 border-l border-line pl-4">
-              <span className="text-12 font-medium text-text-2">{t('methods.page.toc')}</span>
-              <ul className="flex flex-col gap-1.5 text-13">
-                {SECTIONS.map((s) => (
-                  <li key={s}>
-                    <a href={`#${s}`} className="text-text-2 no-underline hover:text-text">
-                      {sectionTitle(s)}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </nav>
         </div>
       </main>
-      <SiteFooter />
+      <SiteFooter privacy={false} />
     </>
   )
 }

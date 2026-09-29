@@ -94,9 +94,9 @@
     },
     "footer": {
       "source": "GitHub'da kaynak kod",
-      "author": "Fatih Aydost yaptı",
+      "author": "Yapan: Fatih Aydost",
       "license": "MIT Lisansı",
-      "privacy": "Verin tarayıcında kalır. Girdiğin hiçbir şey sunucuya gönderilmez."
+      "privacy": "Verileriniz tarayıcınızda kalır."
     }
   },
   "workbench": {
@@ -452,7 +452,7 @@
     "backToCatalog": "Tüm yöntemler",
     "guide": {
       "title": "Hangi yöntemi seçmeliyim?",
-      "answers": "Cevapların",
+      "answers": "Cevaplarınız",
       "change": "Değiştir",
       "restart": "Baştan başla",
       "stage": {
@@ -461,15 +461,15 @@
       },
       "suggestions": "Önerilen yöntemler",
       "suggestionsSoFar": "Şimdiye kadar önerilenler",
-      "risks": "Bu birleşimlere dikkat et",
+      "risks": "Bu birleşimlere dikkat edin",
       "riskSources": "Kanıt ve kaynaklar",
       "treeSources": "Bu ağaç hakkında",
       "intro": "Birkaç soru listeyi daraltır."
     },
     "meta": {
-      "title": "Yöntemler: KDS",
+      "title": "Yöntemler: MCDM Workbench",
       "description": "Çok kriterli kararlar için ağırlıklandırma ve sıralama yöntemleri; her biri için formüller, tuzaklar, yayımlanmış bir referans örnek ve kaynaklar.",
-      "methodTitle": "{{name}}: KDS"
+      "methodTitle": "{{name}}: MCDM Workbench"
     },
     "families": {
       "weighting-objective": "Nesnel ağırlıklandırma",
@@ -489,21 +489,15 @@
       "ranking-outranking": "Üstünlük"
     },
     "catalog": {
-      "lead": "{{total}} yöntemden {{available}} tanesi bugün burada çalışıyor. Diğerleri araştırılmış taslaklar.",
-      "filters": "Filtreler",
-      "familyFilter": "Aile",
-      "statusFilter": "Durum",
-      "allStatuses": "Tümü",
-      "shown": "Gösterilen yöntem: {{count}} / {{total}}",
-      "emptyTitle": "Bu filtrelere uyan yöntem yok",
-      "emptyBody": "Bu durumdaki yöntemlerin hepsi başka bir ailede.",
-      "emptyAction": "Tüm yöntemleri göster",
-      "origin": "Köken",
-      "guideLink": "Hangi yöntemi seçmeliyim?"
+      "lead": "{{total}} yöntemden {{available}} tanesi burada hesaplanıyor; diğerleri araştırma taslağı.",
+      "oneLiner": {
+        "topsis": "En iyiye ve en kötüye uzaklıkla sıralar.",
+        "critic": "Ağırlığı verideki kontrast ve çatışmadan bulur.",
+        "equal": "Her kritere 1/n verir."
+      }
     },
     "page": {
-      "toc": "Bu sayfada",
-      "draftTitle": "Bu yöntem henüz hesaplanmıyor; içerik taslak.",
+      "draftTitle": "Henüz hesaplanmıyor. İçerik taslak.",
       "sections": {
         "idea": "Fikir",
         "details": "Ne zaman kullanılır",
@@ -513,19 +507,25 @@
         "sources": "Kaynaklar"
       },
       "reference": {
-        "match": "Basılı hassasiyette elde ediliyor",
+        "match": "Basılı basamaklarla aynı",
         "partial": "Kısmen elde ediliyor",
         "mismatch": "Elde edilemiyor",
         "researchOnly": "Yöntem araştırılırken yeniden hesaplanarak kontrol edildi, henüz bu sitenin koduyla değil.",
         "tested": "Bu sitenin test takımı tarafından kontrol ediliyor.",
-        "open": "Bu örneği çalışma alanında aç",
+        "open": "Çalışma alanında aç",
         "more": "Ayrıntılar",
-        "openOther": "Başka birimli örneği aç"
+        "openOther": "Başka birimlerle",
+        "researchTitle": "Yayımlanmış örnek (kod henüz yok)",
+        "research": {
+          "match": "Araştırmada elle doğrulandı",
+          "partial": "Araştırmada elle kısmen doğrulandı",
+          "mismatch": "Araştırmada elde edilemedi"
+        }
       },
       "noCombinations": "Bu yöntem için kayıtlı yaygın bir birleşim yok.",
       "tabs": {
-        "when": "Kullan",
-        "whenNot": "Kaçın",
+        "when": "Uygun",
+        "whenNot": "Uygun değil",
         "inputs": "Girdiler",
         "pitfalls": "Tuzaklar"
       },
@@ -553,7 +553,7 @@
           "lowerBetter": "{{name}}, düşük daha iyi"
         },
         "critic": {
-          "title": "Kontrast çarpı çatışma ağırlığı verir",
+          "title": "Kontrast × çatışma = ağırlık",
           "contrast": "Kontrast (σ)",
           "conflict": "Çatışma Σ(1 − ρ)",
           "weight": "Ağırlık",

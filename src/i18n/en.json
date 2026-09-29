@@ -96,7 +96,7 @@
       "source": "Source on GitHub",
       "author": "Built by Fatih Aydost",
       "license": "MIT License",
-      "privacy": "Your data stays in your browser. Nothing you enter is sent to a server."
+      "privacy": "Your data stays in your browser."
     }
   },
   "workbench": {
@@ -467,9 +467,9 @@
       "intro": "A few questions narrow the list."
     },
     "meta": {
-      "title": "Methods: KDS",
+      "title": "Methods: MCDM Workbench",
       "description": "Weighting and ranking methods for multi-criteria decisions, with formulas, pitfalls, a published reference example and sources for each.",
-      "methodTitle": "{{name}}: KDS"
+      "methodTitle": "{{name}}: MCDM Workbench"
     },
     "families": {
       "weighting-objective": "Objective weighting",
@@ -489,21 +489,15 @@
       "ranking-outranking": "Outranking"
     },
     "catalog": {
-      "lead": "{{available}} of {{total}} run here today. The rest are researched drafts.",
-      "filters": "Filters",
-      "familyFilter": "Family",
-      "statusFilter": "Status",
-      "allStatuses": "All",
-      "shown": "Methods shown: {{count}} of {{total}}",
-      "emptyTitle": "No method matches these filters",
-      "emptyBody": "Every method with this status is in another family.",
-      "emptyAction": "Show all methods",
-      "origin": "Origin",
-      "guideLink": "Which method should I choose?"
+      "lead": "{{available}} of {{total}} methods compute here; the rest are researched drafts.",
+      "oneLiner": {
+        "topsis": "Ranks by distance to the best and the worst.",
+        "critic": "Weights from contrast and conflict in the data.",
+        "equal": "Every criterion gets 1/n."
+      }
     },
     "page": {
-      "toc": "On this page",
-      "draftTitle": "This method is not computed yet. The content is a draft.",
+      "draftTitle": "Not computed here yet. The content is a draft.",
       "sections": {
         "idea": "The idea",
         "details": "When to use it",
@@ -513,19 +507,25 @@
         "sources": "Sources"
       },
       "reference": {
-        "match": "Reproduced at the printed precision",
+        "match": "Matches the printed digits",
         "partial": "Partly reproduced",
         "mismatch": "Not reproduced",
         "researchOnly": "Checked by recomputing it while researching the method, not yet by this site's code.",
         "tested": "Checked by this site's test suite.",
-        "open": "Open this example in the workbench",
+        "open": "Open in workbench",
         "more": "Details",
-        "openOther": "Open the example in other units"
+        "openOther": "Other units",
+        "researchTitle": "Published example (not in the code yet)",
+        "research": {
+          "match": "Checked by hand during research",
+          "partial": "Partly checked by hand during research",
+          "mismatch": "Not reproduced during research"
+        }
       },
       "noCombinations": "No common combination is recorded for this method.",
       "tabs": {
-        "when": "Use it when",
-        "whenNot": "Avoid it when",
+        "when": "Use",
+        "whenNot": "Avoid",
         "inputs": "Inputs",
         "pitfalls": "Pitfalls"
       },
@@ -553,7 +553,7 @@
           "lowerBetter": "{{name}}, lower is better"
         },
         "critic": {
-          "title": "Contrast times conflict gives the weight",
+          "title": "Contrast × conflict = weight",
           "contrast": "Contrast (σ)",
           "conflict": "Conflict Σ(1 − ρ)",
           "weight": "Weight",
