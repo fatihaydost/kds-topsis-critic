@@ -37,8 +37,8 @@ Read DESIGN.md first; this file is the API sheet.
   Plex Mono; there is no serif family.
 - Numbers: add `num` (tabular figures) and right-align in tables. Plex Sans digits measured equal width
   by default (16 px: `1111` = `8888` = 40 px), `num` keeps it explicit.
-- Motion: `animate-fade-in` (150 ms, `--ease`), only for a panel opening. `transition-colors` uses
-  `--dur`. Both drop to 0 under `prefers-reduced-motion`.
+- Motion: see [MOTION.md](MOTION.md) (when motion is allowed, the duration tokens, the `animate-*` keyframes of the
+  floating layers). `transition-*` utilities use `--dur`; every token drops to 0 under `prefers-reduced-motion`.
 - Focus: every focusable element gets the global `:focus-visible` ring (`--ring`: 2 px bg gap, 2 px accent).
   Do not add `outline-none` without a replacement.
 - `dark:` exists (it follows `data-theme` and the system) but components should not need it: tokens

@@ -30,10 +30,11 @@ export function Tooltip({ content, children, side = 'top', align = 'center' }: T
           align={align}
           sideOffset={6}
           collisionPadding={8}
-          // Only the first tooltip after the delay animates in; moving between neighbours (instant-open) does not.
+          // Only the first tooltip after the delay animates in; moving between neighbours (instant-open) does not, and a
+          // tooltip leaves at once, so two never overlap.
           className={
             'z-50 max-w-64 origin-(--radix-tooltip-content-transform-origin) rounded-control bg-text px-2 py-1 text-12 text-bg ' +
-            'data-[state=closed]:animate-float-out data-[state=delayed-open]:animate-float-in'
+            'data-[state=delayed-open]:animate-float-in'
           }
         >
           {content}

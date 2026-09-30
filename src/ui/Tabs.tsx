@@ -24,8 +24,12 @@ function useTabIndicator(listRef: RefObject<HTMLDivElement | null>, barRef: RefO
       // Hand over before the first measurement forces a style update, so the trigger's own underline does not fade.
       list.setAttribute('data-indicator', '')
       if (!animate) bar.style.transition = 'none'
-      const y = tab.offsetTop + tab.offsetHeight - 2
-      bar.style.transform = `translate(${tab.offsetLeft}px, ${y}px) scaleX(${tab.offsetWidth})`
+      // Sub-pixel rectangles (offset* round to whole pixels), in the list's scrolled content coordinates.
+      const t = tab.getBoundingClientRect()
+      const r = list.getBoundingClientRect()
+      const x = t.left - r.left - list.clientLeft + list.scrollLeft
+      const y = t.bottom - r.top - list.clientTop + list.scrollTop - 2
+      bar.style.transform = `translate(${x}px, ${y}px) scaleX(${t.width})`
       if (!animate) {
         // Commit the new place without a transition, then let later changes transition again.
         void bar.getBoundingClientRect()
