@@ -3,9 +3,10 @@ import { useTranslation } from 'react-i18next'
 import type { Problem } from '../../core'
 import type { MethodContent } from '../../content/types'
 import { getExample, type ExampleDataset } from '../../data/examples'
-import { CriticIdea } from '../../features/illustrations/CriticIdea'
+import { CRITIC_IDEA_STEPS, CriticIdea } from '../../features/illustrations/CriticIdea'
+import { IdeaSteps, useIdeaSteps, type IdeaStepsLabels } from '../../features/illustrations/IdeaSteps'
 import { MethodGlyph } from '../../features/illustrations/MethodGlyph'
-import { TopsisGeometry } from '../../features/illustrations/TopsisGeometry'
+import { TOPSIS_IDEA_STEPS, TopsisGeometry } from '../../features/illustrations/TopsisGeometry'
 import { useLang, useNumberFormat, type Lang } from '../../i18n'
 
 function toProblem(ex: ExampleDataset, lang: Lang): Problem {
@@ -27,6 +28,21 @@ export function MethodIdea({ m }: { m: MethodContent }) {
     const ex = topsisEx ?? criticEx
     return ex ? toProblem(ex, lang) : null
   }, [topsisEx, criticEx, lang])
+
+  // "Step through": one story per method, the picture transforms from step to step (MOTION.md, explain).
+  const storyCount = topsisEx ? TOPSIS_IDEA_STEPS : criticEx ? CRITIC_IDEA_STEPS : 0
+  const steps = useIdeaSteps(storyCount)
+  const stepLabels: IdeaStepsLabels = {
+    start: t('methods.page.idea.steps.start'),
+    group: t('methods.page.idea.steps.group'),
+    back: t('methods.page.idea.steps.back'),
+    next: t('methods.page.idea.steps.next'),
+    finish: t('methods.page.idea.steps.finish'),
+    close: t('methods.page.idea.steps.close'),
+    progress: (n, count) => t('methods.page.idea.steps.progress', { n, count }),
+  }
+  const topsisSentences = (['s1', 's2', 's3', 's4', 's5'] as const).map((k) => t(`methods.page.idea.topsis.steps.${k}`))
+  const criticSentences = (['s1', 's2', 's3', 's4'] as const).map((k) => t(`methods.page.idea.critic.steps.${k}`))
 
   const source = (ex: ExampleDataset) => (
     <p className="text-12 text-text-2">{t('methods.page.idea.source', { citation: ex.name[lang] })}</p>
@@ -57,7 +73,10 @@ export function MethodIdea({ m }: { m: MethodContent }) {
             showTable: t('methods.page.idea.showTable'),
             alternative: t('methods.page.idea.alternative'),
           }}
+          step={steps.step}
+          explain={steps.explain}
         />
+        <IdeaSteps control={steps} sentences={topsisSentences} labels={stepLabels} />
         {source(topsisEx)}
       </div>
     )
@@ -78,7 +97,10 @@ export function MethodIdea({ m }: { m: MethodContent }) {
             showTable: t('methods.page.idea.showTable'),
             criterion: t('methods.page.idea.criterion'),
           }}
+          step={steps.step}
+          explain={steps.explain}
         />
+        <IdeaSteps control={steps} sentences={criticSentences} labels={stepLabels} />
         {source(criticEx)}
       </div>
     )
