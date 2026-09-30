@@ -30,9 +30,13 @@ MCDM Workbench v1 is built and reviewed, not yet published. The local commits on
 2. **Small leftovers:** `/app` Lighthouse 82 (the shared entry bundle is about 370 kB; split the inactive language
    and heavy modules); prerendered charts stay hidden until the app loads (review-2 P2-6); the grid has no
    single tab stop (roving tabindex).
-3. **Robustness panel:** one-at-a-time weight perturbation (±5/10/20 %), Monte Carlo weights (Dirichlet) with
-   rank acceptability, criterion removal, agreement between methods (Spearman, Kendall τ_b, WS), Borda merge.
-   Sources and formulas: `docs/research/combinations.md` §C and §D.
+3. **Robustness panel:** built on the `robustness` branch as the workbench's fifth stage (`?stage=robustness`, its own
+   lazy chunk and text namespace): move one weight (closeness against w_k with the stability intervals of the core,
+   a slider, the live ranking whose rows slide to their new places), ±5/10/20 % nudges per criterion, Monte Carlo
+   weights (uniform or κ 20 / 100 / 500, N = 10,000, seed 1, in a Web Worker) with rank acceptability and mean rank
+   intervals, criterion removal (rescale or recompute CRITIC) with ρ and WS. Still open: agreement between methods
+   (Kendall τ_b, Kendall's W) and the Borda merge, which need a second ranking method. Sources and formulas:
+   `docs/research/combinations.md` §C and §D.
 4. **Methods, one at a time**, in the order `combinations.md` §E suggests (first: Entropy, SD, MEREC, ROC, AHP; SAW,
    VIKOR, EDAS, WASPAS, COPRAS, MOORA, PROMETHEE II, ELECTRE I). For each: review the card with Fatih, re-research
    it, implement in `src/core`, reference test from the published example (not pyDecision), method page and
