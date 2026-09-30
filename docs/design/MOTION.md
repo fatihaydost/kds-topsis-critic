@@ -1,0 +1,55 @@
+# Motion
+
+The contract behind the `Motion` dial in [DESIGN.md](DESIGN.md). Motion explains a change of state; it is never
+decoration. The test (Stripe Checkout): turn the animations off and the flow should feel broken. If it does not,
+the animation is not needed.
+
+## When motion is allowed
+
+| Purpose | Example | Allowed |
+|---|---|---|
+| Object constancy: the same data mark moves to its new place | TOPSIS points when the view changes, bars when a weight changes | Yes, the main use |
+| State change of one control | tab indicator, open/close of a disclosure or a floating layer | Yes, short |
+| Feedback that a value was recomputed | short accent tint on a changed cell | Yes, colour only |
+| Entry of a page, section or card; scroll reveal; stagger | | No |
+| Count-up numbers, typewriter, looping pulse, shimmer, parallax, hover lift, glow | | No |
+| First paint of a chart (bars growing from zero) | | No: data is shown, not performed |
+
+Frequency rule: the more often a thing happens, the shorter and quieter its motion. Keyboard-driven, high-frequency
+actions (typing in the grid, arrowing through cells) get none.
+
+Evidence for animating data changes and against animating the analysis itself: Heer and Robertson 2007
+(animated transitions between statistical graphics), Bostock "Object constancy", Robertson et al. 2008.
+
+## Tokens
+
+In `src/styles/tokens.css`, all set to `0ms` under `prefers-reduced-motion: reduce`:
+
+| Token | Value | Use |
+|---|---|---|
+| `--ease` | `cubic-bezier(0.2, 0, 0, 1)` | everything that moves or changes on screen |
+| `--ease-exit` | `cubic-bezier(0.3, 0, 1, 1)` | leaving elements (floating layers closing) |
+| `--dur-fast` | `100ms` | exits, tooltips, press feedback |
+| `--dur` | `150ms` | colour and small state changes (default for `transition-*`) |
+| `--dur-slow` | `200ms` | indicators, disclosures, sheets |
+| `--dur-data` | `320ms` | data marks moving to a new position (object constancy) |
+
+No hard-coded durations in components: a literal `ms` escapes reduced motion. JS animation (Web Animations API)
+reads the tokens and checks `matchMedia('(prefers-reduced-motion: reduce)')`.
+
+## Rules
+
+- Animate `transform` and `opacity` (and colour). Never `transition: all`, never layout properties, except a
+  disclosure's `block-size` through `interpolate-size` where supported (others open instantly).
+- Prerendered pages are re-rendered by React on load (`createRoot`, not hydrate): no keyframe animation may run on
+  mount, or it plays twice. Transitions are safe, they do not fire on first insertion.
+- Theme change happens in one frame: transitions are suspended while `data-theme` switches.
+- No dependency: CSS transitions, `@starting-style` for layers that open later, the Web Animations API for FLIP.
+  Radix floating layers use the `animate-*-in` / `animate-*-out` keyframes in `app.css` instead: Radix keeps a
+  closing layer mounted until its `animationend` (not `transitionend`), and a layer is never open on first paint.
+- SVG lines that move between two places transition the CSS `d` property of a `<path>` (the `d` attribute stays as the
+  fallback, which jumps). A unit line stretched by `transform: scale()` smears its dashes and caps while the transform
+  animates, because the browser scales the painted stroke.
+- `aria-live` text lands in the DOM at once; motion never delays or duplicates it. Content that is being replaced
+  (workbench stages) does not animate out, so ids and focus never point at a leaving element.
+- The final frame of every animation equals the reduced-motion render.

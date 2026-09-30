@@ -16,9 +16,10 @@ paper appendix.
 | Landing and method pages | 5 | 3 | 5 |
 | Workbench | 2 | 2 | 7 |
 
-Motion exists only for state change (result updated, row added, panel opened): 120-180 ms,
-`cubic-bezier(0.2, 0, 0, 1)`, disabled under `prefers-reduced-motion`. No entry fades, no staggers,
-no count-up numbers, no scroll reveal.
+Motion exists only for state change (result updated, row added, panel opened, a data mark moving to its new
+place): 100-320 ms from the duration tokens, `cubic-bezier(0.2, 0, 0, 1)`, disabled under `prefers-reduced-motion`.
+No entry fades, no staggers, no count-up numbers, no scroll reveal. The full contract (when, tokens, rules) is
+[MOTION.md](MOTION.md).
 
 ## Tokens
 
