@@ -1,4 +1,4 @@
-import { useCallback, useId, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import type { Problem } from '../../core/types'
 import { SegmentedControl } from '../../ui/SegmentedControl'
 import { ChartFigure, type ChartTable } from '../charts/ChartFigure'
@@ -14,6 +14,7 @@ import {
   placeLabels,
   linePath,
   pointCss,
+  referenceGuides,
   topsisProjection,
   type Point,
   type TopsisProjection,
@@ -98,8 +99,26 @@ export type TopsisGeometryProps = {
   /** Number format for the readout and the table (the active locale, 3 or 4 decimals). */
   format?: ((value: number) => string) | undefined
   labels?: Partial<TopsisGeometryLabels>
+  /**
+   * Step through the idea (IdeaSteps): null or undefined draws the full picture; 0 .. TOPSIS_IDEA_STEPS - 1 draws that
+   * step. The last step is the full distance-plane picture. While stepping, the view follows the step and the points
+   * and the view switch are inert.
+   */
+  step?: number | null | undefined
+  /** Move at the explain pace (--dur-explain), for a step change and the frame the stepping ends. */
+  explain?: boolean | undefined
   className?: string | undefined
 }
+
+/**
+ * The steps of the TOPSIS idea: 0 alternatives as points on two criteria, 1 A+ and A- from the best and worst value
+ * of each criterion, 2 the selected alternative's D+ and D-, 3 every alternative at (D+, D-) (the lines become its
+ * coordinates), 4 the rays of equal C (the full picture).
+ */
+export const TOPSIS_IDEA_STEPS = 5
+
+/** What a drawing shows at the current step. */
+type Show = { refs: boolean; refGuides: boolean; rays: boolean }
 
 const MARGIN = { left: 20, right: 36, top: 28, bottom: 36 }
 const PLANE_MARGIN = { left: 16, right: 52, top: 44, bottom: 28 }
@@ -122,7 +141,19 @@ type Screen = { x: number; y: number }
  * coordinates; what belongs to one view only (axes, rays, A+ and A-) crossfades. Both views are drawn, the hidden one
  * invisible. A new selection moves the lines. Nothing moves on first render or on resize.
  */
-export function TopsisGeometry({ problem, weights, axes, defaultView = 'distances', selected, onSelectedChange, format = defaultFormat, labels, className }: TopsisGeometryProps) {
+export function TopsisGeometry({
+  problem,
+  weights,
+  axes,
+  defaultView = 'distances',
+  selected,
+  onSelectedChange,
+  format = defaultFormat,
+  labels,
+  step,
+  explain = false,
+  className,
+}: TopsisGeometryProps) {
   const l = { ...TOPSIS_GEOMETRY_LABELS_EN, ...labels }
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
@@ -134,9 +165,17 @@ export function TopsisGeometry({ problem, weights, axes, defaultView = 'distance
   const [own, setOwn] = useState<number | null>(null)
   const [view, setView] = useState<TopsisGeometryView>(defaultView)
   const pointRefs = useRef<(SVGGElement | null)[]>([])
+  const stepping = step !== null && step !== undefined
+  const stage = stepping ? Math.min(Math.max(step, 0), TOPSIS_IDEA_STEPS - 1) : TOPSIS_IDEA_STEPS - 1
+  const stepView: TopsisGeometryView = stage < 3 ? 'criteria' : 'distances'
+  const shownView = stepping ? stepView : view
   useLayoutEffect(() => {
-    prevView.current = view
+    prevView.current = shownView
   })
+  // Leaving the steps keeps the view of the last step shown (Finish: the distance plane, as before).
+  useEffect(() => {
+    if (stepping) setView(stepView)
+  }, [stepping, stepView])
 
   const m = problem.alternatives.length
   const best = proj ? argMax(proj.closeness) : 0
@@ -171,7 +210,7 @@ export function TopsisGeometry({ problem, weights, axes, defaultView = 'distance
 
   const distanceCells = (i: number) => [format(proj.dPlus[i]!), format(proj.dMinus[i]!), format(proj.closeness[i]!)]
   const table: ChartTable =
-    view === 'distances'
+    shownView === 'distances'
       ? {
           corner: l.alternative,
           columns: [l.dPlus, l.dMinus, l.closeness],
@@ -194,18 +233,21 @@ export function TopsisGeometry({ problem, weights, axes, defaultView = 'distance
   // Both views share one height, the larger of the two, so switching never resizes the figure (the old view would
   // paint over the text below while it fades, and the readout would jump). The shorter view keeps its equal scale
   // and gets more room inside its axes: the data is centred in the criterion plane, the rays run on in the plane.
+  const show: Show = { refs: stage >= 1, refGuides: stepping && stage === 1, rays: stage >= 4 }
   const draw = (v: TopsisGeometryView, height = 0): Drawing =>
     v === 'distances'
-      ? planeDrawing(proj, w, l, uid, format, height)
-      : criteriaDrawing(proj, w, l, uid, xName, yName, dirName(ax, xName), dirName(ay, yName), height)
+      ? planeDrawing(proj, w, l, uid, format, height, show)
+      : criteriaDrawing(proj, w, l, uid, xName, yName, dirName(ax, xName), dirName(ay, yName), height, show)
   const natural = { distances: draw('distances'), criteria: draw('criteria') }
   const height = Math.max(natural.distances.height, natural.criteria.height)
   const drawings: Record<TopsisGeometryView, Drawing> = {
     distances: natural.distances.height < height ? draw('distances', height) : natural.distances,
     criteria: natural.criteria.height < height ? draw('criteria', height) : natural.criteria,
   }
-  const drawing = drawings[view]
-  const viewChanged = prevView.current !== view
+  const drawing = drawings[shownView]
+  const viewChanged = prevView.current !== shownView
+  // From step 2 on, the selected alternative is the one the story follows; before that every point is alike.
+  const selectOn = stage >= 2
   const pts = drawing.points
   const nameMax = Math.max(40, Math.min(120, (drawing.box.right - drawing.box.left) / 3))
   const shortNames = problem.alternatives.map((name) => truncate(name, nameMax, 12))
@@ -218,8 +260,8 @@ export function TopsisGeometry({ problem, weights, axes, defaultView = 'distance
     proj.closeness.map((_, i) => i).sort((a, b) => proj.closeness[b]! - proj.closeness[a]! || a - b),
   )
 
-  const caption = view === 'distances' ? l.planeCaption : l.caption
-  const note = view === 'criteria' && !proj.exact ? l.projectionNote : null
+  const caption = shownView === 'distances' ? l.planeCaption : l.caption
+  const note = shownView === 'criteria' && !proj.exact ? l.projectionNote : null
 
   return (
     <ChartFigure
@@ -235,15 +277,16 @@ export function TopsisGeometry({ problem, weights, axes, defaultView = 'distance
         aria-label={l.viewLabel}
         size="sm"
         className={s.viewSwitch}
-        value={view}
+        value={shownView}
         onValueChange={setView}
         options={[
-          { value: 'distances', label: l.viewDistances },
-          { value: 'criteria', label: l.viewCriteria },
+          { value: 'distances', label: l.viewDistances, disabled: stepping },
+          { value: 'criteria', label: l.viewCriteria, disabled: stepping },
         ]}
       />
       <svg
-        className={[s.svg, animate && s.animate, viewChanged && s.viewChange].filter(Boolean).join(' ')}
+        className={[s.svg, animate && s.animate, viewChanged && s.viewChange, explain && s.explain].filter(Boolean).join(' ')}
+        data-select-off={selectOn ? undefined : ''}
         width={width}
         height={height}
         viewBox={`0 0 ${width} ${height}`}
@@ -256,14 +299,19 @@ export function TopsisGeometry({ problem, weights, axes, defaultView = 'distance
           </marker>
         </defs>
         {VIEWS.map((v) => (
-          <g key={v} className={s.layer} data-view={v} data-hidden={v === view ? undefined : ''}>
+          <g key={v} className={s.layer} data-view={v} data-hidden={v === shownView ? undefined : ''}>
             {drawings[v].background}
           </g>
         ))}
-        <Distances ends={{ from: pts[current] ?? pts[0]!, ...drawing.distances(pts[current] ?? pts[0]!) }} dPlus={l.dPlus} dMinus={l.dMinus} />
+        <Distances
+          ends={{ from: pts[current] ?? pts[0]!, ...drawing.distances(pts[current] ?? pts[0]!) }}
+          dPlus={l.dPlus}
+          dMinus={l.dMinus}
+          off={!selectOn}
+        />
 
         {/* Alternatives: a radio group, one tab stop, arrows move the selection. */}
-        <g role="radiogroup" aria-label={l.select}>
+        <g role="radiogroup" aria-label={l.select} aria-disabled={stepping || undefined}>
           {pts.map((p, i) => {
             const on = i === current
             const name = problem.alternatives[i] ?? ''
@@ -280,13 +328,13 @@ export function TopsisGeometry({ problem, weights, axes, defaultView = 'distance
                 role="radio"
                 aria-checked={on}
                 aria-label={l.point(name, format(proj.closeness[i]!))}
-                tabIndex={on ? 0 : -1}
-                onClick={() => choose(i)}
-                onKeyDown={(e) => onKey(e, i)}
+                tabIndex={on && !stepping ? 0 : -1}
+                onClick={stepping ? undefined : () => choose(i)}
+                onKeyDown={stepping ? undefined : (e) => onKey(e, i)}
               >
                 <circle className={s.hit} r={14} />
                 <circle className={s.focusRing} r={10} />
-                <circle className={s.dot} r={on ? 6 : 5} />
+                <circle className={s.dot} r={on && selectOn ? 6 : 5} />
                 <text className={s.pointLabel} textAnchor={spot.anchor} style={{ transform: pointCss({ x: spot.x - p.x, y: spot.y - p.y }) }}>
                   {name !== short ? <title>{name}</title> : null}
                   {short}
@@ -296,7 +344,7 @@ export function TopsisGeometry({ problem, weights, axes, defaultView = 'distance
           })}
         </g>
       </svg>
-      <div className={s.readout} aria-live="polite">
+      <div className={`${s.readout} ${s.stageItem}`} data-off={selectOn ? undefined : ''} aria-live="polite">
         <span className={s.readoutName}>{problem.alternatives[current]}</span>
         <span>
           {l.dPlus} {format(proj.dPlus[current]!)}
@@ -308,7 +356,8 @@ export function TopsisGeometry({ problem, weights, axes, defaultView = 'distance
           {l.formula} = <b>{format(proj.closeness[current]!)}</b>
         </span>
       </div>
-      <p className={s.caption}>
+      {/* While stepping, the step's own sentence (IdeaSteps) says what the picture shows. */}
+      <p className={`${s.caption} ${s.stageItem}`} data-off={stepping ? '' : undefined}>
         {caption}
         {note ? (
           <>
@@ -348,10 +397,10 @@ type Drawing = {
  * D+), D- runs down to the D+ axis (its length is D-). Each starts at the dot and moves with it, so a view switch
  * turns the two distances into the two coordinates. Labels ride at the middle of their line.
  */
-function Distances({ ends, dPlus, dMinus }: { ends: { from: Screen; plus: Screen; minus: Screen }; dPlus: string; dMinus: string }) {
+function Distances({ ends, dPlus, dMinus, off }: { ends: { from: Screen; plus: Screen; minus: Screen }; dPlus: string; dMinus: string; off: boolean }) {
   const mid = (a: Screen, b: Screen) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 })
   return (
-    <g aria-hidden="true">
+    <g aria-hidden="true" className={s.stageItem} data-off={off ? '' : undefined}>
       <Segment className={s.dist} from={ends.from} to={ends.plus} data-dist="plus" />
       <Segment className={`${s.dist} ${s.distMinus}`} from={ends.from} to={ends.minus} data-dist="minus" />
       <text className={s.distLabel} x={0} y={0} dx={6} dy={-6} style={{ transform: pointCss(mid(ends.from, ends.plus)) }}>
@@ -373,6 +422,7 @@ function planeDrawing(
   uid: string,
   format: (v: number) => string,
   height: number,
+  show: Show,
 ): Drawing {
   const data = distancePoints(proj)
   const minPlotHeight = Math.max(160, height - PLANE_MARGIN.top - PLANE_MARGIN.bottom)
@@ -388,7 +438,7 @@ function planeDrawing(
     background: (
       <>
         {/* Rays of constant closeness through the origin. */}
-        <g aria-hidden="true">
+        <g aria-hidden="true" className={s.stageItem} data-off={show.rays ? undefined : ''}>
           {ISO_C_DEFAULT.map((c, k) => {
             const end = isoClosenessEnd(c, fit.xMax, fit.yMax)
             const e = P(end)
@@ -437,6 +487,7 @@ function criteriaDrawing(
   xLabel: string,
   yLabel: string,
   height: number,
+  show: Show,
 ): Drawing {
   const minPlotHeight = Math.max(120, height - MARGIN.top - MARGIN.bottom)
   const fit = fitPlot(proj, width, { margin: MARGIN, minPlotHeight, maxPlotHeight: 300 })
@@ -463,7 +514,13 @@ function criteriaDrawing(
           <title>{yName}</title>
           {truncate(yLabel, labelW, 12)}
         </text>
-        <g aria-hidden="true">
+        {/* Where A+ and A- come from: each value is the best (worst) alternative's on that criterion. */}
+        <g aria-hidden="true" className={s.stageItem} data-off={show.refGuides ? undefined : ''}>
+          {[proj.ideal, proj.antiIdeal].flatMap((ref, r) =>
+            referenceGuides(proj.points, ref).map((g, k) => <path key={`${r}-${k}`} className={s.refGuide} d={linePath(P(g.from), P(g.to))} />),
+          )}
+        </g>
+        <g aria-hidden="true" className={`${s.stageItem} ${s.refMarks}`} data-off={show.refs ? undefined : ''}>
           <path className={s.refMark} d={`M${ideal.x} ${ideal.y - 6}l6 6-6 6-6-6z`} />
           <text
             className={s.refLabel}
