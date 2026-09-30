@@ -2,14 +2,13 @@ import { ArrowCounterClockwise } from '@phosphor-icons/react'
 import { useCallback, useId, useMemo, useState, type CSSProperties, type KeyboardEvent } from 'react'
 import { reweight, sweepWeight } from '../../../core/robustness'
 import type { Problem, RankingMethod } from '../../../core/types'
-import { estimateTextWidth } from '../../../features/charts/layout'
 import { SweepChart } from '../../../features/charts/SweepChart'
 import { useElementWidth } from '../../../features/charts/useElementWidth'
 import { useNumberFormat } from '../../../i18n'
 import { Button, SegmentedControl, Select } from '../../../ui'
 import { useTranslation } from 'react-i18next'
 import { DECIMALS } from '../shared'
-import { largestWeight, rankOrder, snapWeight, stepWeight, switchMarks } from './helpers'
+import { largestWeight, rankOrder, segmentedWidth, snapWeight, stepWeight, switchMarks } from './helpers'
 import { LiveRanking } from './LiveRanking'
 import s from './robustness.module.css'
 import { SectionHead, SourcesDisclosure } from './SectionParts'
@@ -22,9 +21,6 @@ type Props = {
   names: string[]
   criteria: string[]
 }
-
-/** Width a segmented control of these labels needs (13 px text, 10 px padding a side, 1 px gaps). */
-const segmentedWidth = (labels: readonly string[]) => labels.reduce((w, l) => w + estimateTextWidth(l, 13) + 22, 0)
 
 /** Thumb of the range input (robustness.module.css --thumb): its centre runs from thumb/2 to width - thumb/2. */
 const THUMB = 16
@@ -138,7 +134,8 @@ export function SweepSection({ problem, weights, method, names, criteria }: Prop
             onPick={(v) => setWk(snapWeight(v))}
             text={{ yours: t('sweep.yours'), showTable: tw('workbench.chart.showTable'), alternative: tw('workbench.alternative') }}
             below={({ left, right }) => (
-              <div className={s.slider} style={{ marginLeft: left - THUMB / 2, width: right - left + THUMB } as CSSProperties}>
+              <div className="flex flex-col gap-1">
+                <div className={s.slider} style={{ marginLeft: left - THUMB / 2, width: right - left + THUMB } as CSSProperties}>
                   <input
                     id={sliderId}
                     type="range"
@@ -153,20 +150,21 @@ export function SweepSection({ problem, weights, method, names, criteria }: Prop
                     onKeyDown={onKey}
                   />
                   <span aria-hidden className={s.baseTick} style={{ left: `calc(${THUMB / 2}px + ${base} * (100% - ${THUMB}px))` }} />
+                </div>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                  <p className="text-14 text-text-2">
+                    {t('sweep.slider', { criterion })}{' '}
+                    <output htmlFor={sliderId} className="num font-semibold text-text" data-testid="sweep-weight">
+                      {nf.format(wk)}
+                    </output>
+                  </p>
+                  <Button size="sm" variant="ghost" icon={<ArrowCounterClockwise aria-hidden />} onClick={() => setWk(base)} disabled={wk === base}>
+                    {t('sweep.reset')}
+                  </Button>
+                </div>
               </div>
             )}
           />
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <p className="text-14 text-text-2">
-              {t('sweep.slider', { criterion })}{' '}
-              <output htmlFor={sliderId} className="num font-semibold text-text" data-testid="sweep-weight">
-                {nf.format(wk)}
-              </output>
-            </p>
-            <Button size="sm" variant="ghost" icon={<ArrowCounterClockwise aria-hidden />} onClick={() => setWk(base)} disabled={wk === base}>
-              {t('sweep.reset')}
-            </Button>
-          </div>
           <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 text-12 text-text-2" aria-hidden>
             <li className="inline-flex items-center gap-1.5">
               <span className={s.swatchTop} />

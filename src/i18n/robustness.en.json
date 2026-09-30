@@ -55,7 +55,7 @@
     "lead": "The ranking without each criterion in turn.",
     "mode": "Weights of the rest",
     "renormalize": "Rescale",
-    "recompute": "Recompute CRITIC",
+    "recompute": "Recompute {{method}}",
     "without": "Without",
     "firstPlace": "First place",
     "rho": "Spearman ρ",

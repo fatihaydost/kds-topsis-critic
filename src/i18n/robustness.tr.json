@@ -55,7 +55,7 @@
     "lead": "Her kriter sırayla çıkarıldığında sıralama.",
     "mode": "Kalan ağırlıklar",
     "renormalize": "Yeniden ölçekle",
-    "recompute": "CRITIC'i yeniden hesapla",
+    "recompute": "{{method}} yeniden hesapla",
     "without": "Çıkarılan",
     "firstPlace": "Birinci",
     "rho": "Spearman ρ",

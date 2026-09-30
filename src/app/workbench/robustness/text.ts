@@ -1,5 +1,5 @@
-import i18n from 'i18next'
 import { useTranslation } from 'react-i18next'
+import i18n from '../../../i18n'
 import en from '../../../i18n/robustness.en.json'
 import tr from '../../../i18n/robustness.tr.json'
 

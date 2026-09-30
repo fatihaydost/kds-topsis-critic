@@ -3,6 +3,7 @@
  * No DOM and no React, so they are unit tested (helpers.test.ts).
  */
 import type { Concentration, PerturbationRow, StableInterval } from '../../../core/robustness'
+import { estimateTextWidth } from '../../../features/charts/layout'
 import type { Lang } from '../../../i18n/lang'
 
 /** Monte Carlo settings shown in the UI (N and seed are printed next to the results). */
@@ -126,3 +127,6 @@ export function formatShare(p: number, lang: Lang, decimals = 0): string {
 export function formatDelta(delta: number, lang: Lang): string {
   return percent(lang, 0, true).format(delta)
 }
+
+/** Width a md segmented control of these labels needs (14 px text, 12 px padding a side, 1 px gaps and border). */
+export const segmentedWidth = (labels: readonly string[]): number => labels.reduce((w, l) => w + estimateTextWidth(l, 14) + 25, 2)
