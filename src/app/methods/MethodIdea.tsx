@@ -94,6 +94,7 @@ export function MethodIdea({ m }: { m: MethodContent }) {
             conflict: t('methods.page.idea.critic.conflict'),
             weight: t('methods.page.idea.critic.weight'),
             information: t('methods.page.idea.critic.information'),
+            weightHead: (total) => t('methods.page.idea.critic.weightHead', { total }),
             showTable: t('methods.page.idea.showTable'),
             criterion: t('methods.page.idea.criterion'),
           }}

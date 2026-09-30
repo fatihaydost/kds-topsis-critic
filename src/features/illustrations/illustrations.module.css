@@ -635,18 +635,24 @@
   transform-origin: 0 0;
 }
 
+.sigmaValue {
+  fill: var(--accent);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
 .sigma[data-emph] {
   stroke: var(--accent);
 }
 
-.explain .criticBar {
+.animate.explain .criticBar {
   transition:
     transform var(--dur-explain) var(--ease),
     fill var(--dur-explain) var(--ease),
     opacity var(--dur-explain) var(--ease);
 }
 
-.explain .criticBar[data-off] {
+.animate.explain .criticBar[data-off] {
   transition:
     transform var(--dur-explain) var(--ease),
     fill var(--dur-explain) var(--ease),

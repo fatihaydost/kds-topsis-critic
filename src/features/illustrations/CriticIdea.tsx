@@ -3,7 +3,7 @@ import type { Problem } from '../../core/types'
 import { ChartFigure, type ChartTable } from '../charts/ChartFigure'
 import { estimateTextWidth, truncate } from '../charts/layout'
 import { scaleLinear } from '../charts/scale'
-import { useElementWidth } from '../charts/useElementWidth'
+import { useAnimateValues, useElementWidth } from '../charts/useElementWidth'
 import { argMax, criticParts } from './geometry'
 import s from './illustrations.module.css'
 
@@ -15,8 +15,13 @@ export type CriticIdeaLabels = {
   contrast: string
   conflict: string
   weight: string
-  /** Table only: information C = σ × conflict. */
+  /** Information C = σ × conflict: in the table, and as the last column's head at the information step. */
   information: string
+  /**
+   * Optional head of the last column with the divisor, e.g. (9.4228) => "Weight = C / 9.4228"; default `weight`.
+   * The method page uses it, so the picture shows the normalization; used only when ΣC > 0.
+   */
+  weightHead?: ((total: string) => string) | undefined
   showTable: string
   /** Header of the first table column. */
   criterion: string
@@ -66,7 +71,8 @@ const defaultFormat = (v: number) => v.toFixed(4)
 
 /**
  * CRITIC in one picture, one row per criterion, read left to right:
- * contrast (the normalized values as dots on 0..1 with a ±σ bracket around their mean),
+ * contrast (the normalized values as dots on 0..1, and σ under them as a ruler from 0 on the same scale, so the
+ * rulers compare like the σ values do),
  * times conflict (Σ(1 − ρ) as a bar), gives the weight (a bar with its value).
  * Every number comes from the core's CRITIC steps.
  */
@@ -74,6 +80,8 @@ export function CriticIdea({ problem, highlight, format = defaultFormat, labels,
   const l = { ...CRITIC_IDEA_LABELS_EN, ...labels }
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
+  // Resizing redraws at once, also while stepping (the bars only move on a step change).
+  const animate = useAnimateValues(width)
   const parts = useMemo(() => criticParts(problem), [problem])
   if (!parts) return null
 
@@ -84,12 +92,17 @@ export function CriticIdea({ problem, highlight, format = defaultFormat, labels,
   const stepping = step !== null && step !== undefined
   const stage = stepping ? Math.min(Math.max(step, 0), CRITIC_IDEA_STEPS - 1) : CRITIC_IDEA_STEPS - 1
   const off = (from: number) => (stage >= from ? undefined : '')
+  const only = (at: number) => (stepping && stage === at ? undefined : '')
+  // The method page can step (step is null or a number there); only then do the information texts need room.
+  const steppable = step !== undefined
+  const total = parts.information.reduce((a, b) => a + b, 0)
+  const weightHead = l.weightHead && total > 0 ? l.weightHead(format(total)) : l.weight
 
   // Columns: name | strip | × | conflict | → | weight + value.
   const W = Math.max(width, 280)
   const nameW = Math.ceil(Math.min(Math.max(...problem.criteria.map((c) => estimateTextWidth(c.name, 13))) + 12, W * 0.26, 140))
   // Wide enough for the information values too, which the last column shows at step 2.
-  const valueW = Math.ceil(Math.max(...[...weightTexts, ...informationTexts].map((t) => estimateTextWidth(t, 13))) + 8)
+  const valueW = Math.ceil(Math.max(...[...weightTexts, ...(steppable ? informationTexts : [])].map((t) => estimateTextWidth(t, 13))) + 8)
   const free = Math.max(120, W - nameW - valueW - OP * 2)
   const stripW = free * 0.42
   const conflictW = free * 0.24
@@ -117,17 +130,26 @@ export function CriticIdea({ problem, highlight, format = defaultFormat, labels,
     if (k < 0) return [truncate(text, w, 12)]
     return [truncate(text.slice(0, k), w, 12), truncate(text.slice(k + 1), w, 12)]
   }
+  // The last column's head is "Information C" at the information step and the weight head otherwise; the two
+  // cross-fade (the weight one in the second phase).
   const heads = [
-    { key: 'contrast', text: l.contrast, x: x0 + pad, w: stripW - pad, from: 0 },
-    { key: 'conflict', text: l.conflict, x: x1, w: conflictW + OP - 4, from: 1 },
-    { key: 'weight', text: stage === 2 ? l.information : l.weight, x: x2, w: weightW + valueW, from: 2 },
+    { key: 'contrast', text: l.contrast, x: x0 + pad, w: stripW - pad, off: off(0), value: false },
+    { key: 'conflict', text: l.conflict, x: x1, w: conflictW + OP - 4, off: off(1), value: false },
+    ...(steppable ? [{ key: 'information', text: l.information, x: x2, w: weightW + valueW, off: only(2), value: true }] : []),
+    { key: 'weight', text: weightHead, x: x2, w: weightW + valueW, off: off(3), value: true },
   ].map((h) => ({ ...h, lines: headLines(h.text, h.w) }))
-  // The head height does not depend on the step: "Information C" may break where "Weight" does not.
-  const HEAD = Math.max(...heads.map((h) => h.lines.length), headLines(l.information, weightW + valueW).length) > 1 ? HEAD_2 : HEAD_1
+  // The head height does not depend on the step.
+  const HEAD = Math.max(...heads.map((h) => h.lines.length)) > 1 ? HEAD_2 : HEAD_1
   const height = HEAD + n * ROW
 
   const head = (h: (typeof heads)[number]) => (
-    <text key={h.key} className={`${s.colHead} ${s.stageItem}`} data-off={off(h.from)} x={h.x} y={HEAD - 10 - (h.lines.length - 1) * 14}>
+    <text
+      key={h.key}
+      className={`${s.colHead} ${s.stageItem}${h.value ? ` ${s.criticValue}` : ''}`}
+      data-off={h.off}
+      x={h.x}
+      y={HEAD - 10 - (h.lines.length - 1) * 14}
+    >
       {h.lines.join(' ') !== h.text ? <title>{h.text}</title> : null}
       {h.lines.map((line, i) => (
         <tspan key={i} x={h.x} dy={i === 0 ? 0 : 14}>
@@ -148,7 +170,7 @@ export function CriticIdea({ problem, highlight, format = defaultFormat, labels,
       className={className}
     >
       <svg
-        className={explain ? `${s.svg} ${s.explain}` : s.svg}
+        className={[s.svg, animate && s.animate, explain && s.explain].filter(Boolean).join(' ')}
         width={W}
         height={height}
         viewBox={`0 0 ${W} ${height}`}
@@ -163,8 +185,10 @@ export function CriticIdea({ problem, highlight, format = defaultFormat, labels,
           const col = parts.normalized.map((row) => row[j]!)
           const mean = col.reduce((a, b) => a + b, 0) / col.length
           const sg = parts.sigma[j]!
-          const lo = strip(Math.max(0, mean - sg))
-          const hiX = strip(Math.min(1, mean + sg))
+          // σ as a ruler from 0, on the strip's scale: its true length (a sample SD of values in 0..1 is at most
+          // about 0.71), comparable from row to row. Not mean ± σ, which the 0..1 strip would have to cut off.
+          const lo = strip(0)
+          const hiX = strip(sg)
           const cw = (parts.conflict[j]! / maxConflict) * conflictW
           const ww = (parts.weights[j]! / maxWeight) * weightW
           const on = j === hi && stage === 3
@@ -175,7 +199,7 @@ export function CriticIdea({ problem, highlight, format = defaultFormat, labels,
                 {short !== c.name ? <title>{c.name}</title> : null}
                 {short}
               </text>
-              {/* Contrast: the column's normalized values, and mean ± σ below them. */}
+              {/* Contrast: the column's normalized values, and σ below them as a ruler from 0. */}
               <line className={s.stripBase} x1={strip(0)} x2={strip(1)} y1={y - 3} y2={y - 3} />
               {col.map((v, i) => (
                 <circle key={i} className={s.stripDot} cx={strip(v)} cy={y - 3} r={3.5} />
@@ -183,8 +207,13 @@ export function CriticIdea({ problem, highlight, format = defaultFormat, labels,
               <path
                 className={s.sigma}
                 data-emph={stepping && stage === 0 ? '' : undefined}
+                data-sigma={sg}
                 d={`M${lo} ${y + 7}H${hiX}M${lo} ${y + 4.5}v5M${hiX} ${y + 4.5}v5`}
               />
+              {/* σ's value, only at the contrast step, so the comparison can be read off the picture. */}
+              <text className={`${s.sigmaValue} ${s.stageItem}`} data-off={only(0)} x={hiX + 5} y={y + 7} dominantBaseline="central">
+                {format(sg)}
+              </text>
               {/* × */}
               <path className={`${s.op} ${s.stageItem}`} data-off={off(1)} d={`M${x1 - OP / 2 - 3} ${y - 3}l6 6m0 -6l-6 6`} />
               {/* Conflict. */}
@@ -203,8 +232,21 @@ export function CriticIdea({ problem, highlight, format = defaultFormat, labels,
                   transform: stage >= 2 ? `translate(${x2}px, ${y - 7}px) scale(${Math.max(ww, 1)}, 14)` : `translate(${x1}px, ${y - 5}px) scale(${Math.max(cw, 1)}, 10)`,
                 }}
               />
-              <text className={`${s.barValue} ${s.stageItem} ${s.criticValue}`} data-off={off(2)} data-highlight={on || undefined} x={x2 + ww + 6} y={y} dominantBaseline="central">
-                {stage === 2 ? informationTexts[j] : weightTexts[j]}
+              {/* Information C at step 2, the weight after it: two texts that cross-fade, not one that swaps. */}
+              {steppable ? (
+                <text className={`${s.barValue} ${s.stageItem} ${s.criticValue}`} data-off={only(2)} x={x2 + ww + 6} y={y} dominantBaseline="central">
+                  {informationTexts[j]}
+                </text>
+              ) : null}
+              <text
+                className={`${s.barValue} ${s.stageItem} ${s.criticValue}`}
+                data-off={off(3)}
+                data-highlight={on || undefined}
+                x={x2 + ww + 6}
+                y={y}
+                dominantBaseline="central"
+              >
+                {weightTexts[j]}
               </text>
               {j < n - 1 ? <line className={s.rowRule} x1={0} x2={W} y1={y + ROW / 2 - 0.5} y2={y + ROW / 2 - 0.5} /> : null}
             </g>
