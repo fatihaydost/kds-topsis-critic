@@ -66,19 +66,20 @@ export function IdeaSteps({ control, sentences, labels, className }: { control: 
     wasOn.current = on
   }, [on])
 
-  // The live region stays in the DOM (empty outside the mode), so the first sentence is announced too.
-  const sentence = (
-    <p aria-live="polite" className={on ? 'max-w-[65ch] text-14 text-text' : 'sr-only'}>
+  // The live region stays in the DOM (empty outside the mode; the keys keep it the same node in both layouts), so the
+  // first sentence is announced too. It holds only the current sentence; the visible ones below are aria-hidden.
+  const live = (
+    <p key="live" aria-live="polite" className="sr-only">
       {on ? sentences[step] : ''}
     </p>
   )
   if (!on) {
     return (
       <div className={className}>
-        <Button ref={startRef} size="sm" onClick={control.start}>
+        <Button key="start" ref={startRef} size="sm" onClick={control.start}>
           {labels.start}
         </Button>
-        {sentence}
+        {live}
       </div>
     )
   }
@@ -93,7 +94,7 @@ export function IdeaSteps({ control, sentences, labels, className }: { control: 
   }
   return (
     <div className={cn('flex flex-col gap-2', className)}>
-      <div role="group" aria-label={labels.group} onKeyDown={onKeyDown} className="flex flex-wrap items-center gap-2">
+      <div key="group" role="group" aria-label={labels.group} onKeyDown={onKeyDown} className="flex flex-wrap items-center gap-2">
         {/* aria-disabled, not disabled: a disabled button would drop the focus that just pressed it. */}
         <Button size="sm" aria-disabled={step === 0} onClick={() => step > 0 && control.back()} className="aria-disabled:opacity-50">
           {labels.back}
@@ -114,7 +115,16 @@ export function IdeaSteps({ control, sentences, labels, className }: { control: 
         </Button>
         <IconButton size="sm" aria-label={labels.close} icon={<X />} onClick={control.close} className="ml-auto" />
       </div>
-      {sentence}
+      {/* Every sentence in one grid cell, only the current one visible: the cell is as tall as the longest at any
+          width and in any language, so the text below never jumps between steps. */}
+      <div key="sentences" aria-hidden className="grid max-w-[65ch] text-14 text-text" data-step-sentences="">
+        {sentences.map((text, k) => (
+          <p key={k} className={cn('[grid-area:1/1]', k !== step && 'invisible')} data-current={k === step || undefined}>
+            {text}
+          </p>
+        ))}
+      </div>
+      {live}
     </div>
   )
 }

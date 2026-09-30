@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
+import { useCallback, useId, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import type { Problem } from '../../core/types'
 import { SegmentedControl } from '../../ui/SegmentedControl'
 import { ChartFigure, type ChartTable } from '../charts/ChartFigure'
@@ -172,10 +172,15 @@ export function TopsisGeometry({
   useLayoutEffect(() => {
     prevView.current = shownView
   })
-  // Leaving the steps keeps the view of the last step shown (Finish: the distance plane, as before).
-  useEffect(() => {
-    if (stepping) setView(stepView)
-  }, [stepping, stepView])
+  // The steps drive the view without touching the reader's own (`view`). Leaving from the last step (Finish) keeps
+  // the distance plane it shows; closing earlier goes back to the view the reader had. Derived in render, so the
+  // frame that ends the steps already shows the right view.
+  const [lastStage, setLastStage] = useState<number | null>(null)
+  if (stepping && lastStage !== stage) setLastStage(stage)
+  if (!stepping && lastStage !== null) {
+    setLastStage(null)
+    if (lastStage === TOPSIS_IDEA_STEPS - 1) setView('distances')
+  }
 
   const m = problem.alternatives.length
   const best = proj ? argMax(proj.closeness) : 0
@@ -356,9 +361,12 @@ export function TopsisGeometry({
           {l.formula} = <b>{format(proj.closeness[current]!)}</b>
         </span>
       </div>
-      {/* While stepping, the step's own sentence (IdeaSteps) says what the picture shows. */}
-      <p className={`${s.caption} ${s.stageItem}`} data-off={stepping ? '' : undefined}>
-        {caption}
+      {/* While stepping, the step's own sentence (IdeaSteps) says what the picture shows; the projection note stays,
+          since the drawn lines are then not the real D+ and D-. */}
+      <p className={s.caption}>
+        <span className={s.stageItem} data-off={stepping ? '' : undefined}>
+          {caption}
+        </span>
         {note ? (
           <>
             {' '}
