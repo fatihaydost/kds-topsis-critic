@@ -44,8 +44,13 @@
 
   --radius-control: 2px;
   --radius-float: 4px;
+  /* Motion (docs/design/MOTION.md): every duration is a token, all 0ms under reduced motion. */
   --ease: cubic-bezier(0.2, 0, 0, 1);
+  --ease-exit: cubic-bezier(0.3, 0, 1, 1);
+  --dur-fast: 100ms;
   --dur: 150ms;
+  --dur-slow: 200ms;
+  --dur-data: 320ms;
 }
 
 :root[data-theme='dark'] {
@@ -108,6 +113,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   :root {
+    --dur-fast: 0ms;
     --dur: 0ms;
+    --dur-slow: 0ms;
+    --dur-data: 0ms;
   }
 }

@@ -54,8 +54,21 @@ function NotFoundMethod({ id }: { id: string }) {
   )
 }
 
-// KaTeX (about 260 kB of script and 30 kB of CSS) loads when the first step is opened, not with the page.
-const Formula = lazy(() => import('../../ui/Formula').then((m) => ({ default: m.Formula })))
+// KaTeX (about 260 kB of script and 30 kB of CSS) loads when the first step is opened, not with the page. Pointing at
+// or focusing the list starts the download early; once loaded, lazy() gets a thenable that resolves synchronously
+// (as in App.tsx), so the step renders its formula in the same commit instead of a placeholder that React reveals
+// 300 ms later. The disclosure then grows once, to its real height, instead of opening and jumping (MOTION.md).
+type FormulaModule = typeof import('../../ui/Formula')
+let formulaModule: FormulaModule | undefined
+const loadFormula = (): Promise<FormulaModule> => import('../../ui/Formula').then((m) => (formulaModule = m))
+const Formula = lazy(() =>
+  formulaModule
+    ? ({ then: (resolve: (m: { default: FormulaModule['Formula'] }) => void) => resolve({ default: formulaModule!.Formula }) } as unknown as Promise<{
+        default: FormulaModule['Formula']
+      }>)
+    : loadFormula().then((m) => ({ default: m.Formula })),
+)
+const preloadFormula = () => void loadFormula().catch(() => {})
 
 /** `/methods/:id`: one method, picture and short summary first, details behind disclosures. */
 export default function MethodPage({ id }: { id: string }) {
@@ -72,7 +85,7 @@ function AlgorithmStep({ n, step }: { n: number; step: { title: string; tex: str
         <span className="text-16 font-medium text-text">{step.title}</span>
         <CaretRight
           aria-hidden
-          className="mr-2 size-4 text-text-2 group-open:rotate-90 motion-safe:transition-transform motion-safe:duration-150"
+          className="mr-2 size-4 text-text-2 transition-transform duration-(--dur-slow) group-open:rotate-90"
         />
       </summary>
       <div className="flex flex-col gap-2 pb-4 pl-[40px]">
@@ -154,7 +167,7 @@ function MethodArticle({ m }: { m: MethodContent }) {
             </Section>
 
             <Section id="algorithm" title={sectionTitle('algorithm')}>
-              <ol className="flex flex-col border-t border-line">
+              <ol className="flex flex-col border-t border-line" onPointerEnter={preloadFormula} onFocus={preloadFormula}>
                 {l.steps.map((s, i) => (
                   <li key={i} className="border-b border-line">
                     <AlgorithmStep n={i + 1} step={s} />

@@ -87,15 +87,48 @@
   --default-transition-duration: var(--dur);
   --default-transition-timing-function: var(--ease);
 
-  /* Motion only for state change (a panel opened). --dur is 0 under prefers-reduced-motion. */
+  /*
+   * Motion only for state change (docs/design/MOTION.md). Floating layers only: they are never open on first paint,
+   * so no keyframe runs on mount. Every duration is a token and 0ms under prefers-reduced-motion; Radix waits for the
+   * `*-out` animation before it unmounts a closing layer.
+   */
   --animate-*: initial;
   --animate-fade-in: kds-fade-in var(--dur) var(--ease);
+  --animate-fade-out: kds-fade-out var(--dur-fast) var(--ease-exit) forwards;
+  --animate-float-in: kds-float-in var(--dur) var(--ease);
+  --animate-float-out: kds-float-out var(--dur-fast) var(--ease-exit) forwards;
+  --animate-sheet-in: kds-sheet-in var(--dur-slow) var(--ease);
+  --animate-sheet-out: kds-sheet-out var(--dur-fast) var(--ease-exit) forwards;
   @keyframes kds-fade-in {
     from {
       opacity: 0;
     }
+  }
+  @keyframes kds-fade-out {
     to {
-      opacity: 1;
+      opacity: 0;
+    }
+  }
+  @keyframes kds-float-in {
+    from {
+      opacity: 0;
+      transform: scale(0.98);
+    }
+  }
+  @keyframes kds-float-out {
+    to {
+      opacity: 0;
+      transform: scale(0.98);
+    }
+  }
+  @keyframes kds-sheet-in {
+    from {
+      transform: translateY(100%);
+    }
+  }
+  @keyframes kds-sheet-out {
+    to {
+      transform: translateY(100%);
     }
   }
 }
@@ -135,6 +168,13 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* A theme change lands in one frame: state/theme.ts sets this attribute for two frames around the switch. */
+  [data-theme-switching] *,
+  [data-theme-switching] *::before,
+  [data-theme-switching] *::after {
+    transition: none !important;
+  }
+
   ::selection {
     background: var(--accent-bg);
     color: var(--text);
@@ -161,4 +201,31 @@
 /* Left-aligned display formulas start at the text edge, not 2em in. */
 .katex-display.fleqn > span.katex {
   padding-left: 0;
+}
+
+/*
+ * Disclosures: every <details> opens and closes in --dur-slow (height and opacity) where the browser can animate to
+ * `auto` (interpolate-size and ::details-content, Chromium 131+); elsewhere it opens at once. The clip margin keeps
+ * focus rings inside the content visible.
+ */
+@supports (interpolate-size: allow-keywords) and selector(::details-content) {
+  details {
+    interpolate-size: allow-keywords;
+  }
+
+  details::details-content {
+    block-size: 0;
+    opacity: 0;
+    overflow: clip;
+    overflow-clip-margin: 4px;
+    transition:
+      block-size var(--dur-slow) var(--ease),
+      opacity var(--dur-slow) var(--ease),
+      content-visibility var(--dur-slow) allow-discrete;
+  }
+
+  details[open]::details-content {
+    block-size: auto;
+    opacity: 1;
+  }
 }

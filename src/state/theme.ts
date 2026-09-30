@@ -20,10 +20,37 @@ function readMode(): ThemeMode {
 let mode: ThemeMode = typeof window === 'undefined' ? 'system' : readMode()
 const listeners = new Set<() => void>()
 
-function apply(m: ThemeMode): void {
+let settle = 0
+
+/**
+ * Runs a theme change with every CSS transition suspended (app.css, `[data-theme-switching]`), so the whole page
+ * changes in one frame instead of a patchwork of 150 ms colour transitions. Transitions come back two frames later,
+ * after the new colours have been painted.
+ */
+function withoutTransitions(change: () => void): void {
   const root = document.documentElement
-  if (m === 'system') root.removeAttribute('data-theme')
-  else root.setAttribute('data-theme', m)
+  root.setAttribute('data-theme-switching', '')
+  change()
+  cancelAnimationFrame(settle)
+  settle = requestAnimationFrame(() => {
+    settle = requestAnimationFrame(() => root.removeAttribute('data-theme-switching'))
+  })
+}
+
+function apply(m: ThemeMode): void {
+  withoutTransitions(() => {
+    const root = document.documentElement
+    if (m === 'system') root.removeAttribute('data-theme')
+    else root.setAttribute('data-theme', m)
+  })
+}
+
+// 'system' follows prefers-color-scheme in CSS; when the system scheme changes, that switch lands in one frame too.
+// Media query listeners run before the style update of the same frame, so the attribute is in place in time.
+if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (mode === 'system') withoutTransitions(() => {})
+  })
 }
 
 export function setThemeMode(next: ThemeMode): void {

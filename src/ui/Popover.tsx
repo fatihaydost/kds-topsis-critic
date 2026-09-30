@@ -26,7 +26,8 @@ export function PopoverContent({
         collisionPadding={collisionPadding}
         className={cn(
           'z-50 w-72 max-w-[calc(100vw-16px)] rounded-float border border-line bg-surface p-3 text-14 text-text shadow-float',
-          'data-[state=open]:animate-fade-in',
+          // Grows out of the trigger's side (Radix sets the origin), leaves faster than it came.
+          'origin-(--radix-popover-content-transform-origin) data-[state=open]:animate-float-in data-[state=closed]:animate-float-out',
           className,
         )}
         {...rest}

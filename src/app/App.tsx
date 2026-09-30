@@ -1,6 +1,6 @@
-import { lazy, Suspense, useLayoutEffect, type ComponentType } from 'react'
+import { lazy, Suspense, useLayoutEffect, useRef, type ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Route, Router, Switch } from 'wouter'
+import { Route, Router, Switch, useLocation } from 'wouter'
 import { TooltipProvider } from '../ui'
 import { NotFound } from './routes/NotFound'
 import { Workbench } from './routes/Workbench'
@@ -64,6 +64,31 @@ function PageFallback() {
   return <div aria-busy="true" className="min-h-[calc(100dvh-60px)]" />
 }
 
+// Back and forward leave the scroll position to the browser; only a link or a pushed route starts at the top.
+let poppedTo: string | null = null
+if (typeof window !== 'undefined') window.addEventListener('popstate', () => (poppedTo = window.location.pathname))
+
+/**
+ * A new page starts at the top (or at its #hash target), as a document load would; wouter keeps the old scroll
+ * position. Not on the first load, not when only the query or hash changes, not on back/forward.
+ */
+function ScrollToTopOnNavigate() {
+  const [path] = useLocation()
+  const prev = useRef(path)
+  useLayoutEffect(() => {
+    if (prev.current === path) return
+    prev.current = path
+    const popped = poppedTo === window.location.pathname
+    poppedTo = null
+    if (popped) return
+    const id = decodeURIComponent(window.location.hash.slice(1))
+    const target = id ? document.getElementById(id) : null
+    if (target) target.scrollIntoView()
+    else window.scrollTo(0, 0)
+  }, [path])
+  return null
+}
+
 /** `ssrPath` only for the build-time prerender (src/app/prerender.tsx). */
 export function App({ ssrPath }: { ssrPath?: string | undefined } = {}) {
   const { t, i18n } = useTranslation()
@@ -81,6 +106,7 @@ export function App({ ssrPath }: { ssrPath?: string | undefined } = {}) {
   return (
     <TooltipProvider>
       <Router base={ROUTER_BASE} {...(ssrPath !== undefined && { ssrPath })}>
+        <ScrollToTopOnNavigate />
         <div className="flex min-h-dvh flex-col">
           <TopBar />
           <Switch>

@@ -26,7 +26,7 @@ export function DropdownMenuContent({
         collisionPadding={collisionPadding}
         className={cn(
           'z-50 min-w-44 rounded-float border border-line bg-surface p-1 text-14 text-text shadow-float',
-          'data-[state=open]:animate-fade-in',
+          'origin-(--radix-dropdown-menu-content-transform-origin) data-[state=open]:animate-float-in data-[state=closed]:animate-float-out',
           className,
         )}
         {...rest}

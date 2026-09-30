@@ -43,15 +43,16 @@ export function DialogContent({ title, description, footer, width = 'md', placem
   const sheet = placement === 'sheet'
   return (
     <RadixDialog.Portal>
-      <RadixDialog.Overlay className="fixed inset-0 z-40 bg-overlay data-[state=open]:animate-fade-in" />
+      {/* Motion (MOTION.md): the scrim fades; the dialog fades in from 98% scale, the sheet slides up; both leave faster. */}
+      <RadixDialog.Overlay className="fixed inset-0 z-40 bg-overlay data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out" />
       <RadixDialog.Content
         id={id}
         className={cn(
           sheet
-            ? 'fixed inset-x-0 bottom-0 z-50 flex max-h-[70dvh] w-full flex-col border-t border-line bg-surface shadow-float data-[state=open]:animate-fade-in'
+            ? 'fixed inset-x-0 bottom-0 z-50 flex max-h-[70dvh] w-full flex-col border-t border-line bg-surface shadow-float data-[state=open]:animate-sheet-in data-[state=closed]:animate-sheet-out'
             : cn(
                 'fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100dvh-32px)] w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 flex-col',
-                'rounded-float border border-line bg-surface shadow-float data-[state=open]:animate-fade-in',
+                'rounded-float border border-line bg-surface shadow-float data-[state=open]:animate-float-in data-[state=closed]:animate-float-out',
                 widths[width],
               ),
           className,
