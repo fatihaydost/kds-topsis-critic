@@ -188,6 +188,8 @@ test('download the full calculation as .xlsx', async ({ page }) => {
 
 test('the whole flow works with the keyboard alone', async ({ page }) => {
   await page.goto('/app')
+  // Tab once the workbench is on screen: before its chunk arrives there is nothing to reach but the top bar.
+  await expect(page.getByRole('button', { name: 'Load example', exact: true }).first()).toBeVisible()
   await tabTo(page, /^Load example$/)
   await page.keyboard.press('Enter')
   await expect(page.getByRole('grid', { name: 'Decision matrix' })).toBeVisible()

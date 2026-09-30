@@ -258,7 +258,7 @@ const krishnan = async () => {
   const problem = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
   const w = critic.compute(problem, {}).weights
   const k = largestWeight(w)
-  return { k, order: (wk: number) => rankOrder(topsis.compute(problem, reweight(w, k, wk), {}).ranking).map((i) => ex.alternatives[i]!) }
+  return { k, base: w[k]!, order: (wk: number) => rankOrder(topsis.compute(problem, reweight(w, k, wk), {}).ranking).map((i) => ex.alternatives[i]!) }
 }
 
 /** Records Web Animations started on live-table rows and every row that took the "moved" tint. */
@@ -291,6 +291,8 @@ test('robustness: a new order slides the rows (FLIP), tints them, and ends in th
   await recordRows(page)
   await page.goto('/app?example=krishnan-2021-smartphones&stage=robustness')
   await expect(page.getByTestId('live-row')).toHaveCount(5)
+  // The sweep comes from a worker: wait for its cursor.
+  await expect(page.locator('svg[data-sweep] [data-cursor]')).toHaveCount(1)
   // The stage opens without motion: nothing runs on its first render.
   await settled(page)
   expect((await rowLog(page)).slides).toEqual([])
@@ -305,6 +307,22 @@ test('robustness: a new order slides the rows (FLIP), tints them, and ends in th
   // Every row back in its own place: no transform left behind.
   const offsets = await page.getByTestId('live-row').evaluateAll((els) => els.map((el) => getComputedStyle(el).transform))
   expect(new Set(offsets)).toEqual(new Set(['none']))
+})
+
+test('robustness: a held-down arrow key re-ranks without sliding (high-frequency keyboard), the tint stays', async ({ page }) => {
+  const { base, order } = await krishnan()
+  await recordRows(page)
+  await page.goto('/app?example=krishnan-2021-smartphones&stage=robustness')
+  await expect(page.getByTestId('live-row')).toHaveCount(5)
+  await page.getByRole('slider').focus()
+  // One keydown, then repeats (Playwright sets KeyboardEvent.repeat for a key pressed again without release).
+  for (let n = 0; n < 40; n++) await page.keyboard.down('ArrowRight')
+  await page.keyboard.up('ArrowRight')
+  const wk = Number(await page.getByTestId('sweep-weight').innerText())
+  expect(order(wk)).not.toEqual(order(base))
+  await expect.poll(async () => (await rowLog(page)).tinted.length).toBeGreaterThan(0)
+  expect((await rowLog(page)).slides).toEqual([])
+  expect(await liveOrder(page)).toEqual(order(wk))
 })
 
 test.describe('robustness with reduced motion', () => {

@@ -90,6 +90,24 @@ test('another criterion: the sentence gives the core\'s stability interval, the 
   await expect.poll(() => liveOrder(page)).toEqual(coreOrder(largestWeight(weights), wk))
 })
 
+test('a criterion with weight 0 is not perturbed: n/a, left out of the count, with a note', async ({ page }) => {
+  await page.goto('/app?example=krishnan-2021-smartphones&stage=weights')
+  await page.getByRole('radio', { name: 'Manual' }).click()
+  const manual = [0, 0.25, 0.25, 0.25, 0.25]
+  for (const [j, v] of manual.entries()) {
+    await page.locator(`#wb-weight-${j}`).fill(String(v))
+    await page.locator(`#wb-weight-${j}`).blur()
+  }
+  await expect(page.getByText('Weights sum to 1.')).toBeVisible()
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Robustness' }).click()
+  const rows = perturbWeights(problem, manual, topsis).filter((r) => r.k !== 0)
+  await expect(page.getByTestId('perturb-summary')).toHaveText(
+    `First place holds in ${rows.filter((r) => r.sameTop).length} of ${rows.length} changes.`,
+  )
+  await expect(page.locator('[data-testid="perturb-cell"][data-na]')).toHaveCount(6)
+  await expect(page.getByText('Criteria with weight 0 are left out: a percentage of 0 is still 0.')).toBeVisible()
+})
+
 test('small changes: the grid and the summary match perturbWeights', async ({ page }) => {
   await open(page)
   const rows = perturbWeights(problem, weights, topsis)
@@ -162,6 +180,9 @@ test('Results leads here by keyboard, and the rail says how often first place ho
   await page.keyboard.press('Enter')
   await expect(page.getByRole('heading', { level: 1, name: 'Robustness' })).toBeVisible()
   await expect(page.locator('#main')).toBeFocused({ timeout: 10_000 })
+  // The stage opens with its content (goTo waits for the chunk): no placeholder to tab past.
+  await expect(page.getByRole('slider')).toBeVisible()
+  await expect(page.getByRole('status', { name: 'Loading the robustness checks' })).toHaveCount(0)
   // Tab reaches the criterion choice, then the slider, which moves with the arrow keys.
   const k = largestWeight(weights)
   for (let n = 0; n < 30; n++) {
@@ -190,6 +211,17 @@ test('Turkish: texts and numbers in Turkish', async ({ page }) => {
   await expect(page.getByTestId('mc-result')).toHaveAttribute('aria-busy', 'false', { timeout: 20_000 })
   await expect(page.getByTestId('mc-same-top')).toContainText('%')
   await expect(page.getByTestId('sweep-weight')).toHaveText(f4(weights[largestWeight(weights)]!).replace('.', ','))
+})
+
+test('390 px: the change grid fits the screen and lists what changed under it', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await open(page)
+  const grid = page.locator('[role="img"][data-compact]')
+  await expect(grid).toBeVisible()
+  const fits = await grid.evaluate((el) => el.scrollWidth <= el.parentElement!.clientWidth)
+  expect(fits).toBe(true)
+  const changed = perturbWeights(problem, weights, topsis).filter((r) => !r.sameTop)
+  await expect(page.getByTestId('perturb-changes').locator('li')).toHaveCount(changed.length)
 })
 
 for (const width of [390, 1440]) {
