@@ -8,14 +8,17 @@
     "yours": "sizin ağırlığınız",
     "chartTitle": "{{criterion}} ağırlığı değiştikçe yakınlık katsayısı C",
     "axis": "{{criterion}} ağırlığı",
-    "legendTop": "{{name}} birinci",
-    "legendRanking": "Tüm sıralama aynı",
+    "legendTop": "{{name}} birinci kaldığı aralık",
+    "legendRanking": "Tüm sıralamanın aynı kaldığı aralık",
     "legendSwitch": "Sıra değişiyor",
     "tableTitle": "Bu ağırlıktaki sıralama",
     "holds": "{{criterion}} ağırlığı {{from}} ile {{to}} arasında kaldıkça {{name}} birinci kalır; sizin ağırlığınız {{base}}.",
     "holdsAll": "{{criterion}} ağırlığı 0 ile 1 arasında ne olursa olsun {{name}} birinci kalır.",
     "leader": "Bu ağırlıkta birinci {{name}}.",
-    "weightColumn": "Ağırlık"
+    "legendLeader": "Bu ağırlıkta birinci",
+    "tableCorner": "Alternatif, {{criterion}} ağırlığına göre",
+    "tied": "Sizin ağırlığınızda {{names}} birinciliği paylaşıyor.",
+    "computing": "Hesaplanıyor"
   },
   "perturb": {
     "title": "Her ağırlığı biraz oynatın",
@@ -26,11 +29,14 @@
     "changed": "Birinci {{name}}",
     "change": "Değişim",
     "firstPlace": "Birinci",
-    "ws": "WS"
+    "ws": "WS",
+    "na": "yok",
+    "zeroNote": "Ağırlığı 0 olan kriterler sayılmaz: 0'ın yüzdesi yine 0'dır.",
+    "changedAt": "{{criterion}} {{delta}}: birinci {{name}}"
   },
   "monteCarlo": {
     "title": "Rastgele ağırlıklar",
-    "lead": "{{n}} rastgele ağırlık vektörü: her seçenek hangi sıraya ne sıklıkla yerleşiyor?",
+    "lead": "{{n}} rastgele ağırlık vektörü: her alternatif hangi sıraya ne sıklıkla yerleşiyor?",
     "spread": "Çekilen ağırlıklar",
     "uniform": "Düzgün",
     "loose": "Gevşek, κ = 20",
@@ -69,7 +75,9 @@
     "loading": "Formüller yükleniyor",
     "sweep": "Diğer ağırlıklar toplam 1 kalacak biçimde yeniden ölçeklenir. Birinci yerin (ya da tüm sıralamanın) değişmediği w_k aralığı ağırlık kararlılık aralığıdır.",
     "perturb": "WS bir sıralamayı sizinkiyle karşılaştırır ve üst sıralara en çok ağırlığı verir: 1 aynı sıralamadır.",
-    "monteCarlo": "Ağırlıklar Dirichlet dağılımından çekilir: tüm ağırlık vektörleri üzerinde düzgün ya da κ yoğunluğuyla sizinkilerin çevresinde. i seçeneğinin r. sırada olduğu çekiliş payı, onun sıra kabul edilebilirliğidir.",
-    "removal": "Kalan ağırlıklar toplamlarına bölünür ya da CRITIC kriter olmadan yeniden çalıştırılır. Burada birinci yerin değişmesi bir sıra dönmesidir."
+    "monteCarlo": "Ağırlıklar Dirichlet dağılımından çekilir: tüm ağırlık vektörleri üzerinde düzgün ya da κ yoğunluğuyla sizinkilerin çevresinde. i alternatifinin r. sırada olduğu çekiliş payı, onun sıra kabul edilebilirliğidir.",
+    "removal": "Kalan ağırlıklar toplamlarına bölünür. Birinci yerin değişmesi sonucun o kritere ne kadar dayandığını gösterir; yalnız kriter alternatifleri neredeyse hiç ayırmıyorsa bu bir sıralama tersine dönmesidir.",
+    "removalRecompute": "Yeniden hesaplamada {{method}} kriter olmadan yeniden çalıştırılır.",
+    "spearmanTies": "Yazılan ρ eşitlik yokken geçerlidir; eşitlik varsa orta sıraların Pearson korelasyonudur."
   }
 }

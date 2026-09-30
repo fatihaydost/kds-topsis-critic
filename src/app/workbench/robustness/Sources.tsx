@@ -40,15 +40,19 @@ const PARTS: Record<SourcesPart, { tex: string[]; sources: Source[] }> = {
 }
 
 /** A section's formula and sources (lazy: KaTeX loads with this chunk). */
-export default function Sources({ part }: { part: SourcesPart }) {
+export default function Sources({ part, recompute }: { part: SourcesPart; recompute?: string | undefined }) {
   const { t } = useRobustnessText()
   const p = PARTS[part]
   return (
     <>
-      <p>{t(`sources.${part}`)}</p>
+      <p>
+        {t(`sources.${part}`)}
+        {part === 'removal' && recompute ? ` ${t('sources.removalRecompute', { method: recompute })}` : null}
+      </p>
       {p.tex.map((tex) => (
         <Formula key={tex} tex={tex} display />
       ))}
+      {part === 'removal' && <p className="text-12">{t('sources.spearmanTies')}</p>}
       <ul className="flex flex-col gap-1 text-12">
         {p.sources.map((src) => (
           <li key={src.doi}>

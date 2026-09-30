@@ -8,14 +8,17 @@
     "yours": "your weight",
     "chartTitle": "Closeness C as the weight of {{criterion}} changes",
     "axis": "Weight of {{criterion}}",
-    "legendTop": "{{name}} first",
-    "legendRanking": "Same full ranking",
+    "legendTop": "Range where {{name}} stays first",
+    "legendRanking": "Range with the same full ranking",
     "legendSwitch": "Order changes",
     "tableTitle": "Ranking at this weight",
     "holds": "{{name}} stays first while the weight of {{criterion}} is between {{from}} and {{to}}; your weight is {{base}}.",
     "holdsAll": "{{name}} stays first at every weight of {{criterion}}, from 0 to 1.",
     "leader": "{{name}} is first at this weight.",
-    "weightColumn": "Weight"
+    "legendLeader": "First at this weight",
+    "tableCorner": "Alternative, by weight of {{criterion}}",
+    "tied": "{{names}} are tied for first at your weight.",
+    "computing": "Calculating"
   },
   "perturb": {
     "title": "Nudge each weight",
@@ -26,7 +29,10 @@
     "changed": "{{name}} first",
     "change": "Change",
     "firstPlace": "First place",
-    "ws": "WS"
+    "ws": "WS",
+    "na": "n/a",
+    "zeroNote": "Criteria with weight 0 are left out: a percentage of 0 is still 0.",
+    "changedAt": "{{criterion}} {{delta}}: {{name}} first"
   },
   "monteCarlo": {
     "title": "Random weights",
@@ -70,6 +76,8 @@
     "sweep": "The other weights are rescaled so the sum stays 1. The interval of w_k where first place (or the whole ranking) does not change is the weight stability interval.",
     "perturb": "WS compares a ranking with yours and weighs the top places most: 1 is the same ranking.",
     "monteCarlo": "Weights are drawn from a Dirichlet distribution: uniform over all weight vectors, or centred on yours with concentration κ. The share of draws in which alternative i has rank r is its rank acceptability.",
-    "removal": "The remaining weights are divided by their sum, or CRITIC is run again without the criterion. A change of first place here is a rank reversal."
+    "removal": "The remaining weights are divided by their sum. A change of first place shows how much the result relies on that criterion; only when the criterion hardly separates the alternatives is it a rank reversal.",
+    "removalRecompute": "With Recompute, {{method}} is run again without the criterion.",
+    "spearmanTies": "ρ as written holds without ties; with ties it is the Pearson correlation of mid-ranks."
   }
 }

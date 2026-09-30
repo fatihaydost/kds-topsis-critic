@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState } from 'react'
+import { estimateTextWidth } from '../../../features/charts/layout'
 import { useRobustnessText } from './text'
 import type { SourcesPart } from './Sources'
 
@@ -18,7 +19,7 @@ export function SectionHead({ id, title, lead }: { id: string; title: string; le
 }
 
 /** "Formula and sources" under a section: closed by default, its content (and KaTeX) loaded when first opened. */
-export function SourcesDisclosure({ part }: { part: SourcesPart }) {
+export function SourcesDisclosure({ part, recompute }: { part: SourcesPart; recompute?: string | undefined }) {
   const { t } = useRobustnessText()
   const [opened, setOpened] = useState(false)
   return (
@@ -27,10 +28,13 @@ export function SourcesDisclosure({ part }: { part: SourcesPart }) {
       <div className="mt-2 flex max-w-[72ch] flex-col gap-3 text-text-2">
         {opened && (
           <Suspense fallback={<p role="status">{t('sources.loading')}</p>}>
-            <Sources part={part} />
+            <Sources part={part} recompute={recompute} />
           </Suspense>
         )}
       </div>
     </details>
   )
 }
+
+/** Width a md segmented control of these labels needs (14 px text, 12 px padding a side, 1 px gaps and border). */
+export const segmentedWidth = (labels: readonly string[]): number => labels.reduce((w, l) => w + estimateTextWidth(l, 14) + 25, 2)

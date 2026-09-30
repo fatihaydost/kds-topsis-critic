@@ -86,7 +86,7 @@ export function RemovalSection({ problem, weights, method, weighting, weightingN
           </Table>
         </>
       )}
-      <SourcesDisclosure part="removal" />
+      <SourcesDisclosure part="removal" recompute={weighting ? weightingName : undefined} />
     </section>
   )
 }
