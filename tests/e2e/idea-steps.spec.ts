@@ -27,7 +27,7 @@ const drawing = (page: Page) =>
 const settled = (page: Page) => page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished.catch(() => null))))
 
 const counter = (page: Page) => page.locator('#idea [role="group"]').getByText(/^\d \/ \d$/)
-const sentence = (page: Page) => page.locator('#idea p[aria-live="polite"]').last()
+const sentence = (page: Page) => page.locator('#idea p[aria-live="polite"]')
 
 for (const reducedMotion of ['reduce', 'no-preference'] as const) {
   test.describe(`motion ${reducedMotion}`, () => {
@@ -39,7 +39,7 @@ for (const reducedMotion of ['reduce', 'no-preference'] as const) {
       await settled(page)
       const full = await drawing(page)
 
-      await page.getByRole('button', { name: 'Step through' }).click()
+      await page.getByRole('button', { name: 'Step through the idea' }).click()
       await expect(counter(page)).toHaveText('1 / 5')
       await expect(sentence(page)).toHaveText('Each alternative is a point: its weighted normalized values on two criteria.')
       // Step 1 is the criterion plane without A+, A- or the distance lines.
@@ -51,12 +51,12 @@ for (const reducedMotion of ['reduce', 'no-preference'] as const) {
         await page.getByRole('button', { name: 'Next' }).click()
         await expect(counter(page)).toHaveText(`${n} / 5`)
       }
-      await expect(sentence(page)).toHaveText('C = D− / (D+ + D−) is the same along each ray; top left is best.')
+      await expect(sentence(page)).toHaveText('Relative closeness C = D− / (D+ + D−) is the same along each ray; top left is best.')
       await settled(page)
       expect(await drawing(page)).toEqual(full)
 
       await page.getByRole('button', { name: 'Finish' }).click()
-      await expect(page.getByRole('button', { name: 'Step through' })).toBeFocused()
+      await expect(page.getByRole('button', { name: 'Step through the idea' })).toBeFocused()
       await settled(page)
       expect(await drawing(page)).toEqual(full)
     })
@@ -67,13 +67,13 @@ for (const reducedMotion of ['reduce', 'no-preference'] as const) {
       await settled(page)
       const full = await drawing(page)
 
-      await page.getByRole('button', { name: 'Step through' }).click()
+      await page.getByRole('button', { name: 'Step through the idea' }).click()
       await expect(counter(page)).toHaveText('1 / 4')
       await page.getByRole('button', { name: 'Next' }).click()
       await page.getByRole('button', { name: 'Next' }).click()
       await expect(counter(page)).toHaveText('3 / 4')
       // Information C = σ × Σ(1 − ρ): Krishnan et al. (2021), Thickness 0.4161 × 5.8868.
-      await expect(page.locator('#idea svg').getByText('Information C')).toBeVisible()
+      await expect(page.locator('#idea svg').getByText('Information content C')).toBeVisible()
       await expect(page.locator('#idea svg').getByText('2.4494')).toBeAttached()
       await page.getByRole('button', { name: 'Next' }).click()
       await expect(page.locator('#idea svg').getByText('0.2599')).toBeAttached()
@@ -84,7 +84,7 @@ for (const reducedMotion of ['reduce', 'no-preference'] as const) {
     test('keyboard: arrows move, Escape closes and gives the focus back', async ({ page }) => {
       await page.goto('/methods/topsis')
       await expect(page.locator('#idea svg [role="radio"]')).toHaveCount(3)
-      await page.getByRole('button', { name: 'Step through' }).click()
+      await page.getByRole('button', { name: 'Step through the idea' }).click()
       await expect(page.getByRole('button', { name: 'Next' })).toBeFocused()
       await page.keyboard.press('ArrowRight')
       await page.keyboard.press('ArrowRight')
@@ -98,7 +98,7 @@ for (const reducedMotion of ['reduce', 'no-preference'] as const) {
       await expect(page.getByRole('button', { name: 'Back' })).toBeFocused()
       await page.keyboard.press('Escape')
       await expect(page.locator('#idea [role="group"]')).toHaveCount(0)
-      await expect(page.getByRole('button', { name: 'Step through' })).toBeFocused()
+      await expect(page.getByRole('button', { name: 'Step through the idea' })).toBeFocused()
     })
   })
 }
@@ -106,7 +106,7 @@ for (const reducedMotion of ['reduce', 'no-preference'] as const) {
 test('while stepping, the points and the view switch are inert', async ({ page }) => {
   await page.goto('/methods/topsis')
   await expect(page.locator('#idea svg [role="radio"]')).toHaveCount(3)
-  await page.getByRole('button', { name: 'Step through' }).click()
+  await page.getByRole('button', { name: 'Step through the idea' }).click()
   for (let k = 0; k < 2; k++) await page.getByRole('button', { name: 'Next' }).click()
   const a2 = page.locator('#idea svg [role="radio"]').nth(1)
   await a2.click({ force: true })
@@ -134,7 +134,7 @@ test.describe('pace', () => {
         if (el.closest('#idea svg')) w.__runs.push(`${e.propertyName} ${getComputedStyle(el).transitionDuration}`)
       })
     })
-    await page.getByRole('button', { name: 'Step through' }).click()
+    await page.getByRole('button', { name: 'Step through the idea' }).click()
     await page.getByRole('button', { name: 'Next' }).click()
     await settled(page)
     const runs = await page.evaluate(() => (window as unknown as { __runs: string[] }).__runs)
@@ -142,5 +142,86 @@ test.describe('pace', () => {
     expect(runs.filter((r) => r.startsWith('transform')).length).toBeGreaterThanOrEqual(3)
     expect(runs.filter((r) => r.startsWith('opacity')).every((r) => r.split(' ')[1]!.split(',').includes('0.45s'))).toBe(true)
     expect(runs.some((r) => r.startsWith('opacity'))).toBe(true)
+  })
+})
+
+test('CRITIC: σ is drawn to its true length, in the full picture and at the contrast step', async ({ page }) => {
+  await page.goto('/methods/critic')
+  await expect(page.locator('#idea svg')).toBeVisible()
+  const rulers = () =>
+    page.locator('#idea svg [data-sigma]').evaluateAll((els) =>
+      els.map((el) => ({ sigma: Number(el.getAttribute('data-sigma')), width: el.getBoundingClientRect().width })),
+    )
+  const proportional = (rows: { sigma: number; width: number }[]) => {
+    // The ruler's end ticks add no width, so width / σ is one scale for every row (Krishnan et al. 2021: 5 criteria,
+    // σ 0.4062 .. 0.4394). A ruler cut to the 0..1 strip, as mean ± σ was, breaks this and the order of the σ.
+    const k = rows[0]!.width / rows[0]!.sigma
+    for (const r of rows) expect(Math.abs(r.width / r.sigma - k) / k).toBeLessThan(0.005)
+    const byWidth = [...rows].sort((a, b) => a.width - b.width).map((r) => r.sigma)
+    expect(byWidth).toEqual([...byWidth].sort((a, b) => a - b))
+  }
+  const full = await rulers()
+  expect(full).toHaveLength(5)
+  proportional(full)
+  await page.getByRole('button', { name: 'Step through the idea' }).click()
+  proportional(await rulers())
+  // The contrast step writes σ next to each ruler.
+  await expect(page.locator('#idea svg').getByText('0.4394')).toBeVisible()
+})
+
+test('the step sentence never moves the text below it (390 and 1440 px, TOPSIS and CRITIC)', async ({ page }) => {
+  for (const width of [390, 1440])
+  for (const [method, count] of [['topsis', 5], ['critic', 4]] as const) {
+    await page.setViewportSize({ width, height: 900 })
+    await page.goto(`/methods/${method}`)
+    await expect(page.locator('#idea svg')).toBeVisible()
+    await page.getByRole('button', { name: 'Step through the idea' }).click()
+    const source = page.locator('#idea').getByText(/^Data: /)
+    const tops: number[] = []
+    for (let k = 0; k < count; k++) {
+      if (k > 0) await page.getByRole('button', { name: 'Next' }).click()
+      await expect(counter(page)).toHaveText(`${k + 1} / ${count}`)
+      tops.push((await source.boundingBox())!.y)
+    }
+    expect(new Set(tops).size, `${method} ${width}: ${tops.join(', ')}`).toBe(1)
+  }
+})
+
+test('closing in the middle gives back the reader\'s view; Finish ends on the distance plane', async ({ page }) => {
+  await page.goto('/methods/topsis')
+  await expect(page.locator('#idea svg [role="radio"]')).toHaveCount(3)
+  const view = (name: string) => page.locator('#idea').getByRole('radio', { name })
+  await page.getByRole('button', { name: 'Step through the idea' }).click()
+  await expect(view('Two criteria')).toHaveAttribute('aria-checked', 'true')
+  await page.keyboard.press('Escape')
+  await expect(view('Distances')).toHaveAttribute('aria-checked', 'true')
+  // From the criterion plane: close keeps it, Finish (the last step is the distance plane) keeps the distance plane.
+  await view('Two criteria').click()
+  await page.getByRole('button', { name: 'Step through the idea' }).click()
+  await page.getByRole('button', { name: 'Next' }).click()
+  await page.getByRole('button', { name: 'Next' }).click()
+  await page.getByRole('button', { name: 'Next' }).click()
+  await expect(view('Distances')).toHaveAttribute('aria-checked', 'true')
+  await page.getByRole('button', { name: 'Close the steps' }).click()
+  await expect(view('Two criteria')).toHaveAttribute('aria-checked', 'true')
+  await page.getByRole('button', { name: 'Step through the idea' }).click()
+  for (let k = 0; k < 4; k++) await page.getByRole('button', { name: 'Next' }).click()
+  await page.getByRole('button', { name: 'Finish' }).click()
+  await expect(view('Distances')).toHaveAttribute('aria-checked', 'true')
+})
+
+test.describe('resize', () => {
+  test.use({ reducedMotion: 'no-preference' })
+
+  test('resizing while stepping moves nothing (CRITIC)', async ({ page }) => {
+    await page.goto('/methods/critic')
+    await expect(page.locator('#idea figure svg')).toBeVisible()
+    await page.getByRole('button', { name: 'Step through the idea' }).click()
+    for (let k = 0; k < 3; k++) await page.getByRole('button', { name: 'Next' }).click()
+    await settled(page)
+    const before = await page.locator('#idea figure svg').getAttribute('width')
+    await page.setViewportSize({ width: 390, height: 900 })
+    await expect.poll(() => page.locator('#idea figure svg').getAttribute('width')).not.toBe(before)
+    expect(await page.locator('#idea figure svg').evaluate((svg) => svg.getAnimations({ subtree: true }).length)).toBe(0)
   })
 })
