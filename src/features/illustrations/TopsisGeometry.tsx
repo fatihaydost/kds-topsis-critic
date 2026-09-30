@@ -1,4 +1,4 @@
-import { useCallback, useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
+import { useCallback, useId, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import type { Problem } from '../../core/types'
 import { SegmentedControl } from '../../ui/SegmentedControl'
 import { ChartFigure, type ChartTable } from '../charts/ChartFigure'
@@ -118,18 +118,25 @@ type Screen = { x: number; y: number }
  *   direction is better. Exact for two criteria, a projection for more.
  * Points are a radio group: click, or Tab to it and use the arrow keys / Home / End.
  * Motion (docs/design/MOTION.md): switching the view moves each alternative's dot and label to its place in the other
- * view (object constancy); what belongs to one view only (axes, rays, A+ and A-, guides) crossfades. Both views are
- * drawn, the hidden one invisible. A new selection moves the lines. Nothing moves on first render or on resize.
+ * view (object constancy), and the selected point's D+ and D- lines turn from distances to A+ and A- into its two
+ * coordinates; what belongs to one view only (axes, rays, A+ and A-) crossfades. Both views are drawn, the hidden one
+ * invisible. A new selection moves the lines. Nothing moves on first render or on resize.
  */
 export function TopsisGeometry({ problem, weights, axes, defaultView = 'distances', selected, onSelectedChange, format = defaultFormat, labels, className }: TopsisGeometryProps) {
   const l = { ...TOPSIS_GEOMETRY_LABELS_EN, ...labels }
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
   const animate = useAnimateValues(width)
+  // The render that switches the view moves the D+ / D- lines with the dots (--dur-data); a new selection moves them
+  // faster (--dur-slow). Transitions take the duration of the style they change to, so a class on this render is enough.
+  const prevView = useRef(defaultView)
   const proj = useMemo(() => topsisProjection(problem, weights, axes), [problem, weights, axes])
   const [own, setOwn] = useState<number | null>(null)
   const [view, setView] = useState<TopsisGeometryView>(defaultView)
   const pointRefs = useRef<(SVGGElement | null)[]>([])
+  useLayoutEffect(() => {
+    prevView.current = view
+  })
 
   const m = problem.alternatives.length
   const best = proj ? argMax(proj.closeness) : 0
@@ -198,6 +205,7 @@ export function TopsisGeometry({ problem, weights, axes, defaultView = 'distance
     criteria: natural.criteria.height < height ? draw('criteria', height) : natural.criteria,
   }
   const drawing = drawings[view]
+  const viewChanged = prevView.current !== view
   const pts = drawing.points
   const nameMax = Math.max(40, Math.min(120, (drawing.box.right - drawing.box.left) / 3))
   const shortNames = problem.alternatives.map((name) => truncate(name, nameMax, 12))
@@ -235,7 +243,7 @@ export function TopsisGeometry({ problem, weights, axes, defaultView = 'distance
         ]}
       />
       <svg
-        className={animate ? `${s.svg} ${s.animate}` : s.svg}
+        className={[s.svg, animate && s.animate, viewChanged && s.viewChange].filter(Boolean).join(' ')}
         width={width}
         height={height}
         viewBox={`0 0 ${width} ${height}`}
@@ -252,15 +260,7 @@ export function TopsisGeometry({ problem, weights, axes, defaultView = 'distance
             {drawings[v].background}
           </g>
         ))}
-        {/* The selection's lines point at where the dot lands: they fade in step with its move. */}
-        {VIEWS.map((v) => {
-          const d = drawings[v]
-          return (
-            <g key={v} className={`${s.layer} ${s.selectionLayer}`} data-view={v} data-hidden={v === view ? undefined : ''}>
-              {d.selection(d.points[current] ?? d.points[0]!, current)}
-            </g>
-          )
-        })}
+        <Distances ends={{ from: pts[current] ?? pts[0]!, ...drawing.distances(pts[current] ?? pts[0]!) }} dPlus={l.dPlus} dMinus={l.dMinus} />
 
         {/* Alternatives: a radio group, one tab stop, arrows move the selection. */}
         <g role="radiogroup" aria-label={l.select}>
@@ -328,9 +328,9 @@ const VIEWS: readonly TopsisGeometryView[] = ['distances', 'criteria']
  * (Chromium, Firefox) and it jumps elsewhere (the attribute). Not a unit line stretched by transform: a composited
  * transform animation scales the painted stroke, which smears dashes and caps while it moves.
  */
-function Segment({ className, from, to }: { className: string | undefined; from: Point; to: Point }) {
+function Segment({ className, from, to, ...rest }: { className: string | undefined; from: Point; to: Point; 'data-dist'?: string }) {
   const d = linePath(from, to)
-  return <path className={className} d={d} style={{ d: `path('${d}')` }} />
+  return <path className={className} d={d} style={{ d: `path('${d}')` }} {...rest} />
 }
 
 type Drawing = {
@@ -338,10 +338,33 @@ type Drawing = {
   box: { left: number; right: number; top: number; bottom: number }
   points: Screen[]
   background: ReactNode
-  selection: (sel: Screen, index: number) => ReactNode
+  /** Where the selected point's D+ and D- lines end: A+ and A- in the criterion plane, the axes in the distance plane. */
+  distances: (sel: Screen) => { plus: Screen; minus: Screen }
 }
 
-/** The D+ / D- plane: origin bottom left, rays of constant C, guides from the selected point to both axes. */
+/**
+ * The selected point's D+ and D- as two lines that belong to both views. In the criterion plane they run to A+ and
+ * A-; in the distance plane the same lines are the point's coordinates: D+ runs level to the D- axis (its length is
+ * D+), D- runs down to the D+ axis (its length is D-). Each starts at the dot and moves with it, so a view switch
+ * turns the two distances into the two coordinates. Labels ride at the middle of their line.
+ */
+function Distances({ ends, dPlus, dMinus }: { ends: { from: Screen; plus: Screen; minus: Screen }; dPlus: string; dMinus: string }) {
+  const mid = (a: Screen, b: Screen) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 })
+  return (
+    <g aria-hidden="true">
+      <Segment className={s.dist} from={ends.from} to={ends.plus} data-dist="plus" />
+      <Segment className={`${s.dist} ${s.distMinus}`} from={ends.from} to={ends.minus} data-dist="minus" />
+      <text className={s.distLabel} x={0} y={0} dx={6} dy={-6} style={{ transform: pointCss(mid(ends.from, ends.plus)) }}>
+        {dPlus}
+      </text>
+      <text className={s.distLabel} x={0} y={0} dx={6} dy={-6} style={{ transform: pointCss(mid(ends.from, ends.minus)) }}>
+        {dMinus}
+      </text>
+    </g>
+  )
+}
+
+/** The D+ / D- plane: origin bottom left, rays of constant C; the selected point's D+ and D- run to the axes. */
 /** `height`: the drawing's total height when it must be taller than the data needs (0: as the data needs). */
 function planeDrawing(
   proj: TopsisProjection,
@@ -386,8 +409,8 @@ function planeDrawing(
           })}
         </g>
         {/* Axes from the origin; arrowheads point to larger distances. */}
-        <path className={s.axis} d={`M${box.left} ${box.bottom}H${box.right + 12}`} markerEnd={`url(#${uid}-head)`} />
-        <path className={s.axis} d={`M${box.left} ${box.bottom}V${box.top - 14}`} markerEnd={`url(#${uid}-head)`} />
+        <path className={s.axis} data-axis="d-plus" d={`M${box.left} ${box.bottom}H${box.right + 12}`} markerEnd={`url(#${uid}-head)`} />
+        <path className={s.axis} data-axis="d-minus" d={`M${box.left} ${box.bottom}V${box.top - 14}`} markerEnd={`url(#${uid}-head)`} />
         <text className={s.axisName} x={box.right + 12} y={box.bottom + 20} textAnchor="end">
           <title>{l.axisDPlus}</title>
           {truncate(l.axisDPlus, xLabelW, 12)}
@@ -398,13 +421,8 @@ function planeDrawing(
         </text>
       </>
     ),
-    // Guides from the selected point down to the D+ axis and left to the D- axis.
-    selection: (sel) => (
-      <g aria-hidden="true">
-        <Segment className={s.guide} from={sel} to={{ x: sel.x, y: box.bottom }} />
-        <Segment className={s.guide} from={sel} to={{ x: box.left, y: sel.y }} />
-      </g>
-    ),
+    // The point's coordinates: D+ level to the D- axis, D- down to the D+ axis.
+    distances: (sel) => ({ plus: { x: box.left, y: sel.y }, minus: { x: sel.x, y: box.bottom } }),
   }
 }
 
@@ -467,22 +485,6 @@ function criteriaDrawing(
         </g>
       </>
     ),
-    selection: (sel) => {
-      const mid = (a: Screen, b: Screen) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 })
-      const midPlus = mid(ideal, sel)
-      const midMinus = mid(anti, sel)
-      return (
-        <>
-          <Segment className={s.dist} from={ideal} to={sel} />
-          <Segment className={`${s.dist} ${s.distMinus}`} from={anti} to={sel} />
-          <text className={s.distLabel} x={0} y={0} dx={6} dy={-6} style={{ transform: pointCss(midPlus) }}>
-            {l.dPlus}
-          </text>
-          <text className={s.distLabel} x={0} y={0} dx={6} dy={-6} style={{ transform: pointCss(midMinus) }}>
-            {l.dMinus}
-          </text>
-        </>
-      )
-    },
+    distances: () => ({ plus: ideal, minus: anti }),
   }
 }

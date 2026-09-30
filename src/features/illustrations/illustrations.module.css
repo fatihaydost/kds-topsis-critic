@@ -271,19 +271,23 @@
 
 /*
  * Only a state change moves anything; resizing redraws at once (.animate is off for that render).
- * A new selection slides the lines (--dur-slow). A new view moves the dots and their labels to their new place
- * (--dur-data) while the view's own marks crossfade (--dur; the selection's lines in --dur-data, so they arrive with
- * the dot); visibility keeps the leaving layer painted until it is gone.
+ * A new view moves the dots, their labels and the D+ / D- lines (--dur-data, same curve, so a line never leaves its
+ * dot) while the marks of one view crossfade (--dur); visibility keeps the leaving layer painted until it is gone.
+ * A new selection slides the lines to the new dot (--dur-slow).
  */
 /* Lines move through CSS d; where d is not a CSS property (Safari) lines and their labels both jump, never apart. */
 @supports (d: path('M0 0')) {
-  .animate .dist,
-  .animate .guide {
+  .animate .dist {
     transition: d var(--dur-slow) var(--ease);
   }
 
   .animate .distLabel {
     transition: transform var(--dur-slow) var(--ease);
+  }
+
+  .animate.viewChange .dist,
+  .animate.viewChange .distLabel {
+    transition-duration: var(--dur-data);
   }
 }
 
@@ -296,10 +300,6 @@
   transition:
     opacity var(--dur) var(--ease),
     visibility var(--dur) var(--ease);
-}
-
-.animate .selectionLayer {
-  transition-duration: var(--dur-data);
 }
 
 .readout {
@@ -549,12 +549,6 @@
   font-size: 12px;
 }
 
-.guide {
-  stroke: var(--data-accent);
-  stroke-width: 1;
-  stroke-dasharray: 2 3;
-  fill: none;
-}
 
 /* Method thumbnails (catalogue cards) --------------------------------------------------------- */
 
