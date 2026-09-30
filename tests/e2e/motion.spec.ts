@@ -17,6 +17,22 @@ const running = (page: Page, selector?: string) =>
 /** Waits until every animation in the document has finished. */
 const settled = (page: Page) => page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished.catch(() => null))))
 
+/**
+ * Starts recording `animationstart` / `transitionrun` names on window.__motion (awaited, so it is in place before the
+ * next action). Reading them afterwards does not depend on how long the animation lasted or how busy the machine is.
+ */
+const recordMotion = (page: Page) =>
+  page.evaluate(() => {
+    const w = window as unknown as { __motion: string[] }
+    w.__motion = []
+    document.addEventListener('animationstart', (e) => w.__motion.push(e.animationName), true)
+    document.addEventListener('transitionrun', (e) => {
+      const t = e.target as Element
+      w.__motion.push(`${t.getAttribute('data-tabs-indicator') !== null ? 'indicator' : t.tagName.toLowerCase()}:${e.propertyName}`)
+    }, true)
+  })
+const recorded = (page: Page) => page.evaluate(() => (window as unknown as { __motion: string[] }).__motion)
+
 /** Screen positions of the TOPSIS points on the method page. */
 const topsisPoints = (page: Page) =>
   page.locator('#idea svg [role="radio"]').evaluateAll((els) =>
@@ -33,13 +49,11 @@ test('floating layers animate out and then leave the DOM', async ({ page }) => {
   const menu = page.getByRole('menu')
   await expect(menu).toBeVisible()
   await settled(page)
-  const exit = page.evaluate(
-    () => new Promise<string>((resolve) => document.addEventListener('animationstart', (e) => resolve(e.animationName), { once: true })),
-  )
+  await recordMotion(page)
   await page.keyboard.press('Escape')
   // The exit animation keeps it for a moment (Radix waits for animationend), then it is gone and focus is back.
-  expect(await exit).toBe('kds-float-out')
   await expect(menu).toHaveCount(0)
+  expect(await recorded(page)).toContain('kds-float-out')
   await expect(trigger).toBeFocused()
 })
 
@@ -48,14 +62,17 @@ test.describe('bottom sheet', () => {
 
   test('slides in, slides out and leaves the DOM', async ({ page }) => {
     await page.goto('/app?example=krishnan-2021-smartphones&stage=weights')
-    await page.getByRole('button', { name: 'Show explanation' }).click()
+    const open = page.getByRole('button', { name: 'Show explanation' })
+    await expect(open).toBeVisible()
+    await recordMotion(page)
+    await open.click()
     const sheet = page.getByRole('dialog', { name: 'Explanation' })
     await expect(sheet).toBeVisible()
-    expect(await sheet.evaluate((el) => el.getAnimations().map((a) => (a as CSSAnimation).animationName))).toEqual(['kds-sheet-in'])
     await settled(page)
     await page.keyboard.press('Escape')
     await expect(sheet).toHaveCount(0)
     await expect(page.locator('.bg-overlay')).toHaveCount(0)
+    expect(await recorded(page)).toEqual(expect.arrayContaining(['kds-fade-in', 'kds-sheet-in', 'kds-fade-out', 'kds-sheet-out']))
   })
 })
 
@@ -63,14 +80,11 @@ test('TOPSIS view switch moves the points and ends where the reduced-motion rend
   await page.goto('/methods/topsis')
   await expect(page.locator('#idea svg [role="radio"]')).toHaveCount(3)
   await settled(page)
-  const view = page.locator('#idea').getByRole('radio', { name: 'Two criteria' })
-  await view.click()
-  // The dots slide (object constancy); the lines of the new view fade in.
-  const moving = await page.locator('#idea svg [role="radio"]').evaluateAll((els) =>
-    els.map((el) => el.getAnimations().some((a) => (a as CSSTransition).transitionProperty === 'transform')),
-  )
-  expect(moving).toEqual([true, true, true])
+  await recordMotion(page)
+  await page.locator('#idea').getByRole('radio', { name: 'Two criteria' }).click()
   await settled(page)
+  // The three dots slid (object constancy): one transform transition each on the point groups.
+  expect((await recorded(page)).filter((m) => m === 'g:transform').length).toBeGreaterThanOrEqual(3)
   const animated = await topsisPoints(page)
 
   const reduced = await browser.newPage({ reducedMotion: 'reduce' })
@@ -86,6 +100,21 @@ test('TOPSIS view switch moves the points and ends where the reduced-motion rend
     .evaluateAll((els) => els.map((el) => `${el.getAttribute('data-view')} ${getComputedStyle(el).visibility} ${getComputedStyle(el).opacity}`))
   expect(new Set(layers)).toEqual(new Set(['distances hidden 0', 'criteria visible 1']))
 })
+
+for (const width of [390, 1440]) {
+  test(`the TOPSIS picture keeps its height when the view changes (${width} px)`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 })
+    await page.goto('/methods/topsis')
+    const svg = page.locator('#idea svg')
+    await expect(page.locator('#idea svg [role="radio"]')).toHaveCount(3)
+    const before = await svg.getAttribute('height')
+    await page.locator('#idea').getByRole('radio', { name: 'Two criteria' }).click()
+    // Same height right after the click: the leaving view never paints over the readout below.
+    expect(await svg.getAttribute('height')).toBe(before)
+    await settled(page)
+    expect(await svg.getAttribute('height')).toBe(before)
+  })
+}
 
 test('the first render and a resize do not animate the TOPSIS picture', async ({ page }) => {
   await page.goto('/methods/topsis')
@@ -111,9 +140,10 @@ test('the tab indicator slides and ends under the selected tab', async ({ page }
   expect(await running(page, '#details [role="tablist"]')).toBe(0)
   for (const d of Object.values(await under('Use'))) expect(d).toBeLessThan(0.5)
 
+  await recordMotion(page)
   await list.getByRole('tab', { name: 'Pitfalls' }).click()
-  expect(await bar.evaluate((el) => el.getAnimations().length)).toBe(1)
   await settled(page)
+  expect((await recorded(page)).filter((m) => m.startsWith('indicator:'))).toEqual(['indicator:transform'])
   for (const d of Object.values(await under('Pitfalls'))) expect(d).toBeLessThan(0.5)
   // The bar draws the underline now; the trigger's own border (the no-JS fallback) is off.
   expect(await list.getByRole('tab', { name: 'Pitfalls' }).evaluate((el) => getComputedStyle(el).borderBottomColor)).toBe('rgba(0, 0, 0, 0)')
@@ -150,23 +180,21 @@ test('a disclosure grows open where the browser can animate to auto', async ({ p
   await page.locator('#algorithm details').first().locator('summary').click()
   await expect(page.locator('#algorithm .katex').first()).toBeVisible()
   await settled(page)
-  // ::details-content transitions are not listed by getAnimations(): watch the height frame by frame instead.
-  const heights = await page.locator('#algorithm details').nth(1).evaluate(
-    (d) =>
-      new Promise<number[]>((resolve) => {
-        const out: number[] = []
-        d.querySelector('summary')!.click()
-        const frame = () => {
-          out.push(Math.round(d.getBoundingClientRect().height))
-          if (out.length < 30) requestAnimationFrame(frame)
-          else resolve(out)
-        }
-        requestAnimationFrame(frame)
-      }),
-  )
-  const final = heights[heights.length - 1]!
-  expect(heights[0]).toBeLessThan(final)
-  expect(heights.filter((h) => h > heights[0]! && h < final).length).toBeGreaterThan(2)
+  // ::details-content transitions are not listed by getAnimations(), so measure the height. Slowed tenfold (CDP) so a
+  // busy machine still catches it half open.
+  const step = page.locator('#algorithm details').nth(1)
+  const closed = (await step.boundingBox())!.height
+  const cdp = await page.context().newCDPSession(page)
+  await cdp.send('Animation.enable')
+  await cdp.send('Animation.setPlaybackRate', { playbackRate: 0.1 })
+  await step.locator('summary').click()
+  await expect.poll(async () => (await step.boundingBox())!.height).toBeGreaterThan(closed)
+  const during = (await step.boundingBox())!.height
+  await cdp.send('Animation.setPlaybackRate', { playbackRate: 1 })
+  await expect.poll(async () => (await step.boundingBox())!.height).toBeGreaterThan(during)
+  await settled(page)
+  const open = (await step.boundingBox())!.height
+  expect(during).toBeLessThan(open)
 })
 
 test('a new page starts at the top', async ({ page }) => {
