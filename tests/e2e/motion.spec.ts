@@ -246,3 +246,93 @@ test('a new page starts at the top', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1, name: 'CRITIC' })).toBeVisible()
   expect(await page.evaluate(() => window.scrollY)).toBe(0)
 })
+
+// ---------- Robustness: the live ranking (FLIP) and the Monte Carlo heat map ----------
+
+const krishnan = async () => {
+  const { critic, topsis } = await import('../../src/core')
+  const { reweight } = await import('../../src/core/robustness')
+  const { largestWeight, rankOrder } = await import('../../src/app/workbench/robustness/helpers')
+  const { getExample } = await import('../../src/data/examples')
+  const ex = getExample('krishnan-2021-smartphones')!
+  const problem = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
+  const w = critic.compute(problem, {}).weights
+  const k = largestWeight(w)
+  return { k, order: (wk: number) => rankOrder(topsis.compute(problem, reweight(w, k, wk), {}).ranking).map((i) => ex.alternatives[i]!) }
+}
+
+/** Records Web Animations started on live-table rows and every row that took the "moved" tint. */
+const recordRows = (page: Page) =>
+  page.addInitScript(() => {
+    const w = window as unknown as { __slides: string[]; __tinted: string[] }
+    w.__slides = []
+    w.__tinted = []
+    const animate = Element.prototype.animate
+    Element.prototype.animate = function (this: Element, ...args: Parameters<Element['animate']>) {
+      if (this.matches('[data-testid="live-row"]')) w.__slides.push(this.querySelector('th')?.textContent ?? '')
+      return animate.apply(this, args)
+    }
+    new MutationObserver((records) => {
+      for (const r of records) {
+        const el = r.target as Element
+        if (el.matches('[data-testid="live-row"][data-moved]')) w.__tinted.push(el.querySelector('th')?.textContent ?? '')
+      }
+    }).observe(document, { subtree: true, attributes: true, attributeFilter: ['data-moved'] })
+  })
+const rowLog = (page: Page) =>
+  page.evaluate(() => {
+    const w = window as unknown as { __slides: string[]; __tinted: string[] }
+    return { slides: w.__slides, tinted: w.__tinted }
+  })
+const liveOrder = (page: Page) => page.getByTestId('live-row').locator('th').allInnerTexts()
+
+test('robustness: a new order slides the rows (FLIP), tints them, and ends in the core\'s order', async ({ page }) => {
+  const { order } = await krishnan()
+  await recordRows(page)
+  await page.goto('/app?example=krishnan-2021-smartphones&stage=robustness')
+  await expect(page.getByTestId('live-row')).toHaveCount(5)
+  // The stage opens without motion: nothing runs on its first render.
+  await settled(page)
+  expect((await rowLog(page)).slides).toEqual([])
+  await page.getByRole('slider').focus()
+  await page.keyboard.press('End')
+  await expect.poll(async () => (await rowLog(page)).slides.length).toBeGreaterThan(0)
+  expect((await rowLog(page)).tinted.length).toBeGreaterThan(0)
+  // The cursor follows at once: no transition on it.
+  expect(await page.evaluate(() => getComputedStyle(document.querySelector('svg[data-sweep] [data-cursor]')!).transitionDuration)).toBe('0s')
+  await settled(page)
+  expect(await liveOrder(page)).toEqual(order(1))
+  // Every row back in its own place: no transform left behind.
+  const offsets = await page.getByTestId('live-row').evaluateAll((els) => els.map((el) => getComputedStyle(el).transform))
+  expect(new Set(offsets)).toEqual(new Set(['none']))
+})
+
+test.describe('robustness with reduced motion', () => {
+  test.use({ reducedMotion: 'reduce' })
+
+  test('rows jump to their new place without sliding, and still take the tint', async ({ page }) => {
+    const { order } = await krishnan()
+    await recordRows(page)
+    await page.goto('/app?example=krishnan-2021-smartphones&stage=robustness')
+    await expect(page.getByTestId('live-row')).toHaveCount(5)
+    await page.getByRole('slider').focus()
+    await page.keyboard.press('End')
+    await expect.poll(async () => (await rowLog(page)).tinted.length).toBeGreaterThan(0)
+    expect((await rowLog(page)).slides).toEqual([])
+    expect(await liveOrder(page)).toEqual(order(1))
+  })
+})
+
+test('robustness: a new κ changes the heat map\'s colours and never moves its cells', async ({ page }) => {
+  await page.goto('/app?example=krishnan-2021-smartphones&stage=robustness')
+  const result = page.getByTestId('mc-result')
+  await expect(result).toHaveAttribute('aria-busy', 'false', { timeout: 20_000 })
+  await settled(page)
+  await recordMotion(page)
+  await page.getByRole('radio', { name: 'Uniform' }).click()
+  await expect(result).toHaveAttribute('aria-busy', 'false', { timeout: 20_000 })
+  await settled(page)
+  const heat = (await recorded(page)).filter((m) => m.startsWith('rect:'))
+  expect(heat.length).toBeGreaterThan(0)
+  expect(new Set(heat)).toEqual(new Set(['rect:fill']))
+})

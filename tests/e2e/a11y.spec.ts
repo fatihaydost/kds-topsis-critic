@@ -85,11 +85,16 @@ test('manual weight: Tab into the field and type replaces the value', async ({ p
   await expect(page.locator('#wb-weight-1')).toHaveValue('0.3')
 })
 
-for (const theme of ['light', 'dark'] as const) {
-  test(`heatmap values reach 4.5:1 on their cells (${theme})`, async ({ page }) => {
+const heatmaps = [
+  { stage: 'results', figure: 'Correlation between criteria' },
+  { stage: 'robustness', figure: 'Share of draws by rank' },
+] as const
+
+for (const [theme, heat] of (['light', 'dark'] as const).flatMap((t) => heatmaps.map((h) => [t, h] as const))) {
+  test(`heatmap values reach 4.5:1 on their cells (${theme}, ${heat.stage})`, async ({ page }) => {
     await page.addInitScript((t) => localStorage.setItem('kds.theme', t), theme)
-    await page.goto('/app?example=krishnan-2021-smartphones&stage=results')
-    const figure = page.locator('figure', { hasText: 'Correlation between criteria' })
+    await page.goto(`/app?example=krishnan-2021-smartphones&stage=${heat.stage}`)
+    const figure = page.locator('figure', { hasText: heat.figure })
     await expect(figure.locator('svg text').first()).toBeVisible()
     const ratios = await figure.evaluate((root) => {
       const cv = document.createElement('canvas')
@@ -118,7 +123,7 @@ for (const theme of ['light', 'dark'] as const) {
       return out
     })
     expect(ratios.length).toBe(25)
-    for (const r of ratios) expect(r.ratio, `${theme} ${r.text}`).toBeGreaterThanOrEqual(4.5)
+    for (const r of ratios) expect(r.ratio, `${theme} ${heat.stage} ${r.text}`).toBeGreaterThanOrEqual(4.5)
   })
 }
 
@@ -211,7 +216,7 @@ test('Results is a summary: no second copy of the closeness bars or the TOPSIS p
 for (const lang of ['en', 'tr'] as const) {
   test(`explanation panel stays at 60 words or fewer per stage (${lang})`, async ({ page }) => {
     await page.addInitScript((l) => localStorage.setItem('kds.lang', l), lang)
-    for (const stage of ['data', 'weights', 'ranking', 'results']) {
+    for (const stage of ['data', 'weights', 'ranking', 'results', 'robustness']) {
       await page.goto(`/app?example=krishnan-2021-smartphones&stage=${stage}`)
       const panel = page.locator('aside')
       await expect(panel).toBeVisible()

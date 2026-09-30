@@ -221,8 +221,26 @@ test('the whole flow works with the keyboard alone', async ({ page }) => {
   await page.keyboard.press('Enter')
   await expect(stageHeading(page, 'Results')).toBeVisible()
   await tabTo(page, 'Download data (.csv)')
+  await tabTo(page, 'Check robustness')
+  await page.keyboard.press('Enter')
+  await expect(stageHeading(page, 'Robustness')).toBeVisible()
+  await expect(page.locator('#main')).toBeFocused({ timeout: 10_000 })
+  await expect(page.getByRole('slider')).toBeVisible() // the stage's own chunk has arrived
+  // The criterion choice (one tab stop, on the selected criterion), then the slider: its arrow keys move the weight.
+  await tabTo(page, /^Thickness$/)
+  await tabTo(page, 'Weight of')
+  const weight = page.getByTestId('sweep-weight')
+  const before = await weight.innerText()
+  await page.keyboard.press('ArrowRight')
+  await expect(weight).not.toHaveText(before)
+  // Random weights: Tab lands on the selected spread; arrows move (each waits for its focus), Space picks.
+  await tabTo(page, 'Medium, κ = 100')
+  await arrow('ArrowLeft', 'Loose, κ = 20')
+  await arrow('ArrowLeft', 'Uniform')
+  await page.keyboard.press('Space')
+  await expect(page.getByRole('radio', { name: 'Uniform' })).toHaveAttribute('aria-checked', 'true')
   // The rail is reachable too: Shift+Tab back up to the stage list and open Data.
-  await tabTo(page, /^Data\s/, 40, 'Shift+Tab')
+  await tabTo(page, /^Data\s/, 120, 'Shift+Tab')
   await page.keyboard.press('Enter')
   await expect(stageHeading(page, 'Data')).toBeVisible()
 })
