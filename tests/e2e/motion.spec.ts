@@ -116,6 +116,45 @@ for (const width of [390, 1440]) {
   })
 }
 
+test('switching views turns the D+ and D- lines into the selected point\'s coordinates', async ({ page }) => {
+  await page.goto('/methods/topsis')
+  await expect(page.locator('#idea svg [role="radio"]')).toHaveCount(3)
+  const idea = page.locator('#idea')
+  await idea.getByRole('radio', { name: 'Two criteria' }).click()
+  await settled(page)
+  await recordMotion(page)
+  await idea.getByRole('radio', { name: 'Distances' }).click()
+  await settled(page)
+  // The same two lines moved (no crossfade): each one's d transitioned.
+  expect((await recorded(page)).filter((m) => m === 'path:d').length).toBe(2)
+  const geo = await page.locator('#idea svg').evaluate((svg) => {
+    const ends = (el: Element | null) => {
+      // The computed d, e.g. path("M 99 140 L 16 140"): what is painted, also mid-transition.
+      const n = (getComputedStyle(el!).getPropertyValue('d').match(/-?[\d.]+(?:e-?\d+)?/g) ?? []).map(Number)
+      return { from: { x: n[0]!, y: n[1]! }, to: { x: n[2]!, y: n[3]! } }
+    }
+    const axis = (name: string) => (svg.querySelector(`[data-axis="${name}"]`)!.getAttribute('d')!.match(/-?[\d.]+/g) ?? []).map(Number)
+    const dot = svg.querySelector('[role="radio"][aria-checked="true"] circle:last-of-type')!.getBoundingClientRect()
+    const box = svg.getBoundingClientRect()
+    return {
+      dot: { x: dot.x + dot.width / 2 - box.x, y: dot.y + dot.height / 2 - box.y },
+      plus: ends(svg.querySelector('[data-dist="plus"]')),
+      minus: ends(svg.querySelector('[data-dist="minus"]')),
+      yAxisX: axis('d-minus')[0]!, // M left bottom V top
+      xAxisY: axis('d-plus')[1]!, // M left bottom H right
+    }
+  })
+  const near = (a: number, b: number) => expect(Math.abs(a - b)).toBeLessThan(0.5)
+  // D+ runs from the dot level to the D- (vertical) axis; D- from the dot down to the D+ (horizontal) axis.
+  near(geo.plus.from.x, geo.dot.x)
+  near(geo.plus.from.y, geo.dot.y)
+  near(geo.plus.to.x, geo.yAxisX)
+  near(geo.plus.to.y, geo.dot.y)
+  near(geo.minus.from.x, geo.dot.x)
+  near(geo.minus.to.x, geo.dot.x)
+  near(geo.minus.to.y, geo.xAxisY)
+})
+
 test('the first render and a resize do not animate the TOPSIS picture', async ({ page }) => {
   await page.goto('/methods/topsis')
   await expect(page.locator('#idea svg [role="radio"]')).toHaveCount(3)
