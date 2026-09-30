@@ -142,7 +142,7 @@ Use: the workbench's empty Data state, above "Load example" / "Start blank".
 
 `topsisProjection(problem, weights, axes?)`, `defaultAxes(weights)`, `fitPlot(...)` (equal-scale
 screen scales, values growing right and up), `distancePoints(proj)`, `closenessAt(p)`,
-`isoClosenessEnd(c, xMax, yMax)`, `fitDistancePlane(...)`, `placeLabels(...)`, `ISO_C_DEFAULT`, `segmentTransform(...)`,
+`isoClosenessEnd(c, xMax, yMax)`, `fitDistancePlane(...)`, `placeLabels(...)`, `ISO_C_DEFAULT`, `linePath(...)`, `pointCss(...)`,
 `planarDistance`, `criticParts(problem)`, `argMax`, `flowIndex`, `TOPSIS_FLOW`, `CRITIC_FLOW`. The
 tests check that A+ / A- and C equal the core and the published values (Opricovic and Tzeng 2004:
 C = 0.762, 0.722, 0.238; Krishnan et al. 2021: σ and weights), that the distance plane places every

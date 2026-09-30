@@ -200,18 +200,14 @@ export function fitDistancePlane(points: readonly Point[], width: number, opts: 
   }
 }
 
-/**
- * A segment as translate + rotate + scale of a unit line, so CSS can transition it (SVG line
- * coordinates do not transition). `fallbackAngle` is used for a zero-length segment so it does
- * not spin when it grows again.
- */
-export function segmentTransform(from: Point, to: Point, fallbackAngle: number): { x: number; y: number; angle: number; length: number } {
-  const dx = to.x - from.x
-  const dy = to.y - from.y
-  const length = Math.hypot(dx, dy)
-  // `+ 0` turns -0 into 0: atan2(-0, -1) would be -180 instead of 180.
-  const angle = length < 1e-9 ? fallbackAngle : (Math.atan2(dy + 0, dx + 0) * 180) / Math.PI
-  return { x: from.x, y: from.y, angle, length }
+/** SVG path data of the straight line from `a` to `b`. */
+export function linePath(a: Point, b: Point): string {
+  return `M${a.x} ${a.y}L${b.x} ${b.y}`
+}
+
+/** CSS transform that puts an element drawn around the origin at `p`, so a move between two places can transition. */
+export function pointCss(p: Point): string {
+  return `translate(${p.x}px, ${p.y}px)`
 }
 
 // ---------------------------------------------------------------------------------------------

@@ -12,7 +12,8 @@ import {
   ISO_C_DEFAULT,
   isoClosenessEnd,
   placeLabels,
-  segmentTransform,
+  linePath,
+  pointCss,
   topsisProjection,
   type Point,
   type TopsisProjection,
@@ -116,6 +117,9 @@ type Screen = { x: number; y: number }
  *   alternative's distance lines. Values grow right and up on both axes; the axis label says which
  *   direction is better. Exact for two criteria, a projection for more.
  * Points are a radio group: click, or Tab to it and use the arrow keys / Home / End.
+ * Motion (docs/design/MOTION.md): switching the view moves each alternative's dot and label to its place in the other
+ * view (object constancy); what belongs to one view only (axes, rays, A+ and A-, guides) crossfades. Both views are
+ * drawn, the hidden one invisible. A new selection moves the lines. Nothing moves on first render or on resize.
  */
 export function TopsisGeometry({ problem, weights, axes, defaultView = 'distances', selected, onSelectedChange, format = defaultFormat, labels, className }: TopsisGeometryProps) {
   const l = { ...TOPSIS_GEOMETRY_LABELS_EN, ...labels }
@@ -180,7 +184,11 @@ export function TopsisGeometry({ problem, weights, axes, defaultView = 'distance
         }
 
   const w = Math.max(width, 240)
-  const drawing = view === 'distances' ? planeDrawing(proj, w, l, uid, format) : criteriaDrawing(proj, w, l, uid, xName, yName, dirName(ax, xName), dirName(ay, yName))
+  const drawings: Record<TopsisGeometryView, Drawing> = {
+    distances: planeDrawing(proj, w, l, uid, format),
+    criteria: criteriaDrawing(proj, w, l, uid, xName, yName, dirName(ax, xName), dirName(ay, yName)),
+  }
+  const drawing = drawings[view]
   const pts = drawing.points
   const nameMax = Math.max(40, Math.min(120, (drawing.box.right - drawing.box.left) / 3))
   const shortNames = problem.alternatives.map((name) => truncate(name, nameMax, 12))
@@ -230,8 +238,20 @@ export function TopsisGeometry({ problem, weights, axes, defaultView = 'distance
             <path className={s.axisHead} d="M0 0.5 8 4 0 7.5z" />
           </marker>
         </defs>
-        {drawing.background}
-        {drawing.selection(pts[current] ?? pts[0]!, current)}
+        {VIEWS.map((v) => (
+          <g key={v} className={s.layer} data-view={v} data-hidden={v === view ? undefined : ''}>
+            {drawings[v].background}
+          </g>
+        ))}
+        {/* The selection's lines point at where the dot lands: they fade in step with its move. */}
+        {VIEWS.map((v) => {
+          const d = drawings[v]
+          return (
+            <g key={v} className={`${s.layer} ${s.selectionLayer}`} data-view={v} data-hidden={v === view ? undefined : ''}>
+              {d.selection(d.points[current] ?? d.points[0]!, current)}
+            </g>
+          )
+        })}
 
         {/* Alternatives: a radio group, one tab stop, arrows move the selection. */}
         <g role="radiogroup" aria-label={l.select}>
@@ -247,6 +267,7 @@ export function TopsisGeometry({ problem, weights, axes, defaultView = 'distance
                   pointRefs.current[i] = el
                 }}
                 className={s.point}
+                style={{ transform: pointCss(p) }}
                 role="radio"
                 aria-checked={on}
                 aria-label={l.point(name, format(proj.closeness[i]!))}
@@ -254,10 +275,10 @@ export function TopsisGeometry({ problem, weights, axes, defaultView = 'distance
                 onClick={() => choose(i)}
                 onKeyDown={(e) => onKey(e, i)}
               >
-                <circle className={s.hit} cx={p.x} cy={p.y} r={14} />
-                <circle className={s.focusRing} cx={p.x} cy={p.y} r={10} />
-                <circle className={s.dot} cx={p.x} cy={p.y} r={on ? 6 : 5} />
-                <text className={s.pointLabel} x={spot.x} y={spot.y} textAnchor={spot.anchor}>
+                <circle className={s.hit} r={14} />
+                <circle className={s.focusRing} r={10} />
+                <circle className={s.dot} r={on ? 6 : 5} />
+                <text className={s.pointLabel} textAnchor={spot.anchor} style={{ transform: pointCss({ x: spot.x - p.x, y: spot.y - p.y }) }}>
                   {name !== short ? <title>{name}</title> : null}
                   {short}
                 </text>
@@ -289,6 +310,18 @@ export function TopsisGeometry({ problem, weights, axes, defaultView = 'distance
       </p>
     </ChartFigure>
   )
+}
+
+const VIEWS: readonly TopsisGeometryView[] = ['distances', 'criteria']
+
+/**
+ * A straight line whose geometry is also the CSS `d` property, so a new selection slides it where `d` transitions
+ * (Chromium, Firefox) and it jumps elsewhere (the attribute). Not a unit line stretched by transform: a composited
+ * transform animation scales the painted stroke, which smears dashes and caps while it moves.
+ */
+function Segment({ className, from, to }: { className: string | undefined; from: Point; to: Point }) {
+  const d = linePath(from, to)
+  return <path className={className} d={d} style={{ d: `path('${d}')` }} />
 }
 
 type Drawing = {
@@ -347,10 +380,11 @@ function planeDrawing(proj: TopsisProjection, width: number, l: TopsisGeometryLa
         </text>
       </>
     ),
+    // Guides from the selected point down to the D+ axis and left to the D- axis.
     selection: (sel) => (
       <g aria-hidden="true">
-        <line className={s.guide} x1={sel.x} y1={sel.y} x2={sel.x} y2={box.bottom} />
-        <line className={s.guide} x1={sel.x} y1={sel.y} x2={box.left} y2={sel.y} />
+        <Segment className={s.guide} from={sel} to={{ x: sel.x, y: box.bottom }} />
+        <Segment className={s.guide} from={sel} to={{ x: box.left, y: sel.y }} />
       </g>
     ),
   }
@@ -373,8 +407,6 @@ function criteriaDrawing(
   const ideal = P(proj.ideal)
   const anti = P(proj.antiIdeal)
   const refLabelW = Math.max(estimateTextWidth(l.ideal, 12), estimateTextWidth(l.antiIdeal, 12))
-  // A zero-length line keeps the direction from A+ towards A- (and back), so it does not spin when it grows.
-  const back = segmentTransform(ideal, anti, 0).angle
   const labelW = box.right - box.left
   return {
     height: fit.height,
@@ -416,36 +448,17 @@ function criteriaDrawing(
       </>
     ),
     selection: (sel) => {
-      const toIdeal = segmentTransform(ideal, sel, back + 180)
-      const toAnti = segmentTransform(anti, sel, back)
       const mid = (a: Screen, b: Screen) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 })
       const midPlus = mid(ideal, sel)
       const midMinus = mid(anti, sel)
       return (
         <>
-          {/* Unit lines moved by transform, so they can transition. */}
-          <line
-            className={s.dist}
-            x1={0}
-            y1={0}
-            x2={1}
-            y2={0}
-            vectorEffect="non-scaling-stroke"
-            style={{ transform: `translate(${toIdeal.x}px, ${toIdeal.y}px) rotate(${toIdeal.angle}deg) scale(${toIdeal.length}, 1)` }}
-          />
-          <line
-            className={`${s.dist} ${s.distMinus}`}
-            x1={0}
-            y1={0}
-            x2={1}
-            y2={0}
-            vectorEffect="non-scaling-stroke"
-            style={{ transform: `translate(${toAnti.x}px, ${toAnti.y}px) rotate(${toAnti.angle}deg) scale(${toAnti.length}, 1)` }}
-          />
-          <text className={s.distLabel} x={0} y={0} dx={6} dy={-6} style={{ transform: `translate(${midPlus.x}px, ${midPlus.y}px)` }}>
+          <Segment className={s.dist} from={ideal} to={sel} />
+          <Segment className={`${s.dist} ${s.distMinus}`} from={anti} to={sel} />
+          <text className={s.distLabel} x={0} y={0} dx={6} dy={-6} style={{ transform: pointCss(midPlus) }}>
             {l.dPlus}
           </text>
-          <text className={s.distLabel} x={0} y={0} dx={6} dy={-6} style={{ transform: `translate(${midMinus.x}px, ${midMinus.y}px)` }}>
+          <text className={s.distLabel} x={0} y={0} dx={6} dy={-6} style={{ transform: pointCss(midMinus) }}>
             {l.dMinus}
           </text>
         </>

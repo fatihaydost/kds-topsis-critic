@@ -1,7 +1,7 @@
 /*
  * Method illustrations. Colours only from tokens.css: UI colour for chrome (--line, --text-*),
  * data colour for marks (--data-context for the rest, --data-accent for the one that matters).
- * Motion only on a state change: 200 ms (4/3 of --dur), 0 under prefers-reduced-motion (--dur is 0).
+ * Motion only on a state change (docs/design/MOTION.md): token durations, all 0 under prefers-reduced-motion.
  */
 
 .fig {
@@ -191,8 +191,6 @@
   stroke-width: 2;
   stroke-linecap: round;
   fill: none;
-  transform-box: view-box;
-  transform-origin: 0 0;
 }
 
 .distMinus {
@@ -215,6 +213,8 @@
 .point {
   cursor: pointer;
   outline: none;
+  transform-box: view-box;
+  transform-origin: 0 0;
 }
 
 .dot {
@@ -254,6 +254,8 @@
   stroke: var(--bg);
   stroke-width: 3px;
   stroke-linejoin: round;
+  transform-box: view-box;
+  transform-origin: 0 0;
 }
 
 .point[aria-checked='true'] .pointLabel {
@@ -261,10 +263,40 @@
   font-weight: 600;
 }
 
-/* Only a selection change moves the lines, in 200 ms; resizing redraws at once. */
+/* The part of the drawing that belongs to one view; the other view's part is drawn but hidden. */
+.layer[data-hidden] {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/*
+ * Only a state change moves anything; resizing redraws at once (.animate is off for that render).
+ * A new selection slides the lines (--dur-slow). A new view moves the dots and their labels to their new place
+ * (--dur-data) while the view's own marks crossfade (--dur; the selection's lines in --dur-data, so they arrive with
+ * the dot); visibility keeps the leaving layer painted until it is gone.
+ */
 .animate .dist,
+.animate .guide {
+  transition: d var(--dur-slow) var(--ease);
+}
+
 .animate .distLabel {
-  transition: transform calc(var(--dur) * 4 / 3) var(--ease);
+  transition: transform var(--dur-slow) var(--ease);
+}
+
+.animate .point,
+.animate .pointLabel {
+  transition: transform var(--dur-data) var(--ease);
+}
+
+.animate .layer {
+  transition:
+    opacity var(--dur) var(--ease),
+    visibility var(--dur) var(--ease);
+}
+
+.animate .selectionLayer {
+  transition-duration: var(--dur-data);
 }
 
 .readout {
@@ -518,6 +550,7 @@
   stroke: var(--data-accent);
   stroke-width: 1;
   stroke-dasharray: 2 3;
+  fill: none;
 }
 
 /* Method thumbnails (catalogue cards) --------------------------------------------------------- */

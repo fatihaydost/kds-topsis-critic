@@ -16,7 +16,8 @@ import {
   isoClosenessEnd,
   flowIndex,
   planarDistance,
-  segmentTransform,
+  linePath,
+  pointCss,
   TOPSIS_FLOW,
   topsisProjection,
 } from './geometry'
@@ -158,14 +159,14 @@ describe('distance plane', () => {
   })
 })
 
-describe('segmentTransform', () => {
-  it('gives length and angle of a segment', () => {
-    expect(segmentTransform({ x: 0, y: 0 }, { x: 3, y: 4 }, 0)).toEqual({ x: 0, y: 0, angle: (Math.atan2(4, 3) * 180) / Math.PI, length: 5 })
-    expect(segmentTransform({ x: 5, y: 5 }, { x: 0, y: 5 }, 0).angle).toBe(180)
-    expect(segmentTransform({ x: 5, y: -0 }, { x: 0, y: 0 }, 0).angle).toBe(180)
+describe('linePath and pointCss', () => {
+  it('draws a straight line as path data (also the CSS d value the lines transition on)', () => {
+    expect(linePath({ x: 10, y: 20 }, { x: 10, y: 50.5 })).toBe('M10 20L10 50.5')
+    // Always one M and one L, so any two lines interpolate (CSS d only transitions between matching commands).
+    expect(linePath({ x: 3, y: 3 }, { x: 3, y: 3 })).toBe('M3 3L3 3')
   })
-  it('keeps the fallback angle for a zero-length segment', () => {
-    expect(segmentTransform({ x: 1, y: 1 }, { x: 1, y: 1 }, 135)).toMatchObject({ angle: 135, length: 0 })
+  it('moves a point by translate', () => {
+    expect(pointCss({ x: 12.5, y: -3 })).toBe('translate(12.5px, -3px)')
   })
 })
 
