@@ -200,6 +200,28 @@ export function fitDistancePlane(points: readonly Point[], width: number, opts: 
   }
 }
 
+/**
+ * Where a reference point (A+ or A-) gets its coordinates: each of its two values is some alternative's value on that
+ * axis. One segment per axis, from that alternative (the nearest, if several share the value) straight to the
+ * reference point: vertical for the x value, horizontal for the y value. Left out when the alternative is the corner
+ * itself on that axis (zero length). Compared with a relative tolerance, in data units.
+ */
+export function referenceGuides(points: readonly Point[], ref: Point): { from: Point; to: Point }[] {
+  const span = Math.max(...points.map((p) => Math.max(Math.abs(p.x), Math.abs(p.y))), Math.abs(ref.x), Math.abs(ref.y), 1e-12)
+  const eps = span * 1e-9
+  const out: { from: Point; to: Point }[] = []
+  for (const axis of ['x', 'y'] as const) {
+    const other = axis === 'x' ? 'y' : 'x'
+    let best: Point | null = null
+    for (const p of points) {
+      if (Math.abs(p[axis] - ref[axis]) > eps) continue
+      if (!best || Math.abs(p[other] - ref[other]) < Math.abs(best[other] - ref[other])) best = p
+    }
+    if (best && Math.abs(best[other] - ref[other]) > eps) out.push({ from: best, to: ref })
+  }
+  return out
+}
+
 /** SVG path data of the straight line from `a` to `b`. */
 export function linePath(a: Point, b: Point): string {
   return `M${a.x} ${a.y}L${b.x} ${b.y}`

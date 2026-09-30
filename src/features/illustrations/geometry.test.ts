@@ -17,6 +17,7 @@ import {
   flowIndex,
   planarDistance,
   linePath,
+  referenceGuides,
   pointCss,
   TOPSIS_FLOW,
   topsisProjection,
@@ -156,6 +157,35 @@ describe('distance plane', () => {
     }
     expect(isoClosenessEnd(0.5, 2, 1)).toMatchObject({ x: 1, y: 1, side: 'top' })
     expect(isoClosenessEnd(0.25, 4, 2)).toMatchObject({ side: 'right' })
+  })
+})
+
+describe('referenceGuides', () => {
+  it('draws where A+ and A- take each coordinate from (Opricovic and Tzeng 2004, problem f)', () => {
+    const proj = topsisProjection(problemOf('opricovic-tzeng-2004-f'), [0.5, 0.5])!
+    for (const ref of [proj.ideal, proj.antiIdeal]) {
+      const guides = referenceGuides(proj.points, ref)
+      for (const g of guides) {
+        expect(g.to).toEqual(ref)
+        // Each guide runs along one axis from an alternative that holds that value.
+        expect(g.from.x === ref.x || g.from.y === ref.y).toBe(true)
+        expect(proj.points).toContainEqual(g.from)
+      }
+      // A reference point is not an alternative here, so both of its values come from somewhere.
+      expect(guides).toHaveLength(2)
+    }
+  })
+  it('leaves out an axis where the alternative is the corner itself, and picks the nearest holder', () => {
+    const pts = [
+      { x: 1, y: 5 },
+      { x: 1, y: 2 },
+      { x: 3, y: 1 },
+    ]
+    expect(referenceGuides(pts, { x: 1, y: 1 })).toEqual([
+      { from: { x: 1, y: 2 }, to: { x: 1, y: 1 } },
+      { from: { x: 3, y: 1 }, to: { x: 1, y: 1 } },
+    ])
+    expect(referenceGuides([{ x: 2, y: 2 }], { x: 2, y: 2 })).toEqual([])
   })
 })
 
