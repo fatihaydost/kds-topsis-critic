@@ -1,40 +1,56 @@
 /**
- * Monte Carlo weights (core monteCarlo) off the main thread: 10,000 rankings would block the slider and the page for
- * a noticeable moment. One request at a time; the page drops stale answers by id and terminates a worker that is still
- * busy when a new request comes (the calculation is synchronous, so a message could not interrupt it).
+ * The heavy robustness calculations off the main thread: Monte Carlo weights (10,000 rankings) and the weight sweep of
+ * one criterion (101 grid points, bisection to every switch point and the crossing marks; about 200 ms on a 30 x 15
+ * matrix). One request at a time per worker; the page drops stale answers by id and terminates a worker that is
+ * still busy when a new request comes (the calculation is synchronous, so a message could not interrupt it).
  */
 import { getRankingMethod } from '../../../core/registry'
-import { monteCarlo, type Concentration, type MonteCarloResult } from '../../../core/robustness'
+import { monteCarlo, reweight, sweepWeight, type Concentration, type MonteCarloResult, type Sweep } from '../../../core/robustness'
 import type { Problem } from '../../../core/types'
+import { switchMarks, topSwitchMarks, type Mark } from './helpers'
 
-export type MonteCarloRequest = {
-  id: number
-  problem: Problem
-  weights: number[]
-  method: string
-  concentration: Concentration
-  n: number
-  seed: number
+export type SweepResult = {
+  sweep: Sweep
+  /** Crossings where any two alternatives swap, and only those where first place changes. */
+  marks: Mark[]
+  topMarks: Mark[]
 }
 
-export type MonteCarloResponse = { id: number; result: MonteCarloResult } | { id: number; error: string }
+type Common = { id: number; problem: Problem; weights: number[]; method: string }
+export type MonteCarloRequest = Common & { kind: 'monteCarlo'; concentration: Concentration; n: number; seed: number }
+export type SweepRequest = Common & { kind: 'sweep'; k: number }
+export type WorkerRequest = MonteCarloRequest | SweepRequest
+
+export type WorkerResponse =
+  | { id: number; kind: 'monteCarlo'; result: MonteCarloResult }
+  | { id: number; kind: 'sweep'; result: SweepResult }
+  | { id: number; error: string }
 
 /** Runs one request; shared with the main-thread fallback where workers are not available. */
-export function runMonteCarlo(req: MonteCarloRequest): MonteCarloResponse {
+export function runRequest(req: WorkerRequest): WorkerResponse {
   const method = getRankingMethod(req.method)
   if (!method) return { id: req.id, error: `unknown ranking method ${req.method}` }
   try {
-    const result = monteCarlo(req.problem, req.weights, method, { concentration: req.concentration, n: req.n, seed: req.seed })
-    return { id: req.id, result }
+    if (req.kind === 'monteCarlo') {
+      const result = monteCarlo(req.problem, req.weights, method, { concentration: req.concentration, n: req.n, seed: req.seed })
+      return { id: req.id, kind: 'monteCarlo', result }
+    }
+    const sweep = sweepWeight(req.problem, req.weights, method, req.k)
+    const scoresAt = (w: number) => method.compute(req.problem, reweight(req.weights, req.k, w), {}).scores
+    return {
+      id: req.id,
+      kind: 'sweep',
+      result: { sweep, marks: switchMarks(sweep.rankingIntervals, scoresAt), topMarks: topSwitchMarks(sweep.topIntervals, scoresAt) },
+    }
   } catch (err) {
     return { id: req.id, error: err instanceof Error ? err.message : String(err) }
   }
 }
 
-type WorkerScope = { onmessage: ((e: MessageEvent<MonteCarloRequest>) => void) | null; postMessage: (msg: MonteCarloResponse) => void }
+type WorkerScope = { onmessage: ((e: MessageEvent<WorkerRequest>) => void) | null; postMessage: (msg: WorkerResponse) => void }
 
-// Only inside a worker (no `document`): the fallback imports runMonteCarlo on the main thread too.
+// Only inside a worker (no `document`): the fallback imports runRequest on the main thread too.
 if (typeof document === 'undefined' && typeof self !== 'undefined') {
   const scope = self as unknown as WorkerScope
-  scope.onmessage = (e) => scope.postMessage(runMonteCarlo(e.data))
+  scope.onmessage = (e) => scope.postMessage(runRequest(e.data))
 }

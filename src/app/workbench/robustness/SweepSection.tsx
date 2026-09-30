@@ -1,36 +1,51 @@
 import { ArrowCounterClockwise } from '@phosphor-icons/react'
-import { useCallback, useId, useMemo, useState, type CSSProperties, type KeyboardEvent } from 'react'
-import { reweight, sweepWeight } from '../../../core/robustness'
+import { useCallback, useId, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react'
+import { useTranslation } from 'react-i18next'
+import { reweight } from '../../../core/robustness'
 import type { Problem, RankingMethod } from '../../../core/types'
 import { SweepChart } from '../../../features/charts/SweepChart'
 import { useElementWidth } from '../../../features/charts/useElementWidth'
 import { useNumberFormat } from '../../../i18n'
 import { Button, SegmentedControl, Select } from '../../../ui'
-import { useTranslation } from 'react-i18next'
 import { DECIMALS } from '../shared'
-import { largestWeight, rankOrder, segmentedWidth, snapWeight, stepWeight, switchMarks } from './helpers'
+import {
+  labelledLines,
+  largestWeight,
+  MANY_ALTERNATIVES,
+  MANY_SWITCHES,
+  rankOrder,
+  snapWeight,
+  stepWeight,
+} from './helpers'
 import { LiveRanking } from './LiveRanking'
 import s from './robustness.module.css'
-import { SectionHead, SourcesDisclosure } from './SectionParts'
+import { SectionHead, segmentedWidth, SourcesDisclosure } from './SectionParts'
 import { useRobustnessText } from './text'
+import { useSweep } from './useWorkerJob'
 
 type Props = {
   problem: Problem
   weights: readonly number[]
   method: RankingMethod
+  /** The ranking with the user's weights. */
+  baseRanking: readonly number[]
   names: string[]
   criteria: string[]
 }
 
 /** Thumb of the range input (robustness.module.css --thumb): its centre runs from thumb/2 to width - thumb/2. */
 const THUMB = 16
+const EMPTY_XS = [0, 1]
+const NO_LINES: number[] = []
+const NO_MARKS: { x: number; y: number }[] = []
 
 /**
  * A: one weight at a time. Pick a criterion, drag its weight (the others keep their proportions); the chart shows
  * every alternative's closeness over the whole range with a cursor at the weight, and the table next to it is the
- * ranking at that weight, its rows sliding to their new places as the order changes.
+ * ranking at that weight, its rows sliding to their new places as the order changes. The sweep of a criterion is
+ * calculated in a worker (a large matrix takes a few hundred ms); the ranking at the cursor is one calculation, here.
  */
-export function SweepSection({ problem, weights, method, names, criteria }: Props) {
+export function SweepSection({ problem, weights, method, baseRanking, names, criteria }: Props) {
   const { t } = useRobustnessText()
   const { t: tw } = useTranslation()
   const nf = useNumberFormat(DECIMALS.weight)
@@ -38,25 +53,39 @@ export function SweepSection({ problem, weights, method, names, criteria }: Prop
   const [k, setK] = useState(() => largestWeight(weights))
   const base = weights[k] ?? 0
   const [wk, setWk] = useState(base)
-  const [boxRef, boxWidth] = useElementWidth<HTMLDivElement>()
+  const [boxRef, boxWidth] = useElementWidth<HTMLElement>()
+  // Set by the key handler just before the weight changes: a held-down key makes the rows jump instead of slide.
+  const keyRepeat = useRef(false)
 
   const choose = (j: number) => {
+    keyRepeat.current = false
     setK(j)
     setWk(weights[j] ?? 0)
   }
+  const setWeight = (v: number, repeat = false) => {
+    keyRepeat.current = repeat
+    setWk(v)
+  }
 
-  const sweep = useMemo(() => sweepWeight(problem, weights, method, k), [problem, weights, method, k])
-  const xs = useMemo(() => sweep.points.map((p) => p.wk), [sweep])
-  const series = useMemo(() => names.map((_, i) => sweep.points.map((p) => p.scores[i]!)), [sweep, names])
-  const scoresAt = useCallback((w: number) => method.compute(problem, reweight(weights, k, w), {}).scores, [method, problem, weights, k])
-  const switches = useMemo(() => switchMarks(sweep.rankingIntervals, scoresAt), [sweep, scoresAt])
+  const job = useSweep(problem, weights, method.id, k)
+  const result = job.result
+  const sweep = result?.sweep ?? null
+  const current = sweep !== null && sweep.k === k
+  const xs = useMemo(() => sweep?.points.map((p) => p.wk) ?? [], [sweep])
+  const series = useMemo(() => (sweep ? names.map((_, i) => sweep.points.map((p) => p.scores[i]!)) : []), [sweep, names])
   // The ranking at the slider's weight: computed exactly there, never read off the grid.
   const at = useMemo(() => method.compute(problem, reweight(weights, k, wk), {}), [method, problem, weights, k, wk])
   const order = rankOrder(at.ranking)
   const leaders = order.filter((i) => at.ranking[i] === 1)
-  const baseTop = sweep.baseTopInterval
-  const topNames = baseTop.top.map((i) => names[i]).join(', ')
+  const baseLeaders = rankOrder(baseRanking).filter((i) => baseRanking[i] === 1)
   const criterion = criteria[k] ?? ''
+  const shownCriterion = sweep ? (criteria[sweep.k] ?? '') : criterion
+  const many = names.length > MANY_ALTERNATIVES || (result?.marks.length ?? 0) > MANY_SWITCHES
+  const endLabels = useMemo(
+    () => (names.length > MANY_ALTERNATIVES ? labelledLines(baseRanking, leaders) : undefined),
+    // Leaders change while dragging; their names come and go with the accent (the key keeps the memo stable meanwhile).
+    [names.length, baseRanking, leaders.join(',')],
+  )
 
   const format4 = useCallback((v: number) => nf.format(v), [nf])
   const formatTick = useCallback((v: number, d: number) => nf.format(v, d), [nf])
@@ -66,21 +95,41 @@ export function SweepSection({ problem, weights, method, names, criteria }: Prop
     const steps: Record<string, number> = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1, PageUp: 10, PageDown: -10 }
     if (e.key in steps) {
       e.preventDefault()
-      setWk((v) => stepWeight(v, steps[e.key]!))
+      setWeight(stepWeight(wk, steps[e.key]!), e.repeat)
     } else if (e.key === 'Home' || e.key === 'End') {
       e.preventDefault()
-      setWk(e.key === 'Home' ? 0 : 1)
+      setWeight(e.key === 'Home' ? 0 : 1, e.repeat)
     }
   }
 
-  const holds =
-    baseTop.from <= 1e-9 && baseTop.to >= 1 - 1e-9
-      ? t('sweep.holdsAll', { name: topNames, criterion })
-      : t('sweep.holds', { name: topNames, criterion, from: nf.format(baseTop.from), to: nf.format(baseTop.to), base: nf.format(base) })
+  let holds = ''
+  if (baseLeaders.length > 1) holds = t('sweep.tied', { names: baseLeaders.map((i) => names[i]).join(', ') })
+  else if (sweep && current) {
+    const top = sweep.baseTopInterval
+    const topNames = top.top.map((i) => names[i]).join(', ')
+    holds =
+      top.from <= 1e-9 && top.to >= 1 - 1e-9
+        ? t('sweep.holdsAll', { name: topNames, criterion })
+        : t('sweep.holds', { name: topNames, criterion, from: nf.format(top.from), to: nf.format(top.to), base: nf.format(base) })
+  }
 
   const useSegments = criteria.length <= 5 && segmentedWidth(criteria) <= boxWidth
   const sliderId = `${uid}-slider`
   const tableTitleId = `${uid}-table`
+  const baseName = baseLeaders.map((i) => names[i]).join(', ')
+  const readout = (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+      <p className="text-14 text-text-2">
+        {t('sweep.slider', { criterion })}{' '}
+        <output htmlFor={sliderId} className="num font-semibold text-text" data-testid="sweep-weight">
+          {nf.format(wk)}
+        </output>
+      </p>
+      <Button size="sm" variant="ghost" icon={<ArrowCounterClockwise aria-hidden />} onClick={() => setWeight(base)} disabled={wk === base}>
+        {t('sweep.reset')}
+      </Button>
+    </div>
+  )
 
   return (
     <section aria-labelledby={`${uid}-title`} className="flex flex-col gap-4" ref={boxRef}>
@@ -110,65 +159,66 @@ export function SweepSection({ problem, weights, method, names, criteria }: Prop
         )}
       </div>
 
-      <p className="max-w-[72ch] text-16 font-medium text-text" data-testid="holds-sentence">
+      {/* The sentence of the criterion being shown; it changes when that criterion's sweep has arrived. */}
+      <p className="min-h-6 max-w-[72ch] text-16 font-medium text-text" data-testid="holds-sentence">
         {holds}
       </p>
 
       <div className="grid grid-cols-1 items-start gap-8 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        <div className="flex min-w-0 flex-col gap-3">
+        <div className="flex min-w-0 flex-col gap-3" aria-busy={job.busy} data-testid="sweep-chart">
+          {/* One chart from the start (empty axes until the first sweep arrives), so the slider inside it is the same
+              element throughout and keeps the focus. */}
           <SweepChart
-            title={t('sweep.chartTitle', { criterion })}
+            title={t('sweep.chartTitle', { criterion: shownCriterion })}
             labels={names}
-            xs={xs}
+            endLabels={sweep ? endLabels : NO_LINES}
+            xs={sweep ? xs : EMPTY_XS}
             series={series}
-            cursor={wk}
+            cursor={current ? wk : null}
             cursorValues={at.scores}
-            base={base}
-            switches={switches}
-            topBand={[baseTop.from, baseTop.to]}
-            rankingBand={[sweep.baseRankingInterval.from, sweep.baseRankingInterval.to]}
-            highlight={leaders}
+            base={weights[sweep?.k ?? k] ?? 0}
+            switches={!result ? NO_MARKS : many ? result.topMarks : result.marks}
+            topBand={sweep ? [sweep.baseTopInterval.from, sweep.baseTopInterval.to] : [base, base]}
+            rankingBand={sweep ? [sweep.baseRankingInterval.from, sweep.baseRankingInterval.to] : [base, base]}
+            highlight={current ? leaders : []}
             format={format4}
             formatTick={formatTick}
             formatWeight={formatWeight}
-            onPick={(v) => setWk(snapWeight(v))}
-            text={{ yours: t('sweep.yours'), showTable: tw('workbench.chart.showTable'), alternative: tw('workbench.alternative') }}
+            onPick={(v) => setWeight(snapWeight(v))}
+            text={{
+              yours: t('sweep.yours'),
+              showTable: tw('workbench.chart.showTable'),
+              tableCorner: t('sweep.tableCorner', { criterion: shownCriterion }),
+              axis: t('sweep.axis', { criterion: shownCriterion }),
+            }}
             below={({ left, right }) => (
               <div className="flex flex-col gap-1">
                 <div className={s.slider} style={{ marginLeft: left - THUMB / 2, width: right - left + THUMB } as CSSProperties}>
-                  <input
+                  <WeightInput
                     id={sliderId}
-                    type="range"
-                    className={s.range}
-                    min={0}
-                    max={1}
-                    step={0.01}
+                    label={t('sweep.slider', { criterion })}
                     value={wk}
-                    aria-label={t('sweep.slider', { criterion })}
-                    aria-valuetext={nf.format(wk)}
-                    onChange={(e) => setWk(snapWeight(Number(e.target.value)))}
+                    valueText={nf.format(wk)}
+                    onChange={(v) => setWeight(snapWeight(v))}
                     onKeyDown={onKey}
                   />
                   <span aria-hidden className={s.baseTick} style={{ left: `calc(${THUMB / 2}px + ${base} * (100% - ${THUMB}px))` }} />
                 </div>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                  <p className="text-14 text-text-2">
-                    {t('sweep.slider', { criterion })}{' '}
-                    <output htmlFor={sliderId} className="num font-semibold text-text" data-testid="sweep-weight">
-                      {nf.format(wk)}
-                    </output>
-                  </p>
-                  <Button size="sm" variant="ghost" icon={<ArrowCounterClockwise aria-hidden />} onClick={() => setWk(base)} disabled={wk === base}>
-                    {t('sweep.reset')}
-                  </Button>
-                </div>
+                {readout}
               </div>
             )}
           />
+          <span role="status" className="text-12 text-text-2" data-testid="sweep-status">
+            {job.busy ? t('sweep.computing') : ''}
+          </span>
           <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 text-12 text-text-2" aria-hidden>
             <li className="inline-flex items-center gap-1.5">
+              <span className={s.swatchLeader} />
+              {t('sweep.legendLeader')}
+            </li>
+            <li className="inline-flex items-center gap-1.5">
               <span className={s.swatchTop} />
-              {t('sweep.legendTop', { name: topNames })}
+              {t('sweep.legendTop', { name: baseName })}
             </li>
             <li className="inline-flex items-center gap-1.5">
               <span className={s.swatchRanking} />
@@ -196,6 +246,7 @@ export function SweepSection({ problem, weights, method, names, criteria }: Prop
             names={names}
             format={format4}
             labelledBy={tableTitleId}
+            instant={keyRepeat.current}
             columns={{
               rank: tw('workbench.ranking.columns.rank'),
               alternative: tw('workbench.ranking.columns.alternative'),
@@ -211,5 +262,31 @@ export function SweepSection({ problem, weights, method, names, criteria }: Prop
 
       <SourcesDisclosure part="sweep" />
     </section>
+  )
+}
+
+/** The weight as a native range input: 0..1 in 0.01 steps, the exact value in aria-valuetext. */
+function WeightInput(props: {
+  id: string
+  label: string
+  value: number
+  valueText: string
+  onChange: (v: number) => void
+  onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void
+}) {
+  return (
+    <input
+      id={props.id}
+      type="range"
+      className={s.range}
+      min={0}
+      max={1}
+      step={0.01}
+      value={props.value}
+      aria-label={props.label}
+      aria-valuetext={props.valueText}
+      onChange={(e) => props.onChange(Number(e.target.value))}
+      onKeyDown={props.onKeyDown}
+    />
   )
 }

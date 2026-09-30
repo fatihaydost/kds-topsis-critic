@@ -20,6 +20,11 @@ export type LiveRankingProps = {
   format: (v: number) => string
   labelledBy: string
   columns: { rank: string; alternative: string; closeness: string }
+  /**
+   * The change comes from a held-down key (key repeat): rows jump instead of sliding (MOTION.md frequency rule: a
+   * high-frequency keyboard action gets no motion); the tint stays.
+   */
+  instant?: boolean
 }
 
 /**
@@ -28,7 +33,7 @@ export type LiveRankingProps = {
  * starts from their painted position, so dragging never makes a row jump. Rows that changed place take a short accent
  * tint. Closeness values change at once (no counting). With reduced motion the rows jump and the tint remains.
  */
-export function LiveRanking({ order, ranking, scores, names, format, labelledBy, columns }: LiveRankingProps) {
+export function LiveRanking({ order, ranking, scores, names, format, labelledBy, columns, instant = false }: LiveRankingProps) {
   const rows = useRef(new Map<number, HTMLTableRowElement>())
   const tops = useRef(new Map<number, number>())
   const prevOrder = useRef<number[] | null>(null)
@@ -44,7 +49,7 @@ export function LiveRanking({ order, ranking, scores, names, format, labelledBy,
       const changed = movedAlternatives(prev, order)
       setMoved((m) => ({ ids: new Set(changed), n: (m?.n ?? 0) + 1 }))
       const any = rows.current.values().next().value
-      const duration = any && !reducedMotion() ? tokenMs(any, '--dur-data') : 0
+      const duration = any && !instant && !reducedMotion() ? tokenMs(any, '--dur-data') : 0
       const easing = any ? tokenEase(any) : 'ease'
       for (const [i, el] of rows.current) {
         const before = tops.current.get(i)
@@ -53,9 +58,19 @@ export function LiveRanking({ order, ranking, scores, names, format, labelledBy,
         // Where the row is painted now: its old place plus what a running slide still adds.
         const painted = before + paintedOffsetY(el)
         for (const a of el.getAnimations()) a.cancel()
+        el.removeAttribute('data-lifted')
         const dy = painted - after
         if (duration > 0 && Math.abs(dy) > 0.5) {
-          el.animate([{ transform: `translateY(${dy}px)` }, { transform: 'translateY(0px)' }], { duration, easing })
+          const anim = el.animate([{ transform: `translateY(${dy}px)` }, { transform: 'translateY(0px)' }], { duration, easing })
+          if (dy > 0) {
+            el.setAttribute('data-lifted', '')
+            // Lowered when no slide is left on the row: a cancelled earlier slide reports later and must not.
+            const drop = () => {
+              if (el.getAnimations().length === 0) el.removeAttribute('data-lifted')
+            }
+            anim.addEventListener('finish', drop)
+            anim.addEventListener('cancel', drop)
+          }
         }
       }
     }

@@ -3,7 +3,6 @@
  * No DOM and no React, so they are unit tested (helpers.test.ts).
  */
 import type { Concentration, PerturbationRow, StableInterval } from '../../../core/robustness'
-import { estimateTextWidth } from '../../../features/charts/layout'
 import type { Lang } from '../../../i18n/lang'
 
 /** Monte Carlo settings shown in the UI (N and seed are printed next to the results). */
@@ -59,8 +58,10 @@ export function stepWeight(v: number, steps: number): number {
  * closest pair of alternatives that changed rank there, at their (equal) closeness. `scoresAt` evaluates the method
  * at a weight exactly.
  */
-export function switchMarks(intervals: readonly StableInterval[], scoresAt: (wk: number) => readonly number[]): { x: number; y: number }[] {
-  const out: { x: number; y: number }[] = []
+export type Mark = { x: number; y: number }
+
+export function switchMarks(intervals: readonly StableInterval[], scoresAt: (wk: number) => readonly number[]): Mark[] {
+  const out: Mark[] = []
   for (let k = 0; k + 1 < intervals.length; k++) {
     const a = intervals[k]!
     const b = intervals[k + 1]!
@@ -73,6 +74,35 @@ export function switchMarks(intervals: readonly StableInterval[], scoresAt: (wk:
     out.push({ x: a.to, y: (s[sorted[best]!]! + s[sorted[best + 1]!]!) / 2 })
   }
   return out
+}
+
+/**
+ * Only the crossings where first place changes hands: at each boundary between two intervals of constant first place,
+ * the old and the new leaders, at their (equal) closeness.
+ */
+export function topSwitchMarks(intervals: readonly StableInterval[], scoresAt: (wk: number) => readonly number[]): Mark[] {
+  const out: Mark[] = []
+  for (let k = 0; k + 1 < intervals.length; k++) {
+    const a = intervals[k]!
+    const players = [...new Set([...a.top, ...intervals[k + 1]!.top])]
+    if (players.length < 2) continue
+    const s = scoresAt(a.to)
+    out.push({ x: a.to, y: players.reduce((sum, i) => sum + s[i]!, 0) / players.length })
+  }
+  return out
+}
+
+/** Past these, drawing every crossing turns the chart into a tangle: only first-place changes are marked. */
+export const MANY_ALTERNATIVES = 12
+export const MANY_SWITCHES = 40
+
+/**
+ * Lines that get a name at their right end: the leaders at the cursor and the first `limit` of the user's ranking.
+ * The rest are named in the table next to the chart.
+ */
+export function labelledLines(baseRanking: readonly number[], leaders: readonly number[], limit = 8): number[] {
+  const top = rankOrder(baseRanking).slice(0, limit)
+  return [...new Set([...leaders, ...top])].sort((a, b) => a - b)
 }
 
 /** Perturbation rows as a grid: grid[j][d] is criterion j changed by deltas[d] (undefined when the core skipped it). */
@@ -89,9 +119,16 @@ export function perturbGrid(
   return grid
 }
 
-/** First place held in how many of the perturbations. */
-export function heldCount(rows: readonly PerturbationRow[]): { held: number; total: number } {
-  return { held: rows.filter((r) => r.sameTop).length, total: rows.length }
+/**
+ * A perturbation of a criterion whose weight is 0 changes nothing (a percentage of 0 is 0): it is not a test of the
+ * ranking and is left out of the count.
+ */
+export const applicable = (row: PerturbationRow, weights: readonly number[]): boolean => (weights[row.k] ?? 0) > 0
+
+/** First place held in how many of the (applicable) perturbations. */
+export function heldCount(rows: readonly PerturbationRow[], weights: readonly number[]): { held: number; total: number } {
+  const counted = rows.filter((r) => applicable(r, weights))
+  return { held: counted.filter((r) => r.sameTop).length, total: counted.length }
 }
 
 const BCP47: Record<Lang, string> = { en: 'en-US', tr: 'tr-TR' }
@@ -127,6 +164,3 @@ export function formatShare(p: number, lang: Lang, decimals = 0): string {
 export function formatDelta(delta: number, lang: Lang): string {
   return percent(lang, 0, true).format(delta)
 }
-
-/** Width a md segmented control of these labels needs (14 px text, 12 px padding a side, 1 px gaps and border). */
-export const segmentedWidth = (labels: readonly string[]): number => labels.reduce((w, l) => w + estimateTextWidth(l, 14) + 25, 2)

@@ -1,15 +1,17 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Concentration, MonteCarloResult } from '../../../core/robustness'
 import type { Problem } from '../../../core/types'
-import { runMonteCarlo, type MonteCarloRequest, type MonteCarloResponse } from './robustness.worker'
+import { runRequest, type SweepResult, type WorkerRequest, type WorkerResponse } from './robustness.worker'
 
-export type MonteCarloState = {
+export type JobState<T> = {
   /** The last finished result; it stays on screen while a new one is calculated. */
-  result: MonteCarloResult | null
+  result: T | null
   /** A calculation for the current inputs is running. */
   busy: boolean
   failed: boolean
 }
+
+type Job = WorkerRequest extends infer R ? (R extends WorkerRequest ? Omit<R, 'id'> : never) : never
 
 function createWorker(): Worker | null {
   if (typeof Worker === 'undefined') return null
@@ -21,29 +23,23 @@ function createWorker(): Worker | null {
 }
 
 /**
- * Monte Carlo weights in a Web Worker. A change of the inputs cancels the running calculation (the worker is
- * terminated and a new one started) and starts the new one; answers to older requests are dropped by id.
+ * One robustness calculation in a Web Worker of its own. A new `job` (a new object: memoize it) cancels the running
+ * calculation (the worker is terminated and a new one started) and starts the new one; answers to older requests are
+ * dropped by id. The previous result stays until the new one arrives.
  */
-export function useMonteCarlo(
-  problem: Problem,
-  weights: readonly number[],
-  method: string,
-  concentration: Concentration,
-  n: number,
-  seed: number,
-): MonteCarloState {
-  const [state, setState] = useState<MonteCarloState>({ result: null, busy: true, failed: false })
+function useWorkerJob<T>(job: Job): JobState<T> {
+  const [state, setState] = useState<JobState<T>>({ result: null, busy: true, failed: false })
   const worker = useRef<Worker | null>(null)
   const running = useRef(false)
   const lastId = useRef(0)
 
   useEffect(() => {
     const id = ++lastId.current
-    const req: MonteCarloRequest = { id, problem, weights: [...weights], method, concentration, n, seed }
-    const done = (res: MonteCarloResponse) => {
+    const req = { ...job, id } as WorkerRequest
+    const done = (res: WorkerResponse) => {
       if (res.id !== lastId.current) return
       running.current = false
-      setState((s) => ('result' in res ? { result: res.result, busy: false, failed: false } : { result: s.result, busy: false, failed: true }))
+      setState((s) => ('result' in res ? { result: res.result as T, busy: false, failed: false } : { result: s.result, busy: false, failed: true }))
     }
     // A worker still busy with the previous inputs is stopped: its answer is no longer wanted.
     if (running.current && worker.current) {
@@ -56,17 +52,17 @@ export function useMonteCarlo(
     const w = worker.current
     if (!w) {
       // No workers here: compute after this frame, so the previous result and the status paint first.
-      const t = window.setTimeout(() => done(runMonteCarlo(req)), 0)
+      const t = window.setTimeout(() => done(runRequest(req)), 0)
       return () => window.clearTimeout(t)
     }
-    w.onmessage = (e: MessageEvent<MonteCarloResponse>) => done(e.data)
+    w.onmessage = (e: MessageEvent<WorkerResponse>) => done(e.data)
     w.onerror = (e) => {
       e.preventDefault()
       done({ id, error: e.message })
     }
     w.postMessage(req)
     return undefined
-  }, [problem, weights, method, concentration, n, seed])
+  }, [job])
 
   useEffect(
     () => () => {
@@ -78,4 +74,26 @@ export function useMonteCarlo(
   )
 
   return state
+}
+
+/** Monte Carlo weights (core monteCarlo) in a worker. */
+export function useMonteCarlo(
+  problem: Problem,
+  weights: readonly number[],
+  method: string,
+  concentration: Concentration,
+  n: number,
+  seed: number,
+): JobState<MonteCarloResult> {
+  const job = useMemo(
+    (): Job => ({ kind: 'monteCarlo', problem, weights: [...weights], method, concentration, n, seed }),
+    [problem, weights, method, concentration, n, seed],
+  )
+  return useWorkerJob<MonteCarloResult>(job)
+}
+
+/** The sweep of criterion k (core sweepWeight) and its crossing marks, in a worker. */
+export function useSweep(problem: Problem, weights: readonly number[], method: string, k: number): JobState<SweepResult> {
+  const job = useMemo((): Job => ({ kind: 'sweep', problem, weights: [...weights], method, k }), [problem, weights, method, k])
+  return useWorkerJob<SweepResult>(job)
 }

@@ -30,6 +30,8 @@ export type HeatmapProps = {
   className?: string
   /** Cells that take a new value change colour in --dur (never move); off by default. */
   fade?: boolean
+  /** Title over the column labels (e.g. "Rank" over 1..5); also prefixes the table's column headers. */
+  columnsTitle?: string
 }
 
 /**
@@ -38,7 +40,7 @@ export type HeatmapProps = {
  * the active theme; a fill on which neither reaches 4.5:1 moves slightly along the ramp
  * (see `heatPaint`), so every printed value stays readable in light and dark.
  */
-export function Heatmap({ title, rowLabels, colLabels, values, scale, domain, format, description, tableLabels, className, fade = false }: HeatmapProps) {
+export function Heatmap({ title, rowLabels, colLabels, values, scale, domain, format, description, tableLabels, className, fade = false, columnsTitle }: HeatmapProps) {
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
   const tokens = useHeatTokens()
@@ -46,9 +48,10 @@ export function Heatmap({ title, rowLabels, colLabels, values, scale, domain, fo
   const { labelWidth, headerHeight, cellWidth, cellHeight } = layout
 
   const text = (v: number | null | undefined) => (typeof v === 'number' && Number.isFinite(v) ? format(v) : '')
+  const top = columnsTitle ? 18 : 0
   const table = {
     corner: tableLabels.corner,
-    columns: colLabels,
+    columns: columnsTitle ? colLabels.map((c) => `${columnsTitle} ${c}`) : colLabels,
     rows: rowLabels.map((label, i) => ({ label, cells: colLabels.map((_, j) => text(values[i]?.[j])) })),
   }
 
@@ -66,56 +69,63 @@ export function Heatmap({ title, rowLabels, colLabels, values, scale, domain, fo
       <svg
         className={fade ? `${s.svg} ${s.fade}` : s.svg}
         width={layout.width}
-        height={layout.height}
-        viewBox={`0 0 ${layout.width} ${layout.height}`}
+        height={layout.height + top}
+        viewBox={`0 0 ${layout.width} ${layout.height + top}`}
         role="img"
         aria-labelledby={`${uid}-title`}
         aria-describedby={`${uid}-table`}
       >
-        {layout.colLabels.map((label, j) => (
-          <text
-            key={`c${j}`}
-            className={s.axisLabel}
-            x={labelWidth + j * cellWidth + cellWidth / 2}
-            y={headerHeight / 2}
-            textAnchor="middle"
-            dominantBaseline="central"
-          >
-            {label !== colLabels[j] ? <title>{colLabels[j]}</title> : null}
-            {label}
+        {columnsTitle ? (
+          <text className={s.axisLabel} x={labelWidth + (cellWidth * colLabels.length) / 2} y={top / 2} textAnchor="middle" dominantBaseline="central">
+            {columnsTitle}
           </text>
-        ))}
-        {layout.rowLabels.map((label, i) => {
-          const y = headerHeight + i * cellHeight
-          return (
-            <g key={`r${i}`}>
-              <text className={s.axisLabel} x={0} y={y + cellHeight / 2} dominantBaseline="central">
-                {label !== rowLabels[i] ? <title>{rowLabels[i]}</title> : null}
-                {label}
-              </text>
-              {colLabels.map((_, j) => {
-                const v = values[i]?.[j]
-                const c = heatPaint(v, scale, domain, tokens)
-                const x = labelWidth + j * cellWidth
-                return (
-                  <g key={j}>
-                    <rect className={s.cell} x={x + 1} y={y + 1} width={cellWidth - 2} height={cellHeight - 2} style={{ fill: c.fill }} />
-                    <text
-                      className={s.cellText}
-                      data-ink={c.ink}
-                      x={x + cellWidth / 2}
-                      y={y + cellHeight / 2}
-                      textAnchor="middle"
-                      dominantBaseline="central"
-                    >
-                      {text(v)}
-                    </text>
-                  </g>
-                )
-              })}
-            </g>
-          )
-        })}
+        ) : null}
+        <g transform={top ? `translate(0 ${top})` : undefined}>
+          {layout.colLabels.map((label, j) => (
+            <text
+              key={`c${j}`}
+              className={s.axisLabel}
+              x={labelWidth + j * cellWidth + cellWidth / 2}
+              y={headerHeight / 2}
+              textAnchor="middle"
+              dominantBaseline="central"
+            >
+              {label !== colLabels[j] ? <title>{colLabels[j]}</title> : null}
+              {label}
+            </text>
+          ))}
+          {layout.rowLabels.map((label, i) => {
+            const y = headerHeight + i * cellHeight
+            return (
+              <g key={`r${i}`}>
+                <text className={s.axisLabel} x={0} y={y + cellHeight / 2} dominantBaseline="central">
+                  {label !== rowLabels[i] ? <title>{rowLabels[i]}</title> : null}
+                  {label}
+                </text>
+                {colLabels.map((_, j) => {
+                  const v = values[i]?.[j]
+                  const c = heatPaint(v, scale, domain, tokens)
+                  const x = labelWidth + j * cellWidth
+                  return (
+                    <g key={j}>
+                      <rect className={s.cell} x={x + 1} y={y + 1} width={cellWidth - 2} height={cellHeight - 2} style={{ fill: c.fill }} />
+                      <text
+                        className={s.cellText}
+                        data-ink={c.ink}
+                        x={x + cellWidth / 2}
+                        y={y + cellHeight / 2}
+                        textAnchor="middle"
+                        dominantBaseline="central"
+                      >
+                        {text(v)}
+                      </text>
+                    </g>
+                  )
+                })}
+              </g>
+            )
+          })}
+        </g>
       </svg>
     </ChartFigure>
   )

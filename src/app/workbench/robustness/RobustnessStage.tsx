@@ -15,7 +15,7 @@ import { RemovalSection } from './RemovalSection'
 import { SweepSection } from './SweepSection'
 
 // The rail's status line for this stage: first place held in how many of the ±5/10/20 % nudges.
-registerRobustnessSummary((problem, weights, method) => heldCount(perturbWeights(problem, weights, method, DEFAULT_DELTAS)))
+registerRobustnessSummary((problem, weights, method) => heldCount(perturbWeights(problem, weights, method, DEFAULT_DELTAS), weights))
 
 /**
  * Robustness: how much the ranking of the stages before depends on the weights. Four checks, each a short title, one
@@ -58,7 +58,7 @@ export default function RobustnessStage() {
   const weighting = weightMethod === 'critic' ? getWeightingMethod('critic') : undefined
   return (
     <div className="flex flex-col gap-12 pt-4">
-      <SweepSection problem={problem} weights={w} method={method} names={names} criteria={criteria} />
+      <SweepSection problem={problem} weights={w} method={method} baseRanking={ranking.value.ranking} names={names} criteria={criteria} />
       <PerturbSection problem={problem} weights={w} method={method} names={names} criteria={criteria} />
       <MonteCarloSection problem={problem} weights={w} method={rankingMethod} names={names} baseRanking={ranking.value.ranking} />
       <RemovalSection

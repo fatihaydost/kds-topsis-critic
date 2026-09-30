@@ -6,10 +6,10 @@ import { RankIntervalChart } from '../../../features/charts/RankIntervalChart'
 import { useNumberFormat } from '../../../i18n'
 import { useElementWidth } from '../../../features/charts/useElementWidth'
 import { Notice, SegmentedControl, Select } from '../../../ui'
-import { CONCENTRATION, formatShare, MC_RUNS, MC_SEED, rankOrder, segmentedWidth, SPREADS, type Spread } from './helpers'
-import { SectionHead, SourcesDisclosure } from './SectionParts'
+import { CONCENTRATION, formatShare, MC_RUNS, MC_SEED, rankOrder, SPREADS, type Spread } from './helpers'
+import { SectionHead, segmentedWidth, SourcesDisclosure } from './SectionParts'
 import { useRobustnessText } from './text'
-import { useMonteCarlo } from './useMonteCarlo'
+import { useMonteCarlo } from './useWorkerJob'
 
 type Props = {
   problem: Problem
@@ -97,6 +97,7 @@ export function MonteCarloSection({ problem, weights, method, names, baseRanking
                 format={share}
                 tableLabels={{ show: tw('workbench.chart.showTable'), corner: tw('workbench.alternative') }}
                 fade
+                columnsTitle={t('monteCarlo.rankColumn')}
                 className="min-w-0"
               />
               <RankIntervalChart

@@ -12,6 +12,8 @@ import {
   snapWeight,
   stepWeight,
   switchMarks,
+  labelledLines,
+  topSwitchMarks,
 } from './helpers'
 
 describe('orders', () => {
@@ -68,6 +70,20 @@ describe('switchMarks', () => {
   })
 })
 
+describe('topSwitchMarks and labelledLines', () => {
+  const iv = (from: number, to: number, ranking: number[]): StableInterval => ({ from, to, ranking, top: ranking.flatMap((r, i) => (r === 1 ? [i] : [])) })
+
+  it('marks only where first place changes hands, between the old and new leader', () => {
+    const intervals = [iv(0, 0.3, [1, 2, 3]), iv(0.3, 0.7, [1, 3, 2]), iv(0.7, 1, [2, 3, 1])]
+    expect(topSwitchMarks(intervals.filter((_, k) => k !== 1), () => [0.6, 0.1, 0.6])).toEqual([{ x: 0.3, y: 0.6 }])
+    expect(topSwitchMarks(intervals, (w) => (w === 0.7 ? [0.5, 0.2, 0.5] : [0.9, 0.9, 0.9]))).toEqual([{ x: 0.7, y: 0.5 }])
+  })
+
+  it('labels the leaders and the first k of the base ranking', () => {
+    expect(labelledLines([3, 1, 2, 4, 5], [4], 2)).toEqual([1, 2, 4])
+  })
+})
+
 describe('perturbation grid', () => {
   const row = (k: number, delta: number, sameTop: boolean): PerturbationRow => ({ k, delta, weights: [], ranking: [], sameTop, spearman: 1, ws: 1 })
 
@@ -77,7 +93,9 @@ describe('perturbation grid', () => {
     expect(grid[0]![0]).toBe(rows[0])
     expect(grid[0]![1]).toBeUndefined()
     expect(grid[1]![1]).toBe(rows[1])
-    expect(heldCount(rows)).toEqual({ held: 2, total: 3 })
+    expect(heldCount(rows, [0.5, 0.5])).toEqual({ held: 2, total: 3 })
+    // A criterion with weight 0 is not perturbed at all: left out of the count.
+    expect(heldCount(rows, [0, 1])).toEqual({ held: 1, total: 2 })
   })
 })
 

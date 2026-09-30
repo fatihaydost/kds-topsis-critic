@@ -72,12 +72,18 @@
   font-weight: 600;
 }
 
+/* The bands describe the user's weight, not the cursor: neutral ink. The accent is only for first place at the cursor. */
 .bandTop {
-  fill: var(--data-accent);
+  fill: var(--text-2);
 }
 
 .bandRanking {
+  fill: var(--text-3);
+}
+
+.axisTitle {
   fill: var(--text-2);
+  font-size: 12px;
 }
 
 /* Pointer on the plot picks a weight; vertical swipes still scroll the page on touch screens. */

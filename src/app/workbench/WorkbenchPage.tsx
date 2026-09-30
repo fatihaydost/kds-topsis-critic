@@ -21,7 +21,15 @@ import { WeightsStage } from './WeightsStage'
 preloadPanelCards()
 
 // Robustness (its charts, texts and the Monte Carlo worker) is a chunk of its own: /app does not load it up front.
-const loadRobustness = () => import('./robustness/RobustnessStage')
+// Once loaded it renders directly, not through lazy(): a lazy component suspends again on every mount, and React holds
+// a Suspense reveal back for a moment, so the stage would open empty and the focus moved into it would find nothing.
+type StageComponent = (typeof import('./robustness/RobustnessStage'))['default']
+let LoadedRobustness: StageComponent | null = null
+const loadRobustness = () =>
+  import('./robustness/RobustnessStage').then((m) => {
+    LoadedRobustness = m.default
+    return m
+  })
 const RobustnessStage = lazy(loadRobustness)
 
 /** Layout-shaped placeholder while the robustness chunk loads: a control row, a chart and a table. */
@@ -106,12 +114,22 @@ export default function WorkbenchPage() {
 
   const goTo = useCallback(
     (next: Stage, targetId?: string) => {
-      focusRequest.current = { id: targetId ?? null }
-      setStage(next)
-      setFocusTick((k) => k + 1)
+      const go = () => {
+        focusRequest.current = { id: targetId ?? null }
+        setStage(next)
+        setFocusTick((k) => k + 1)
+      }
+      // Robustness opens once its chunk is here, so the stage the focus moves to is never an empty placeholder.
+      if (next === 'robustness' && !LoadedRobustness) loadRobustness().then(go, go)
+      else go()
     },
     [setStage],
   )
+
+  // Results leads to Robustness: fetch it now rather than when the browser is idle.
+  useEffect(() => {
+    if (stage === 'results') void loadRobustness()
+  }, [stage])
 
   // After a stage change the user asked for: focus the target control, or the stage itself,
   // so keyboard and screen reader users start at the top of the new stage.
@@ -189,6 +207,9 @@ export default function WorkbenchPage() {
     }
     if (robustness) {
       stageMeta.robustness = <StageStatus state="pending">{t('workbench.rail.robustness', robustness)}</StageStatus>
+    } else if (ranking.value) {
+      // Until the stage's chunk has loaded: an empty line of the same height, so the rail does not shift.
+      stageMeta.robustness = <span aria-hidden className="invisible">0</span>
     }
   }
 
@@ -197,6 +218,7 @@ export default function WorkbenchPage() {
   else if (stage === 'weights') content = <WeightsStage />
   else if (stage === 'ranking') content = <RankingStage />
   else if (stage === 'results') content = <ResultsStage />
+  else if (LoadedRobustness) content = <LoadedRobustness />
   else
     content = (
       <Suspense fallback={<RobustnessSkeleton />}>

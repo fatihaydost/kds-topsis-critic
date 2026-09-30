@@ -32,6 +32,8 @@ export function spreadLabels(ys: readonly number[], gap: number, lo: number, hi:
 
 export type SweepLayoutInput = {
   width: number
+  /** Lines that get a name at their right end (default all); only these compete for label room. */
+  labelled?: readonly number[] | undefined
   /** Height of the plot area (the lines), without axes and bands. */
   plotHeight?: number
   /** Grid of the swept weight, increasing, e.g. 0, 0.01, …, 1. */
@@ -64,6 +66,8 @@ export type SweepLayout = {
   bandTopY: number
   bandRankingY: number
   tickY: number
+  /** Baseline of the x axis title, under the tick labels. */
+  titleY: number
 }
 
 const LABEL_GAP = 14
@@ -76,11 +80,12 @@ export function linePath(points: readonly (readonly [number, number])[]): string
   return points.map(([x, y], k) => `${k === 0 ? 'M' : 'L'}${num(x)} ${num(y)}`).join('')
 }
 
-export function layoutSweep({ width, plotHeight = 240, xs, series, extra = [], labels, fontSize = 12 }: SweepLayoutInput): SweepLayout {
+export function layoutSweep({ width, labelled, plotHeight = 240, xs, series, extra = [], labels, fontSize = 12 }: SweepLayoutInput): SweepLayout {
   const top = 22
   const bottom = top + plotHeight
   const left = AXIS_LEFT
-  const maxLabel = Math.max(0, ...labels.map((l) => estimateTextWidth(l, fontSize)))
+  const named = labelled ?? labels.map((_, i) => i)
+  const maxLabel = Math.max(0, ...named.map((i) => estimateTextWidth(labels[i] ?? '', fontSize)))
   const labelRoom = Math.ceil(Math.min(maxLabel, Math.max(width * 0.24, 40))) + 12
   const right = Math.max(left + 80, width - labelRoom)
 
@@ -92,16 +97,20 @@ export function layoutSweep({ width, plotHeight = 240, xs, series, extra = [], l
   const y = scaleLinear(yDomain, [bottom, top])
 
   const paths = series.map((s) => linePath(xs.map((w, p) => [x(w), y(s[p] ?? Number.NaN)] as const).filter(([, py]) => Number.isFinite(py))))
-  const lastY = series.map((s) => y(s[s.length - 1] ?? 0))
+  const lastY = named.map((i) => y(series[i]?.[series[i]!.length - 1] ?? 0))
   const spread = spreadLabels(lastY, LABEL_GAP, top, bottom)
-  const ends = labels.map((full, index) => ({ index, full, text: truncate(full, labelRoom - 8, fontSize), y: spread[index]! }))
+  const ends = named.map((index, k) => {
+    const full = labels[index] ?? ''
+    return { index, full, text: truncate(full, labelRoom - 8, fontSize), y: spread[k]! }
+  })
 
   const bandTopY = bottom + 6
   const bandRankingY = bottom + 15
   const tickY = bottom + 30
+  const titleY = tickY + 20
   return {
     width,
-    height: tickY + 8,
+    height: titleY + 8,
     left,
     right,
     top,
@@ -115,6 +124,7 @@ export function layoutSweep({ width, plotHeight = 240, xs, series, extra = [], l
     bandTopY,
     bandRankingY,
     tickY,
+    titleY,
   }
 }
 

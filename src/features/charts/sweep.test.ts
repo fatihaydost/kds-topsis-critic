@@ -47,6 +47,14 @@ describe('layoutSweep', () => {
     expect(l.ends[0]!.y).toBeLessThan(l.ends[1]!.y)
   })
 
+  it('names only the labelled lines, spread inside the plot', () => {
+    const many = Array.from({ length: 30 }, (_, i) => [0.5, 0.5, 0.5 + i / 1000])
+    const l2 = layoutSweep({ width: 600, xs, series: many, labels: many.map((_, i) => `A${i + 1}`), labelled: [0, 29] })
+    expect(l2.ends.map((e) => e.index)).toEqual([0, 29])
+    for (const e of l2.ends) expect(e.y).toBeGreaterThanOrEqual(l2.top)
+    expect(Math.abs(l2.ends[0]!.y - l2.ends[1]!.y)).toBeGreaterThanOrEqual(14 - 1e-9)
+  })
+
   it('writes short path text', () => {
     expect(linePath([
       [0, 1.234],

@@ -1,6 +1,12 @@
 /* Robustness stage. Colours only from tokens.css; every duration a token (docs/design/MOTION.md). */
 
-/* Live ranking: rows that changed place take the accent tint for a moment. */
+/* Live ranking: rows that changed place take the accent tint for a moment. A row sliding up is drawn over the row it
+   passes (its tint covers the other's text). */
+.liveRow[data-lifted] {
+  position: relative;
+  z-index: 1;
+}
+
 .liveRow > * {
   transition: background-color var(--dur) var(--ease);
 }
@@ -73,6 +79,7 @@
 }
 
 /* Legend swatches (the bands and marks of the sweep chart). */
+.swatchLeader,
 .swatchTop,
 .swatchRanking,
 .swatchSwitch,
@@ -81,16 +88,22 @@
   flex: none;
 }
 
+.swatchLeader {
+  width: 16px;
+  height: 2.25px;
+  background: var(--data-accent);
+}
+
 .swatchTop {
   width: 16px;
   height: 5px;
-  background: var(--data-accent);
+  background: var(--text-2);
 }
 
 .swatchRanking {
   width: 16px;
   height: 2px;
-  background: var(--text-2);
+  background: var(--text-3);
 }
 
 .swatchSwitch {
@@ -110,8 +123,11 @@
 .pgrid {
   display: grid;
   gap: 2px;
-  min-width: max-content;
   font-size: 12px;
+}
+
+.pgrid[data-compact] .pcell {
+  padding: 0;
 }
 
 .pcol {
@@ -122,12 +138,26 @@
 }
 
 .prow {
-  display: flex;
-  align-items: center;
+  display: block;
+  align-self: center;
+  overflow: hidden;
   padding-right: 12px;
   color: var(--text);
   font-size: 13px;
   white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* A long leader name is cut; the full name is the cell's title and in the table. */
+.pname {
+  overflow: hidden;
+  max-width: 88px;
+  text-overflow: ellipsis;
+}
+
+.pcell[data-na] {
+  background: transparent;
+  color: var(--text-3);
 }
 
 .pcell {
@@ -135,7 +165,7 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  min-width: 56px;
+  min-width: 0;
   height: 32px;
   padding: 0 6px;
   border-radius: 2px;
