@@ -11,6 +11,7 @@ the animation is not needed.
 | Object constancy: the same data mark moves to its new place | TOPSIS points when the view changes, bars when a weight changes | Yes, the main use |
 | State change of one control | tab indicator, open/close of a disclosure or a floating layer | Yes, short |
 | Feedback that a value was recomputed | short accent tint on a changed cell | Yes, colour only |
+| Explain: a user-triggered, one-off teaching moment | "Step through" a method's idea: each step transforms the picture into the next | Yes, `--dur-explain`, at most two phases (the second after `--delay-explain`, 700 ms in all); never automatic, never looped |
 | Entry of a page, section or card; scroll reveal; stagger | | No |
 | Count-up numbers, typewriter, looping pulse, shimmer, parallax, hover lift, glow | | No |
 | First paint of a chart (bars growing from zero) | | No: data is shown, not performed |
@@ -33,6 +34,8 @@ In `src/styles/tokens.css`, all set to `0ms` under `prefers-reduced-motion: redu
 | `--dur` | `150ms` | colour and small state changes (default for `transition-*`) |
 | `--dur-slow` | `200ms` | indicators, disclosures, sheets |
 | `--dur-data` | `320ms` | data marks moving to a new position (object constancy) |
+| `--dur-explain` | `450ms` | explain steps: rare, chosen by the reader, so slower than a data change |
+| `--delay-explain` | `250ms` | start of an explain step's second phase (Heer and Robertson: stage simply, shape first, then value) |
 
 No hard-coded durations in components: a literal `ms` escapes reduced motion. JS animation (Web Animations API)
 reads the tokens and checks `matchMedia('(prefers-reduced-motion: reduce)')`.

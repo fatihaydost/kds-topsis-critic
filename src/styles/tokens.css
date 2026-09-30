@@ -51,6 +51,9 @@
   --dur: 150ms;
   --dur-slow: 200ms;
   --dur-data: 320ms;
+  /* A user-triggered, one-off teaching moment (the "step through" of a method's idea), in at most two phases. */
+  --dur-explain: 450ms;
+  --delay-explain: 250ms;
 }
 
 :root[data-theme='dark'] {
@@ -117,5 +120,7 @@
     --dur: 0ms;
     --dur-slow: 0ms;
     --dur-data: 0ms;
+    --dur-explain: 0ms;
+    --delay-explain: 0ms;
   }
 }
