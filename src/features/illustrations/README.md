@@ -31,7 +31,7 @@ rail). One `role="img"` figure; its name lists the stages.
 | `methods` | `Partial<Record<stage, string>>` | Small line under a stage, e.g. `{ weights: 'CRITIC', ranking: 'TOPSIS' }`. |
 | `weights` | `number[]` | Real weights for the bars (up to 6); without it a neutral shape. |
 | `showRobustness` | `boolean` | Default `true`. |
-| `labels` | `{ data, weights, ranking, results, robustness, soon, ariaLabel? }` | |
+| `labels` | `{ data, weights, ranking, results, robustness, ariaLabel? }` | |
 
 Use: landing "How it works" (full width, with the example's weights), workbench rail or stage
 header (`active={stage}`, `showRobustness={false}`).

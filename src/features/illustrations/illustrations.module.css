@@ -66,11 +66,6 @@
   color: var(--data-accent);
 }
 
-.stage[data-soon] {
-  border-style: dashed;
-  background: transparent;
-}
-
 .stageGlyph {
   flex: none;
   width: 40px;
@@ -94,19 +89,10 @@
   font-weight: 600;
 }
 
-.stage[data-soon] .stageName {
-  color: var(--text-3);
-  font-weight: 400;
-}
-
 .stageMethod {
   color: var(--text-2);
   font-size: 12px;
   line-height: 16px;
-}
-
-.stage[data-soon] .stageMethod {
-  color: var(--text-3);
 }
 
 .arrow {
@@ -120,10 +106,6 @@
   width: 20px;
   height: 16px;
   transform: rotate(90deg);
-}
-
-.arrow[data-soon] svg {
-  stroke-dasharray: 2 3;
 }
 
 @container (min-width: 600px) {

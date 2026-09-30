@@ -110,6 +110,17 @@ function ManualNotes() {
   )
 }
 
+function RobustnessNotes() {
+  const { t } = useTranslation()
+  return (
+    <section className="flex flex-col gap-1">
+      <h3 className="text-14 font-semibold text-text">{t('workbench.panel.robustness.title')}</h3>
+      <p>{t('workbench.panel.robustness.body')}</p>
+      <p className="text-13">{t('workbench.panel.robustness.readOnly')}</p>
+    </section>
+  )
+}
+
 /** Explanation panel content for the current stage: the selected methods from src/content. */
 export function ExplanationPanel({ stage }: { stage: Stage }) {
   const weightMethod = useWorkbench((s) => s.weightMethod)
@@ -118,6 +129,7 @@ export function ExplanationPanel({ stage }: { stage: Stage }) {
   if (stage === 'data') return <DataNotes />
   if (stage === 'weights') return weightMethod === 'manual' ? <ManualNotes /> : <MethodNote id={weightMethod} />
   if (stage === 'ranking') return <MethodNote id={rankingMethod} />
+  if (stage === 'robustness') return <RobustnessNotes />
   // Results: one line per method and the links; the details are on the stages before.
   return (
     <div className="flex flex-col gap-5">

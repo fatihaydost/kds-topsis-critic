@@ -28,7 +28,6 @@ export function Pipeline() {
           ranking: t('landing.how.labels.ranking'),
           results: t('landing.how.labels.results'),
           robustness: t('landing.how.labels.robustness'),
-          soon: t('landing.how.labels.soon'),
         }}
       />
     </section>

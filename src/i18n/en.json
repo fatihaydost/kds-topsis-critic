@@ -73,8 +73,7 @@
         "weights": "Weighting method",
         "ranking": "Ranking method",
         "results": "Result",
-        "robustness": "Robustness",
-        "soon": "Next version"
+        "robustness": "Robustness"
       }
     },
     "verified": {
@@ -110,7 +109,8 @@
       "data": "Data",
       "weights": "Weights",
       "ranking": "Ranking",
-      "results": "Results"
+      "results": "Results",
+      "robustness": "Robustness"
     },
     "empty": {
       "data": {
@@ -133,6 +133,10 @@
         "title": "No results yet",
         "body": "Enter or load a decision matrix, and the result appears here.",
         "blocked": "The ranking cannot be calculated yet."
+      },
+      "robustness": {
+        "title": "Robustness needs a ranking",
+        "body": "When the ranking can be calculated, this stage checks how much it depends on the weights."
       }
     },
     "explanation": {
@@ -168,9 +172,11 @@
     "continue": {
       "weights": "Continue to weights",
       "ranking": "Continue to ranking",
-      "results": "Continue to results"
+      "results": "Continue to results",
+      "robustness": "Check robustness"
     },
     "loadingStage": "Loading the workbench",
+    "loadingRobustness": "Loading the robustness checks",
     "grid": {
       "name": "Decision matrix",
       "corner": "Alternative",
@@ -393,6 +399,11 @@
       "manual": {
         "title": "Manual weights",
         "body": "Your own weights, for example from an expert survey. Each is 0 or more and they sum to 1; Normalize divides each by the total."
+      },
+      "robustness": {
+        "title": "Robustness",
+        "body": "Would the ranking change under other reasonable weights? Move one weight, nudge each weight by a few percent, draw random weights, or drop a criterion.",
+        "readOnly": "Nothing here changes your weights."
       }
     },
     "rail": {
@@ -400,7 +411,8 @@
       "attention": "Needs attention",
       "toFix_one": "{{count}} to fix",
       "toFix_other": "{{count}} to fix",
-      "checkWeights": "Check weights"
+      "checkWeights": "Check weights",
+      "robustness": "First place held: {{held}}/{{total}}"
     },
     "visual": {
       "emptyMatrix": "An empty decision matrix: alternatives in rows, criteria in columns",
@@ -441,8 +453,7 @@
       "weights": "Weighting method",
       "ranking": "Ranking method",
       "results": "Result",
-      "robustness": "Robustness",
-      "soon": "Coming later"
+      "robustness": "Robustness"
     },
     "meta": {
       "title": "CRITIC and TOPSIS in the browser: MCDM Workbench",

@@ -73,8 +73,7 @@
         "weights": "Ağırlıklandırma",
         "ranking": "Sıralama",
         "results": "Sonuç",
-        "robustness": "Sağlamlık",
-        "soon": "Sonraki sürümde"
+        "robustness": "Sağlamlık"
       }
     },
     "verified": {
@@ -110,7 +109,8 @@
       "data": "Veri",
       "weights": "Ağırlıklar",
       "ranking": "Sıralama",
-      "results": "Sonuçlar"
+      "results": "Sonuçlar",
+      "robustness": "Sağlamlık"
     },
     "empty": {
       "data": {
@@ -133,6 +133,10 @@
         "title": "Henüz sonuç yok",
         "body": "Bir karar matrisi girin ya da örnek yükleyin; sonuç burada görünür.",
         "blocked": "Sıralama henüz hesaplanamıyor."
+      },
+      "robustness": {
+        "title": "Sağlamlık için bir sıralama gerekli",
+        "body": "Sıralama hesaplanabildiğinde bu adım, sonucun ağırlıklara ne kadar bağlı olduğunu sınar."
       }
     },
     "explanation": {
@@ -168,9 +172,11 @@
     "continue": {
       "weights": "Ağırlıklara geç",
       "ranking": "Sıralamaya geç",
-      "results": "Sonuçlara geç"
+      "results": "Sonuçlara geç",
+      "robustness": "Sağlamlığı sınayın"
     },
     "loadingStage": "Çalışma alanı yükleniyor",
+    "loadingRobustness": "Sağlamlık sınamaları yükleniyor",
     "grid": {
       "name": "Karar matrisi",
       "corner": "Alternatif",
@@ -393,6 +399,11 @@
       "manual": {
         "title": "Elle girilen ağırlıklar",
         "body": "Kendi ağırlıklarınız, örneğin bir uzman anketinden. Her biri 0 ya da daha büyük olmalı ve toplamları 1 etmeli; ölçekleme her birini toplama böler."
+      },
+      "robustness": {
+        "title": "Sağlamlık",
+        "body": "Başka makul ağırlıklarla sıralama değişir mi? Bir ağırlığı kaydırın, her ağırlığı yüzde birkaç oynatın, rastgele ağırlıklar çekin ya da bir kriteri çıkarın.",
+        "readOnly": "Buradaki hiçbir şey ağırlıklarınızı değiştirmez."
       }
     },
     "rail": {
@@ -400,7 +411,8 @@
       "attention": "Düzeltme gerekiyor",
       "toFix_one": "{{count}} sorun",
       "toFix_other": "{{count}} sorun",
-      "checkWeights": "Ağırlıkları kontrol edin"
+      "checkWeights": "Ağırlıkları kontrol edin",
+      "robustness": "Birinci aynı: {{held}}/{{total}}"
     },
     "visual": {
       "emptyMatrix": "Boş bir karar matrisi: satırlarda alternatifler, sütunlarda kriterler",
@@ -441,8 +453,7 @@
       "weights": "Ağırlıklandırma yöntemi",
       "ranking": "Sıralama yöntemi",
       "results": "Sonuç",
-      "robustness": "Sağlamlık",
-      "soon": "Yakında"
+      "robustness": "Sağlamlık"
     },
     "meta": {
       "title": "Tarayıcıda CRITIC ve TOPSIS: MCDM Workbench",

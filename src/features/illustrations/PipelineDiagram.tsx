@@ -9,8 +9,6 @@ export type PipelineLabels = {
   ranking: string
   results: string
   robustness: string
-  /** Marker of the stage that is not built yet. */
-  soon: string
   /** Accessible name of the whole figure; default: the stage names in order. */
   ariaLabel?: string
 }
@@ -22,7 +20,7 @@ export type PipelineDiagramProps = {
   methods?: Partial<Record<PipelineStage, string>> | undefined
   /** Real weights for the weights glyph (up to 6 bars, scaled to the largest); default a neutral shape. */
   weights?: readonly number[] | undefined
-  /** Draw the robustness stage after the results, faded and marked `soon` (default true). */
+  /** Draw the robustness stage after the results (default true). */
   showRobustness?: boolean
   labels?: Partial<PipelineLabels>
   className?: string
@@ -35,7 +33,6 @@ export const PIPELINE_LABELS_EN: PipelineLabels = {
   ranking: 'Ranking method',
   results: 'Result',
   robustness: 'Robustness',
-  soon: 'Coming later',
 }
 
 const STAGES: readonly PipelineStage[] = ['data', 'weights', 'ranking', 'results', 'robustness']
@@ -48,34 +45,29 @@ const STAGES: readonly PipelineStage[] = ['data', 'weights', 'ranking', 'results
 export function PipelineDiagram({ active, methods, weights, showRobustness = true, labels, className }: PipelineDiagramProps) {
   const l = { ...PIPELINE_LABELS_EN, ...labels }
   const stages = showRobustness ? STAGES : STAGES.slice(0, 4)
-  const aria =
-    l.ariaLabel ??
-    stages.map((k) => (k === 'robustness' ? `${l[k]} (${l.soon})` : methods?.[k] ? `${l[k]}: ${methods[k]}` : l[k])).join(', ')
+  const aria = l.ariaLabel ?? stages.map((k) => (methods?.[k] ? `${l[k]}: ${methods[k]}` : l[k])).join(', ')
 
   return (
     <figure className={[s.fig, s.pipeline, className].filter(Boolean).join(' ')} role="img" aria-label={aria}>
       <ol className={s.track}>
-        {stages.map((k, i) => {
-          const soon = k === 'robustness'
-          return (
-            <Fragment key={k}>
-              {i > 0 ? (
-                <li className={s.arrow} aria-hidden="true" data-soon={soon || undefined}>
-                  <svg viewBox="0 0 20 16" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M2 8h15M12 3.5 17 8l-5 4.5" />
-                  </svg>
-                </li>
-              ) : null}
-              <li className={s.stage} data-active={active === k || undefined} data-soon={soon || undefined}>
-                <StageGlyph stage={k} weights={weights} />
-                <span className={s.stageText}>
-                  <span className={s.stageName}>{l[k]}</span>
-                  {soon ? <span className={s.stageMethod}>{l.soon}</span> : methods?.[k] ? <span className={s.stageMethod}>{methods[k]}</span> : null}
-                </span>
+        {stages.map((k, i) => (
+          <Fragment key={k}>
+            {i > 0 ? (
+              <li className={s.arrow} aria-hidden="true">
+                <svg viewBox="0 0 20 16" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M2 8h15M12 3.5 17 8l-5 4.5" />
+                </svg>
               </li>
-            </Fragment>
-          )
-        })}
+            ) : null}
+            <li className={s.stage} data-active={active === k || undefined}>
+              <StageGlyph stage={k} weights={weights} />
+              <span className={s.stageText}>
+                <span className={s.stageName}>{l[k]}</span>
+                {methods?.[k] ? <span className={s.stageMethod}>{methods[k]}</span> : null}
+              </span>
+            </li>
+          </Fragment>
+        ))}
       </ol>
     </figure>
   )

@@ -2,6 +2,7 @@ import i18n from 'i18next'
 import { useCallback, useMemo } from 'react'
 import { initReactI18next, useTranslation } from 'react-i18next'
 import en from './en.json'
+import type robustness from './robustness.en.json'
 import tr from './tr.json'
 import { detectLanguage, isLang, LANG_STORAGE_KEY, type Lang } from './lang'
 import { formatNumber, formatRaw, isAmbiguousNumber, parseLocaleNumber } from './number'
@@ -12,7 +13,8 @@ export { formatNumber, formatRaw, isAmbiguousNumber, numberFormatter, parseLocal
 declare module 'i18next' {
   interface CustomTypeOptions {
     defaultNS: 'translation'
-    resources: { translation: typeof en }
+    // `robustness` is added by the Robustness stage's own chunk (src/app/workbench/robustness/text.ts).
+    resources: { translation: typeof en; robustness: typeof robustness }
   }
 }
 

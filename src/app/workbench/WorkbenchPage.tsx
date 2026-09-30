@@ -1,9 +1,11 @@
 import { CheckCircle, WarningCircle } from '@phosphor-icons/react'
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getExample } from '../../data/examples'
 import { useLang } from '../../i18n'
-import { isEmptyProblem, STAGES, useRanking, useValidation, useWeights, useWorkbench, type Stage } from '../../state/workbench'
+import { getRankingMethod } from '../../core'
+import { isEmptyProblem, STAGES, toProblem, useRanking, useValidation, useWeights, useWorkbench, type Stage } from '../../state/workbench'
+import { Skeleton } from '../../ui'
 import { usePageMeta } from '../landing/usePageMeta'
 import { WorkbenchLayout } from '../shell/WorkbenchLayout'
 import { DataStage } from './DataStage'
@@ -11,11 +13,31 @@ import { ExplanationPanel, preloadPanelCards } from './ExplanationPanel'
 import { WorkbenchNavContext, type ImportReport, type WorkbenchNav } from './nav'
 import { bestIndex, RankingStage } from './RankingStage'
 import { ResultsStage } from './ResultsStage'
+import { useRobustnessSummary } from './robustnessSummary'
 import { alternativeName, weightMethodLabel } from './shared'
 import { WeightsStage } from './WeightsStage'
 
 // The panel's method cards load alongside this chunk, not after the first render.
 preloadPanelCards()
+
+// Robustness (its charts, texts and the Monte Carlo worker) is a chunk of its own: /app does not load it up front.
+const loadRobustness = () => import('./robustness/RobustnessStage')
+const RobustnessStage = lazy(loadRobustness)
+
+/** Layout-shaped placeholder while the robustness chunk loads: a control row, a chart and a table. */
+function RobustnessSkeleton() {
+  const { t } = useTranslation()
+  return (
+    <div role="status" aria-label={t('workbench.loadingRobustness')} className="flex flex-col gap-4 pt-4">
+      <Skeleton width={180} height={20} />
+      <Skeleton width={320} height={28} />
+      <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
+        <Skeleton height={280} />
+        <Skeleton height={280} />
+      </div>
+    </div>
+  )
+}
 
 const isStage = (v: string | null): v is Stage => v !== null && (STAGES as readonly string[]).includes(v)
 
@@ -61,7 +83,7 @@ function StageStatus({ state, children }: { state: StageState; children: ReactNo
   )
 }
 
-const NO_ATTEMPTS: Record<Stage, boolean> = { data: false, weights: false, ranking: false, results: false }
+const NO_ATTEMPTS: Record<Stage, boolean> = { data: false, weights: false, ranking: false, results: false, robustness: false }
 
 export default function WorkbenchPage() {
   const { t } = useTranslation()
@@ -75,6 +97,7 @@ export default function WorkbenchPage() {
   const ranking = useRanking()
   const weights = useWeights()
   const validation = useValidation()
+  const robustnessSummary = useRobustnessSummary()
 
   const [attempted, setAttemptedState] = useState<Record<Stage, boolean>>(NO_ATTEMPTS)
   const [importReport, setImportReport] = useState<ImportReport | null>(null)
@@ -109,9 +132,13 @@ export default function WorkbenchPage() {
     return () => cancelAnimationFrame(raf)
   }, [focusTick])
 
-  // Warm the calculation chunk (KaTeX) once the page is idle, so "Show the calculation" opens at once.
+  // Warm the calculation chunk (KaTeX) and the robustness stage once the page is idle, so "Show the calculation" and
+  // the Robustness stage open at once (and the rail can say how robust the ranking is).
   useEffect(() => {
-    const load = () => void import('./WorkedCalculation')
+    const load = () => {
+      void import('./WorkedCalculation')
+      void loadRobustness()
+    }
     if ('requestIdleCallback' in window) {
       const id = window.requestIdleCallback(load, { timeout: 2000 })
       return () => window.cancelIdleCallback(id)
@@ -130,6 +157,13 @@ export default function WorkbenchPage() {
     }),
     [goTo, attempted, importReport],
   )
+
+  // How often first place survives the ±5/10/20 % nudges of each weight, once the robustness chunk has loaded.
+  const robustness = useMemo(() => {
+    const method = getRankingMethod(rankingMethod)
+    if (!robustnessSummary || !method || !weights.value || !ranking.value) return null
+    return robustnessSummary(toProblem(problem), weights.value.weights, method)
+  }, [robustnessSummary, rankingMethod, problem, weights.value, ranking.value])
 
   const stageMeta: Partial<Record<Stage, ReactNode>> = {}
   if (!isEmptyProblem(problem)) {
@@ -153,13 +187,22 @@ export default function WorkbenchPage() {
     if (ranking.value) {
       stageMeta.results = <StageStatus state="done">{alternativeName(problem, bestIndex(ranking.value), t)}</StageStatus>
     }
+    if (robustness) {
+      stageMeta.robustness = <StageStatus state="pending">{t('workbench.rail.robustness', robustness)}</StageStatus>
+    }
   }
 
   let content: ReactNode
   if (stage === 'data') content = <DataStage />
   else if (stage === 'weights') content = <WeightsStage />
   else if (stage === 'ranking') content = <RankingStage />
-  else content = <ResultsStage />
+  else if (stage === 'results') content = <ResultsStage />
+  else
+    content = (
+      <Suspense fallback={<RobustnessSkeleton />}>
+        <RobustnessStage />
+      </Suspense>
+    )
 
   return (
     <WorkbenchNavContext.Provider value={nav}>

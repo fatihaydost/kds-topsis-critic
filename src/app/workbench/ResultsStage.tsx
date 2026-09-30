@@ -8,7 +8,7 @@ import { useNumberFormat } from '../../i18n'
 import { isEmptyProblem, useRanking, useWeights, useWorkbench } from '../../state/workbench'
 import { Button, EmptyState, Notice } from '../../ui'
 import { useWorkbenchNav } from './nav'
-import { BlockedByIssues, CalculationToggle, SectionTitle } from './parts'
+import { BlockedByIssues, CalculationToggle, ContinueBar, SectionTitle } from './parts'
 import { bestIndex, RankingTable } from './RankingStage'
 import { alternativeName, criterionName, DECIMALS, downloadBlob, findStep, stepName, weightMethodLabel } from './shared'
 import { WeightsChart } from './WeightsStage'
@@ -218,6 +218,8 @@ export function ResultsStage() {
           ]}
         />
       </section>
+
+      <ContinueBar to="robustness" onContinue={() => goTo('robustness')} />
     </div>
   )
 }

@@ -179,3 +179,14 @@
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
+
+/* Heatmap cells that take a new value change colour; they never move. */
+.fade .cell {
+  transition: fill var(--dur) var(--ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade .cell {
+    transition: none;
+  }
+}

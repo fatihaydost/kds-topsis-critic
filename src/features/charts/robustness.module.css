@@ -1,0 +1,158 @@
+/* Styles of the robustness charts (their own CSS chunk, loaded with the Robustness stage). Colours from tokens.css. */
+
+/* Axes shared by the line and interval charts ---------------------------------------------- */
+
+.grid {
+  stroke: var(--line);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.axis {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.tick {
+  fill: var(--text-2);
+  font-size: 12px;
+}
+
+/* Weight sweep ------------------------------------------------------------------------------- */
+
+.sweepLine {
+  fill: none;
+  stroke: var(--data-context);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.sweepLine[data-highlight] {
+  stroke: var(--data-accent);
+  stroke-width: 2.25;
+}
+
+.baseLine {
+  stroke: var(--text-3);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+/* The cursor follows the slider at once: no transition on it, ever. */
+.cursor {
+  stroke: var(--text);
+  stroke-width: 1;
+}
+
+.cursorDot {
+  fill: var(--data-context);
+  stroke: var(--bg);
+  stroke-width: 1.5;
+}
+
+.cursorDot[data-highlight] {
+  fill: var(--data-accent);
+}
+
+.switchMark {
+  fill: var(--bg);
+  stroke: var(--text-2);
+  stroke-width: 1.25;
+}
+
+.endLabel {
+  fill: var(--text-2);
+  font-size: 12px;
+}
+
+.endLabel[data-highlight] {
+  fill: var(--text);
+  font-weight: 600;
+}
+
+.bandTop {
+  fill: var(--data-accent);
+}
+
+.bandRanking {
+  fill: var(--text-2);
+}
+
+/* Pointer on the plot picks a weight; vertical swipes still scroll the page on touch screens. */
+.pickArea {
+  fill: transparent;
+  cursor: ew-resize;
+  touch-action: pan-y;
+}
+
+/* The lines move to their new curves when the swept criterion changes (object constancy), and the end labels with
+   them; a resize redraws at once. */
+.animate .sweepLine {
+  transition: d var(--dur-data) var(--ease);
+}
+
+.animate .endLabel {
+  transition: transform var(--dur-data) var(--ease);
+}
+
+/* Rank intervals ------------------------------------------------------------------------------ */
+
+.intervalRow {
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+
+.whisker {
+  fill: none;
+  stroke: var(--data-context);
+  stroke-width: 1.5;
+}
+
+.meanDot {
+  fill: var(--data-context);
+}
+
+.intervalRow[data-highlight] .whisker {
+  stroke: var(--data-accent);
+}
+
+.intervalRow[data-highlight] .meanDot {
+  fill: var(--data-accent);
+}
+
+.label {
+  fill: var(--text);
+  font-size: 13px;
+}
+
+.value {
+  fill: var(--text-2);
+  font-size: 13px;
+}
+
+.intervalRow[data-highlight] .label,
+.intervalRow[data-highlight] .value {
+  fill: var(--text);
+  font-weight: 600;
+}
+
+.animate .intervalRow,
+.animate .meanDot {
+  transition: transform var(--dur-data) var(--ease);
+}
+
+.animate .whisker {
+  transition: d var(--dur-data) var(--ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate .sweepLine,
+  .animate .endLabel,
+  .animate .intervalRow,
+  .animate .whisker,
+  .animate .meanDot {
+    transition: none;
+  }
+}

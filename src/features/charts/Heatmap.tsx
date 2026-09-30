@@ -28,6 +28,8 @@ export type HeatmapProps = {
     corner: string
   }
   className?: string
+  /** Cells that take a new value change colour in --dur (never move); off by default. */
+  fade?: boolean
 }
 
 /**
@@ -36,7 +38,7 @@ export type HeatmapProps = {
  * the active theme; a fill on which neither reaches 4.5:1 moves slightly along the ramp
  * (see `heatPaint`), so every printed value stays readable in light and dark.
  */
-export function Heatmap({ title, rowLabels, colLabels, values, scale, domain, format, description, tableLabels, className }: HeatmapProps) {
+export function Heatmap({ title, rowLabels, colLabels, values, scale, domain, format, description, tableLabels, className, fade = false }: HeatmapProps) {
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
   const tokens = useHeatTokens()
@@ -62,7 +64,7 @@ export function Heatmap({ title, rowLabels, colLabels, values, scale, domain, fo
       className={className}
     >
       <svg
-        className={s.svg}
+        className={fade ? `${s.svg} ${s.fade}` : s.svg}
         width={layout.width}
         height={layout.height}
         viewBox={`0 0 ${layout.width} ${layout.height}`}
