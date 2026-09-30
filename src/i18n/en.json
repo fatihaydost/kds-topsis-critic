@@ -571,10 +571,10 @@
           "lowerBetter": "{{name}}, lower is better",
           "steps": {
             "s1": "Each alternative is a point: its weighted normalized values on two criteria.",
-            "s2": "A+ takes the best value of each criterion, A− the worst.",
-            "s3": "D+ and D− are the alternative's distances to A+ and A−.",
+            "s2": "The ideal A+ takes the best value of each criterion, the anti-ideal A− the worst.",
+            "s3": "D+ and D− are the selected alternative's distances to the ideal and the anti-ideal.",
             "s4": "Place each alternative at (D+, D−): its two distances become its coordinates.",
-            "s5": "C = D− / (D+ + D−) is the same along each ray; top left is best."
+            "s5": "Relative closeness C = D− / (D+ + D−) is the same along each ray; top left is best."
           }
         },
         "critic": {
@@ -582,16 +582,17 @@
           "contrast": "Contrast (σ)",
           "conflict": "Conflict Σ(1 − ρ)",
           "weight": "Weight",
-          "information": "Information C",
+          "information": "Information content C",
           "steps": {
-            "s1": "Contrast: σ, the spread of each criterion's normalized values.",
+            "s1": "Contrast: σ, the standard deviation of each criterion's normalized values.",
             "s2": "Conflict: Σ(1 − ρ) is large when a criterion correlates weakly or negatively with the others.",
-            "s3": "Information: C = σ × Σ(1 − ρ). A criterion that varies and disagrees carries more.",
-            "s4": "Weight: w = C / ΣC, so the weights add up to 1. The largest is highlighted."
-          }
+            "s3": "Information content C = σ × Σ(1 − ρ): a criterion that varies and disagrees carries more.",
+            "s4": "Weight w = C / ΣC: the same bars divided by the total, so the weights add up to 1."
+          },
+          "weightHead": "Weight = C / {{total}}"
         },
         "steps": {
-          "start": "Step through",
+          "start": "Step through the idea",
           "group": "Step through the idea",
           "back": "Back",
           "next": "Next",

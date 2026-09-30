@@ -571,10 +571,10 @@
           "lowerBetter": "{{name}}, düşük daha iyi",
           "steps": {
             "s1": "Her alternatif bir noktadır: iki kriterdeki ağırlıklı normalize değerleri.",
-            "s2": "A+ her kriterin en iyi değerini, A− en kötüsünü alır.",
-            "s3": "D+ ve D−, alternatifin A+ ve A−'ye uzaklıklarıdır.",
+            "s2": "İdeal çözüm A+ her kriterin en iyi değerini, negatif ideal A− en kötüsünü alır.",
+            "s3": "D+ ve D−, seçili alternatifin ideal ve negatif ideal çözüme uzaklıklarıdır.",
             "s4": "Her alternatif (D+, D−) noktasına taşınır: iki uzaklık, iki koordinat olur.",
-            "s5": "Her ışın boyunca C = D− / (D+ + D−) aynıdır; en iyisi sol üsttedir."
+            "s5": "Göreli yakınlık C = D− / (D+ + D−) her ışın boyunca aynıdır; en iyisi sol üsttedir."
           }
         },
         "critic": {
@@ -582,16 +582,17 @@
           "contrast": "Kontrast (σ)",
           "conflict": "Çatışma Σ(1 − ρ)",
           "weight": "Ağırlık",
-          "information": "Bilgi C",
+          "information": "Bilgi miktarı C",
           "steps": {
-            "s1": "Kontrast: σ, her kriterin normalize değerlerinin yayılımı.",
+            "s1": "Kontrast: σ, her kriterin normalize değerlerinin standart sapması.",
             "s2": "Çatışma: kriter diğerleriyle zayıf ya da ters yönde ilişkiliyse Σ(1 − ρ) büyür.",
-            "s3": "Bilgi: C = σ × Σ(1 − ρ). Hem değişen hem ayrışan kriter daha çok bilgi taşır.",
-            "s4": "Ağırlık: w = C / ΣC; ağırlıkların toplamı 1'dir. En büyüğü vurgulanır."
-          }
+            "s3": "Bilgi miktarı C = σ × Σ(1 − ρ): hem değişen hem ayrışan kriter daha çok bilgi taşır.",
+            "s4": "Ağırlık w = C / ΣC: aynı çubuklar toplama bölünür, ağırlıkların toplamı 1 olur."
+          },
+          "weightHead": "Ağırlık = C / {{total}}"
         },
         "steps": {
-          "start": "Adım adım",
+          "start": "Fikri adım adım izle",
           "group": "Fikri adım adım izleyin",
           "back": "Geri",
           "next": "İleri",
