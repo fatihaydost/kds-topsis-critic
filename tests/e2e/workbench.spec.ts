@@ -197,14 +197,18 @@ test('the whole flow works with the keyboard alone', async ({ page }) => {
   // The stage takes focus, so Tab continues from the top of the new stage.
   await expect(page.locator('#main')).toBeFocused({ timeout: 10_000 })
   await tabTo(page, /^CRITIC$/)
-  await page.keyboard.press('ArrowRight')
-  await page.keyboard.press('ArrowRight')
-  await expect(page.getByRole('radio', { name: 'Manual' })).toBeFocused()
+  // Radix roving focus moves the focus in a timeout after the key; a second key sent before it lands goes to the old
+  // item. Each arrow therefore waits for the focus it produces, as a person would see it move.
+  const arrow = async (key: 'ArrowRight' | 'ArrowLeft', to: string) => {
+    await page.keyboard.press(key)
+    await expect(page.getByRole('radio', { name: to })).toBeFocused()
+  }
+  await arrow('ArrowRight', 'Equal weights')
+  await arrow('ArrowRight', 'Manual')
   await page.keyboard.press('Space')
   await expect(page.getByRole('radio', { name: 'Manual' })).toHaveAttribute('aria-checked', 'true')
-  await page.keyboard.press('ArrowLeft')
-  await page.keyboard.press('ArrowLeft')
-  await expect(page.getByRole('radio', { name: 'CRITIC' })).toBeFocused()
+  await arrow('ArrowLeft', 'Equal weights')
+  await arrow('ArrowLeft', 'CRITIC')
   await page.keyboard.press('Space')
   await expect(page.getByRole('radio', { name: 'CRITIC' })).toHaveAttribute('aria-checked', 'true')
   await tabTo(page, 'Show the calculation')
