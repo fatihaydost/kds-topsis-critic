@@ -184,9 +184,18 @@ export function TopsisGeometry({ problem, weights, axes, defaultView = 'distance
         }
 
   const w = Math.max(width, 240)
+  // Both views share one height, the larger of the two, so switching never resizes the figure (the old view would
+  // paint over the text below while it fades, and the readout would jump). The shorter view keeps its equal scale
+  // and gets more room inside its axes: the data is centred in the criterion plane, the rays run on in the plane.
+  const draw = (v: TopsisGeometryView, height = 0): Drawing =>
+    v === 'distances'
+      ? planeDrawing(proj, w, l, uid, format, height)
+      : criteriaDrawing(proj, w, l, uid, xName, yName, dirName(ax, xName), dirName(ay, yName), height)
+  const natural = { distances: draw('distances'), criteria: draw('criteria') }
+  const height = Math.max(natural.distances.height, natural.criteria.height)
   const drawings: Record<TopsisGeometryView, Drawing> = {
-    distances: planeDrawing(proj, w, l, uid, format),
-    criteria: criteriaDrawing(proj, w, l, uid, xName, yName, dirName(ax, xName), dirName(ay, yName)),
+    distances: natural.distances.height < height ? draw('distances', height) : natural.distances,
+    criteria: natural.criteria.height < height ? draw('criteria', height) : natural.criteria,
   }
   const drawing = drawings[view]
   const pts = drawing.points
@@ -197,7 +206,7 @@ export function TopsisGeometry({ problem, weights, axes, defaultView = 'distance
   const labelSpots = placeLabels(
     pts,
     shortNames.map((n) => estimateTextWidth(n, 12) * 1.1),
-    { width, height: drawing.height },
+    { width, height },
     proj.closeness.map((_, i) => i).sort((a, b) => proj.closeness[b]! - proj.closeness[a]! || a - b),
   )
 
@@ -228,8 +237,8 @@ export function TopsisGeometry({ problem, weights, axes, defaultView = 'distance
       <svg
         className={animate ? `${s.svg} ${s.animate}` : s.svg}
         width={width}
-        height={drawing.height}
-        viewBox={`0 0 ${width} ${drawing.height}`}
+        height={height}
+        viewBox={`0 0 ${width} ${height}`}
         aria-labelledby={`${uid}-title`}
         aria-describedby={`${uid}-table`}
       >
@@ -333,9 +342,18 @@ type Drawing = {
 }
 
 /** The D+ / D- plane: origin bottom left, rays of constant C, guides from the selected point to both axes. */
-function planeDrawing(proj: TopsisProjection, width: number, l: TopsisGeometryLabels, uid: string, format: (v: number) => string): Drawing {
+/** `height`: the drawing's total height when it must be taller than the data needs (0: as the data needs). */
+function planeDrawing(
+  proj: TopsisProjection,
+  width: number,
+  l: TopsisGeometryLabels,
+  uid: string,
+  format: (v: number) => string,
+  height: number,
+): Drawing {
   const data = distancePoints(proj)
-  const fit = fitDistancePlane(data, width, { margin: PLANE_MARGIN, minPlotHeight: 160, maxPlotHeight: 300 })
+  const minPlotHeight = Math.max(160, height - PLANE_MARGIN.top - PLANE_MARGIN.bottom)
+  const fit = fitDistancePlane(data, width, { margin: PLANE_MARGIN, minPlotHeight, maxPlotHeight: 300 })
   const { box } = fit
   const P = (p: Point): Screen => ({ x: fit.x(p.x), y: fit.y(p.y) })
   const short = (v: number) => trimZeros(format(v))
@@ -400,8 +418,10 @@ function criteriaDrawing(
   yName: string,
   xLabel: string,
   yLabel: string,
+  height: number,
 ): Drawing {
-  const fit = fitPlot(proj, width, { margin: MARGIN, minPlotHeight: 120, maxPlotHeight: 300 })
+  const minPlotHeight = Math.max(120, height - MARGIN.top - MARGIN.bottom)
+  const fit = fitPlot(proj, width, { margin: MARGIN, minPlotHeight, maxPlotHeight: 300 })
   const { box } = fit
   const P = (p: Point): Screen => ({ x: fit.x(p.x), y: fit.y(p.y) })
   const ideal = P(proj.ideal)

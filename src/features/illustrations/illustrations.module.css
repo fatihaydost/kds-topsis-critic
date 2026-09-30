@@ -275,13 +275,16 @@
  * (--dur-data) while the view's own marks crossfade (--dur; the selection's lines in --dur-data, so they arrive with
  * the dot); visibility keeps the leaving layer painted until it is gone.
  */
-.animate .dist,
-.animate .guide {
-  transition: d var(--dur-slow) var(--ease);
-}
+/* Lines move through CSS d; where d is not a CSS property (Safari) lines and their labels both jump, never apart. */
+@supports (d: path('M0 0')) {
+  .animate .dist,
+  .animate .guide {
+    transition: d var(--dur-slow) var(--ease);
+  }
 
-.animate .distLabel {
-  transition: transform var(--dur-slow) var(--ease);
+  .animate .distLabel {
+    transition: transform var(--dur-slow) var(--ease);
+  }
 }
 
 .animate .point,
