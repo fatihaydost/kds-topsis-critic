@@ -40,6 +40,10 @@ In `src/styles/tokens.css`, all set to `0ms` under `prefers-reduced-motion: redu
 No hard-coded durations in components: a literal `ms` escapes reduced motion. JS animation (Web Animations API)
 reads the tokens and checks `matchMedia('(prefers-reduced-motion: reduce)')`.
 
+Hold times are not motion: how long a colour highlight stays on a changed cell or a moved row (e.g.
+`MOVED_HOLD_MS` in the robustness ranking, the grid's type-changed tint) is a named constant in the feature, the
+same with reduced motion, since the highlight is how a reduced-motion reader sees what changed.
+
 ## Rules
 
 - Animate `transform` and `opacity` (and colour). Never `transition: all`, never layout properties, except a

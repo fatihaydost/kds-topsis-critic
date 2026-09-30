@@ -1,25 +1,20 @@
 import { describe, expect, it } from 'vitest'
+import { critic, equal, rankScores, topsis, type Problem, type RankingMethod } from '../src/core'
 import {
   createRng,
-  critic,
   DEFAULT_DELTAS,
-  equal,
   kendallTauB,
   midRanks,
   monteCarlo,
   perturbWeights,
-  rankScores,
   removeCriteria,
   reweight,
   sampleDirichlet,
   spearman,
   sweepWeight,
-  topsis,
   wsCoefficient,
-  type Problem,
-  type RankingMethod,
   type Sweep,
-} from '../src/core'
+} from '../src/core/robustness'
 import { examples } from '../src/data/examples'
 import { expectClose, makeProblem } from './helpers'
 
